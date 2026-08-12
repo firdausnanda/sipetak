@@ -1,0 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom NProgress styling for thickness */
+#nprogress .bar {
+    height: 4px !important;
+}
+#nprogress .peg {
+    box-shadow: 0 0 10px #fb8500, 0 0 5px #fb8500 !important;
+}
+#nprogress .spinner-icon {
+    border-top-color: #fb8500 !important;
+    border-left-color: #fb8500 !important;
+}

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SIPETAK - Riwayat Input</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-container": "#79574c",
+                    "on-error": "#ffffff",
+                    "primary": "#012d1d",
+                    "on-tertiary-fixed-variant": "#703800",
+                    "inverse-on-surface": "#f0f1f2",
+                    "secondary-fixed-dim": "#e9bdae",
+                    "outline": "#717973",
+                    "tertiary-container": "#5f2f00",
+                    "surface": "#f8f9fa",
+                    "on-primary-container": "#86af99",
+                    "tertiary-fixed-dim": "#ffb781",
+                    "surface-container-low": "#f3f4f5",
+                    "on-tertiary-container": "#fd8704",
+                    "on-error-container": "#93000a",
+                    "background": "#f8f9fa",
+                    "outline-variant": "#c1c8c2",
+                    "on-background": "#191c1d",
+                    "error": "#ba1a1a",
+                    "secondary": "#79564b",
+                    "error-container": "#ffdad6",
+                    "on-surface-variant": "#414844",
+                    "surface-container": "#edeeef",
+                    "inverse-primary": "#a5d0b9",
+                    "on-surface": "#191c1d",
+                    "on-primary": "#ffffff",
+                    "surface-bright": "#f8f9fa",
+                    "surface-container-high": "#e7e8e9",
+                    "on-tertiary-fixed": "#301400",
+                    "primary-container": "#1b4332",
+                    "surface-tint": "#3f6653",
+                    "inverse-surface": "#2e3132",
+                    "primary-fixed-dim": "#a5d0b9",
+                    "secondary-fixed": "#ffdbcf",
+                    "on-primary-fixed": "#002114",
+                    "secondary-container": "#fed0c1",
+                    "on-primary-fixed-variant": "#274e3d",
+                    "tertiary": "#3f1d00",
+                    "on-secondary-fixed-variant": "#5e3f35",
+                    "surface-variant": "#e1e3e4",
+                    "tertiary-fixed": "#ffdcc4",
+                    "surface-container-highest": "#e1e3e4",
+                    "primary-fixed": "#c1ecd4",
+                    "on-secondary-fixed": "#2d150d",
+                    "surface-dim": "#d9dadb",
+                    "surface-container-lowest": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "touch-target": "48px",
+                    "container-padding": "24px",
+                    "margin-desktop": "64px",
+                    "gutter": "16px",
+                    "base": "8px",
+                    "margin-mobile": "16px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "data-mono": ["JetBrains Mono"],
+                    "display": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-lg-mobile": ["Inter"]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "data-mono": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "display": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["22px", {"lineHeight": "28px", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+      .hide-scrollbar::-webkit-scrollbar { display: none; }
+      .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      .bg-safety-orange { background-color: #FB8500; }
+      .text-safety-orange { color: #FB8500; }
+      .border-safety-orange { border-color: #FB8500; }
+      
+      .bg-earth-brown { background-color: #6D4C41; }
+      .text-earth-brown { color: #6D4C41; }
+      
+      .text-deep-forest { color: #1B4332; }
+      
+      /* Active Input Focus */
+      input:focus {
+        border-color: #FB8500 !important;
+        outline: none !important;
+        box-shadow: 0 0 0 2px rgba(251, 133, 0, 0.2) !important;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-24 md:pb-8 flex flex-col md:flex-row">
+<!-- Sub-page Navigation: Replaces main nav for focused task -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center px-margin-mobile h-touch-target bg-surface border-b border-outline-variant md:hidden">
+<button class="h-touch-target w-touch-target flex items-center justify-center -ml-3 text-primary hover:bg-surface-container-high rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="arrow_back" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md-mobile text-primary ml-2 flex-grow">Riwayat Input</h1>
+</header>
+<!-- Desktop Sidebar (Hidden on Mobile, simplified for task focus) -->
+<aside class="hidden md:flex flex-col w-64 border-r border-outline-variant bg-surface-container-low min-h-screen sticky top-0 h-screen">
+<div class="p-container-padding border-b border-outline-variant">
+<h2 class="font-headline-lg text-headline-lg font-bold text-primary">SIPETAK</h2>
+</div>
+<nav class="p-4 flex flex-col gap-2 flex-grow">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<!-- Active State -->
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container font-bold rounded-xl transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="history" style="font-variation-settings: 'FILL' 1;">history</span>
+<span class="font-body-md text-body-md">Riwayat Input</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="sync_alt">sync_alt</span>
+<span class="font-body-md text-body-md">Antrean Sinkronisasi</span>
+</a>
+</nav>
+<div class="p-4 border-t border-outline-variant mt-auto">
+<button class="w-full flex items-center justify-center gap-2 h-touch-target text-error hover:bg-error-container rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+<span class="font-body-md text-body-md font-semibold">Kembali</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-grow pt-[calc(var(--spacing-touch-target)+var(--spacing-margin-mobile))] md:pt-margin-desktop px-margin-mobile md:px-margin-desktop flex flex-col max-w-[1200px] w-full mx-auto pb-8">
+<!-- Desktop Header -->
+<div class="hidden md:flex items-center justify-between mb-8">
+<h1 class="font-display text-display text-primary">Riwayat Input Kelompok A</h1>
+<div class="flex items-center gap-2 text-on-surface-variant font-label-caps text-label-caps bg-surface-container-high px-4 py-2 rounded-full">
+<span class="w-2 h-2 rounded-full bg-green-600"></span>
+<span>Online</span>
+</div>
+</div>
+<!-- Search & Filter Controls -->
+<section class="flex flex-col gap-4 mb-6">
+<!-- Search Bar -->
+<div class="relative w-full">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-outline material-symbols-outlined pointer-events-none" data-icon="search">search</span>
+<input class="w-full h-touch-target pl-12 pr-12 rounded-lg border border-outline-variant bg-surface text-on-surface placeholder-on-surface-variant font-body-md text-body-md transition-shadow focus:border-safety-orange" placeholder="Cari No. Petak atau Jenis Pohon..." type="text"/>
+<button aria-label="Clear search" class="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center text-outline hover:text-on-surface rounded-full transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="close">close</span>
+</button>
+</div>
+<!-- Quick Filters (Horizontal Scroll on Mobile) -->
+<div class="flex gap-2 overflow-x-auto hide-scrollbar pb-1 -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0">
+<button class="whitespace-nowrap h-10 px-4 rounded-full border border-safety-orange bg-safety-orange/10 text-safety-orange font-label-caps text-label-caps transition-colors">
+                    HARI INI
+                </button>
+<button class="whitespace-nowrap h-10 px-4 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-high transition-colors">
+                    KEMARIN
+                </button>
+<button class="whitespace-nowrap h-10 px-4 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-high transition-colors">
+                    MINGGU INI
+                </button>
+<button class="whitespace-nowrap h-10 px-4 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-high transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="filter_list">filter_list</span>
+                    FILTER LAINNYa
+                </button>
+</div>
+</section>
+<!-- Data List Container -->
+<section class="flex flex-col gap-4">
+<!-- Data Card 1 -->
+<article class="bg-surface border border-outline-variant rounded-xl p-4 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-shadow">
+<div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+<!-- Identity Block -->
+<div class="flex gap-4 items-center">
+<div class="h-12 w-12 rounded-lg bg-surface-container-high flex items-center justify-center text-earth-brown border border-outline-variant">
+<span class="material-symbols-outlined" data-icon="forest">forest</span>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-caps text-label-caps text-earth-brown">NO. PETAK</span>
+<span class="font-data-mono text-data-mono text-deep-forest font-bold bg-surface-container-low px-2 py-0.5 rounded border border-outline-variant">14A</span>
+</div>
+<h3 class="font-headline-md text-headline-md-mobile text-primary">Meranti Merah</h3>
+</div>
+</div>
+<!-- Metadata Block (Grid on Mobile, Flex on Desktop) -->
+<div class="grid grid-cols-2 md:flex gap-4 md:ml-8 md:items-center w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-outline-variant">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1">WAKTU INPUT</span>
+<span class="font-body-md text-body-md text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="schedule">schedule</span>
+                                12 Okt, 14:30
+                            </span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1">STATUS</span>
+<span class="font-body-md text-body-md text-green-700 flex items-center gap-1 font-semibold">
+<span class="material-symbols-outlined text-[18px]" data-icon="cloud_done">cloud_done</span>
+                                Sinkron
+                            </span>
+</div>
+</div>
+</div>
+<!-- Action -->
+<button class="w-full md:w-auto h-touch-target px-6 rounded-lg border border-outline-variant bg-surface hover:bg-surface-container-high text-primary font-body-md text-body-md font-semibold transition-colors mt-2 md:mt-0">
+                    Lihat Detail
+                </button>
+</article>
+<!-- Data Card 2 (Pending Sync) -->
+<article class="bg-surface border border-outline-variant rounded-xl p-4 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-shadow">
+<div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+<div class="flex gap-4 items-center">
+<div class="h-12 w-12 rounded-lg bg-surface-container-high flex items-center justify-center text-earth-brown border border-outline-variant">
+<span class="material-symbols-outlined" data-icon="forest">forest</span>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-caps text-label-caps text-earth-brown">NO. PETAK</span>
+<span class="font-data-mono text-data-mono text-deep-forest font-bold bg-surface-container-low px-2 py-0.5 rounded border border-outline-variant">14B</span>
+</div>
+<h3 class="font-headline-md text-headline-md-mobile text-primary">Kapur</h3>
+</div>
+</div>
+<div class="grid grid-cols-2 md:flex gap-4 md:ml-8 md:items-center w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-outline-variant">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1">WAKTU INPUT</span>
+<span class="font-body-md text-body-md text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="schedule">schedule</span>
+                                12 Okt, 13:15
+                            </span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1">STATUS</span>
+<span class="font-body-md text-body-md text-safety-orange flex items-center gap-1 font-semibold">
+<span class="material-symbols-outlined text-[18px]" data-icon="sync">sync</span>
+                                Menunggu
+                            </span>
+</div>
+</div>
+</div>
+<button class="w-full md:w-auto h-touch-target px-6 rounded-lg border border-outline-variant bg-surface hover:bg-surface-container-high text-primary font-body-md text-body-md font-semibold transition-colors mt-2 md:mt-0">
+                    Lihat Detail
+                </button>
+</article>
+<!-- Data Card 3 -->
+<article class="bg-surface border border-outline-variant rounded-xl p-4 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-shadow opacity-75">
+<div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+<div class="flex gap-4 items-center">
+<div class="h-12 w-12 rounded-lg bg-surface-container-high flex items-center justify-center text-earth-brown border border-outline-variant">
+<span class="material-symbols-outlined" data-icon="forest">forest</span>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-caps text-label-caps text-earth-brown">NO. PETAK</span>
+<span class="font-data-mono text-data-mono text-deep-forest font-bold bg-surface-container-low px-2 py-0.5 rounded border border-outline-variant">12C</span>
+</div>
+<h3 class="font-headline-md text-headline-md-mobile text-primary">Ulin</h3>
+</div>
+</div>
+<div class="grid grid-cols-2 md:flex gap-4 md:ml-8 md:items-center w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-outline-variant">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1">WAKTU INPUT</span>
+<span class="font-body-md text-body-md text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="schedule">schedule</span>
+                                12 Okt, 10:05
+                            </span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1">STATUS</span>
+<span class="font-body-md text-body-md text-green-700 flex items-center gap-1 font-semibold">
+<span class="material-symbols-outlined text-[18px]" data-icon="cloud_done">cloud_done</span>
+                                Sinkron
+                            </span>
+</div>
+</div>
+</div>
+<button class="w-full md:w-auto h-touch-target px-6 rounded-lg border border-outline-variant bg-surface hover:bg-surface-container-high text-primary font-body-md text-body-md font-semibold transition-colors mt-2 md:mt-0">
+                    Lihat Detail
+                </button>
+</article>
+</section>
+<!-- Load More (Utility pattern) -->
+<div class="mt-8 flex justify-center">
+<button class="h-touch-target px-8 rounded-full border border-outline-variant bg-surface text-on-surface hover:bg-surface-container-high transition-colors font-label-caps text-label-caps flex items-center gap-2">
+                MUAT LEBIH BANYAK
+                <span class="material-symbols-outlined text-[18px]" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</main>
+</body></html>
