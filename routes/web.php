@@ -96,10 +96,22 @@ Route::get('/history/{id}', function (Illuminate\Http\Request $request, $id) {
 })->middleware(['auth', 'verified', 'role:user'])->name('history.show');
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\PohonController as AdminPohonController;
+use App\Http\Controllers\Admin\PetakController as AdminPetakController;
 
-Route::get('/admin/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok'])
-    ->name('admin.dashboard');
+Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // User Management
+    Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);
+    
+    // Master Pohon
+    Route::resource('pohons', AdminPohonController::class)->except(['create', 'show', 'edit']);
+    
+    // Master Petak
+    Route::resource('petaks', AdminPetakController::class)->except(['create', 'show', 'edit']);
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

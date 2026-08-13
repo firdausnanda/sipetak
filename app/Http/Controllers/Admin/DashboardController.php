@@ -16,7 +16,13 @@ class DashboardController extends Controller
         $query = Batang::with(['pohon.kelompok', 'pohon.petak', 'pohon.jenisPohon', 'creator'])
             ->select('batangs.*');
 
-        if ($request->filled('kelompok_id')) {
+        $currentUser = auth()->user();
+
+        if ($currentUser->hasRole('admin_kelompok')) {
+            $query->whereHas('pohon', function ($q) use ($currentUser) {
+                $q->where('kelompok_id', $currentUser->kelompok_id);
+            });
+        } elseif ($request->filled('kelompok_id')) {
             $query->whereHas('pohon', function ($q) use ($request) {
                 $q->where('kelompok_id', $request->kelompok_id);
             });
@@ -73,9 +79,17 @@ class DashboardController extends Controller
         $perPage = $request->input('per_page', 10);
         $batangs = $query->paginate($perPage)->withQueryString();
         
-        $kelompoks = Kelompok::orderBy('nama_kelompok')->get();
+        $kelompoksQuery = Kelompok::orderBy('nama_kelompok');
         // Fixing the column name from nama_petak to no_petak
-        $petaks = Petak::orderBy('no_petak')->get();
+        $petaksQuery = Petak::orderBy('no_petak');
+
+        if ($currentUser->hasRole('admin_kelompok')) {
+            $kelompoksQuery->where('id', $currentUser->kelompok_id);
+            $petaksQuery->where('kelompok_id', $currentUser->kelompok_id);
+        }
+
+        $kelompoks = $kelompoksQuery->get();
+        $petaks = $petaksQuery->get();
 
         return Inertia::render('Admin/Dashboard', [
             'batangs' => $batangs,

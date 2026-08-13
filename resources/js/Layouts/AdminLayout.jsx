@@ -4,6 +4,9 @@ import { useState } from 'react';
 export default function AdminLayout({ children }) {
     const user = usePage().props.auth.user;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+    const [isMasterOpen, setIsMasterOpen] = useState(
+        route().current('admin.pohons.*') || route().current('admin.petaks.*')
+    );
 
     return (
         <div className="bg-background text-on-background font-body-md h-screen flex overflow-hidden w-full">
@@ -27,12 +30,41 @@ export default function AdminLayout({ children }) {
                         Laporan
                     </Link>
                     <Link
-                        href="#"
-                        className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps"
+                        href={route('admin.users.index')}
+                        className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.users.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                     >
                         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
                         Manajemen Pengguna
                     </Link>
+                    <div className="flex flex-col">
+                        <button
+                            onClick={() => setIsMasterOpen(!isMasterOpen)}
+                            className="flex items-center justify-between px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps w-full"
+                        >
+                            <div className="flex items-center gap-3">
+                                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dataset</span>
+                                Master
+                            </div>
+                            <span className={`material-symbols-outlined transition-transform duration-200 ${isMasterOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                        </button>
+                        
+                        <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ease-in-out ${isMasterOpen ? 'max-h-40 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                            <Link
+                                href={route('admin.pohons.index')}
+                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.pohons.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                            >
+                                <span className="material-symbols-outlined text-sm">park</span>
+                                Pohon
+                            </Link>
+                            <Link
+                                href={route('admin.petaks.index')}
+                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.petaks.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                            >
+                                <span className="material-symbols-outlined text-sm">map</span>
+                                Petak
+                            </Link>
+                        </div>
+                    </div>
                     <Link
                         href="#"
                         className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps"
@@ -83,12 +115,41 @@ export default function AdminLayout({ children }) {
                         Laporan
                     </Link>
                     <Link
-                        href="#"
-                        className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps"
+                        href={route('admin.users.index')}
+                        className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.users.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                     >
                         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
                         Manajemen Pengguna
                     </Link>
+                    <div className="flex flex-col">
+                        <button
+                            onClick={() => setIsMasterOpen(!isMasterOpen)}
+                            className="flex items-center justify-between px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps w-full"
+                        >
+                            <div className="flex items-center gap-3">
+                                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dataset</span>
+                                Master
+                            </div>
+                            <span className={`material-symbols-outlined transition-transform duration-200 ${isMasterOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                        </button>
+                        
+                        <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ease-in-out ${isMasterOpen ? 'max-h-40 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                            <Link
+                                href={route('admin.pohons.index')}
+                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.pohons.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                            >
+                                <span className="material-symbols-outlined text-sm">park</span>
+                                Pohon
+                            </Link>
+                            <Link
+                                href={route('admin.petaks.index')}
+                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.petaks.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                            >
+                                <span className="material-symbols-outlined text-sm">map</span>
+                                Petak
+                            </Link>
+                        </div>
+                    </div>
                     <Link
                         href="#"
                         className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps"

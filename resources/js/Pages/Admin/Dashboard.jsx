@@ -2,7 +2,10 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, router, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import Select from 'react-select';
-import { Table as TableIcon, Users, Map, Search, ChevronsUpDown, ArrowUp, ArrowDown, PackageOpen, QrCode, TreePine, User } from 'lucide-react';
+import { Table as TableIcon, Users, Map, Search, ChevronsUpDown, ArrowUp, ArrowDown, PackageOpen, QrCode, TreePine, User, Calendar } from 'lucide-react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { format, parseISO } from 'date-fns';
 
 export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
     const [filterData, setFilterData] = useState({
@@ -76,6 +79,11 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
             preserveState: true,
             preserveScroll: true,
         });
+    };
+
+    const handleDateChange = (date, name) => {
+        const formattedDate = date ? format(date, 'yyyy-MM-dd') : '';
+        handleFilterChange({ target: { name, value: formattedDate } });
     };
 
     const handleSort = (column) => {
@@ -155,24 +163,35 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
                 <div className="w-full lg:flex-1">
                     <label className="block font-label-caps text-label-caps text-[#6D4C41] mb-2">Dari Tanggal</label>
                     <div className="relative">
-                        <input 
-                            type="date" 
-                            name="start_date"
-                            value={filterData.start_date}
-                            onChange={handleFilterChange}
-                            className="w-full px-4 py-2 border border-outline-variant rounded-lg focus:outline-none focus:border-[#FB8500] focus:ring-1 focus:ring-[#FB8500] min-h-[48px] bg-surface-container-lowest" 
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant z-10 pointer-events-none w-[18px] h-[18px]" />
+                        <DatePicker 
+                            selected={filterData.start_date ? parseISO(filterData.start_date) : null}
+                            onChange={(date) => handleDateChange(date, 'start_date')}
+                            dateFormat="yyyy-MM-dd"
+                            className="w-full pl-10 pr-4 py-2 border border-outline-variant rounded-lg focus:outline-none focus:border-[#FB8500] focus:ring-1 focus:ring-[#FB8500] min-h-[48px] bg-surface-container-lowest" 
+                            placeholderText="Pilih tanggal mulai"
+                            isClearable
+                            selectsStart
+                            startDate={filterData.start_date ? parseISO(filterData.start_date) : null}
+                            endDate={filterData.end_date ? parseISO(filterData.end_date) : null}
                         />
                     </div>
                 </div>
                 <div className="w-full lg:flex-1">
                     <label className="block font-label-caps text-label-caps text-[#6D4C41] mb-2">Sampai Tanggal</label>
                     <div className="relative">
-                        <input 
-                            type="date" 
-                            name="end_date"
-                            value={filterData.end_date}
-                            onChange={handleFilterChange}
-                            className="w-full px-4 py-2 border border-outline-variant rounded-lg focus:outline-none focus:border-[#FB8500] focus:ring-1 focus:ring-[#FB8500] min-h-[48px] bg-surface-container-lowest" 
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant z-10 pointer-events-none w-[18px] h-[18px]" />
+                        <DatePicker 
+                            selected={filterData.end_date ? parseISO(filterData.end_date) : null}
+                            onChange={(date) => handleDateChange(date, 'end_date')}
+                            dateFormat="yyyy-MM-dd"
+                            className="w-full pl-10 pr-4 py-2 border border-outline-variant rounded-lg focus:outline-none focus:border-[#FB8500] focus:ring-1 focus:ring-[#FB8500] min-h-[48px] bg-surface-container-lowest" 
+                            placeholderText="Pilih tanggal akhir"
+                            isClearable
+                            selectsEnd
+                            startDate={filterData.start_date ? parseISO(filterData.start_date) : null}
+                            endDate={filterData.end_date ? parseISO(filterData.end_date) : null}
+                            minDate={filterData.start_date ? parseISO(filterData.start_date) : null}
                         />
                     </div>
                 </div>

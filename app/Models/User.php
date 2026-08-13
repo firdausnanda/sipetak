@@ -31,4 +31,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function kelompok()
+    {
+        return $this->belongsTo(Kelompok::class);
+    }
 }
