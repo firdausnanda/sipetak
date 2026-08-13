@@ -95,9 +95,11 @@ Route::get('/history/{id}', function (Illuminate\Http\Request $request, $id) {
     return Inertia::render('History/Show', ['pohon' => $pohon]);
 })->middleware(['auth', 'verified', 'role:user'])->name('history.show');
 
-Route::get('/admin/dashboard', function () {
-    return Inertia::render('Admin/Dashboard');
-})->middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok'])->name('admin.dashboard');
+use App\Http\Controllers\Admin\DashboardController;
+
+Route::get('/admin/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok'])
+    ->name('admin.dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

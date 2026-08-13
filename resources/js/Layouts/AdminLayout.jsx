@@ -136,7 +136,6 @@ export default function AdminLayout({ children }) {
                             <span className="material-symbols-outlined">notifications</span>
                             <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
                         </button>
-                        <button className="text-primary font-body-md text-body-md hover:bg-surface-container-high px-4 py-2 rounded-lg transition-colors hidden sm:block font-bold">Bantuan</button>
                         <div className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant flex items-center justify-center bg-primary text-on-primary font-bold ml-2">
                             {user.name.charAt(0)}
                         </div>
