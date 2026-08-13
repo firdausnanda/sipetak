@@ -17,7 +17,7 @@ class Batang extends Model
         return LogOptions::defaults()
             ->logAll()
             ->logOnlyDirty()
-            ->dontSubmitEmptyLogs();
+            ->dontLogEmptyChanges();
     }
     protected $guarded = [];
 
