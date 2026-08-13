@@ -136,10 +136,13 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
                     <p className="font-body-md text-body-md text-on-surface-variant">Kelola dan tinjau data operasional penebangan harian.</p>
                 </div>
                 <div className="flex gap-3">
-                    <button className="flex items-center gap-2 bg-[#FB8500] text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors min-h-[48px] font-bold shadow-sm">
+                    <a 
+                        href={route('admin.dashboard.export', filterData)}
+                        className="flex items-center gap-2 bg-[#FB8500] text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors min-h-[48px] font-bold shadow-sm"
+                    >
                         <TableIcon className="w-[18px] h-[18px]" />
                         Excel
-                    </button>
+                    </a>
                 </div>
             </div>
 

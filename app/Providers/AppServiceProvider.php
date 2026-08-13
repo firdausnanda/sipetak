@@ -21,5 +21,21 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+
+        \Illuminate\Support\Facades\Event::listen(function (\Illuminate\Auth\Events\Login $event) {
+            activity()
+                ->causedBy($event->user)
+                ->event('login')
+                ->log('Pengguna berhasil login');
+        });
+
+        \Illuminate\Support\Facades\Event::listen(function (\Illuminate\Auth\Events\Logout $event) {
+            if ($event->user) {
+                activity()
+                    ->causedBy($event->user)
+                    ->event('logout')
+                    ->log('Pengguna berhasil logout');
+            }
+        });
     }
 }

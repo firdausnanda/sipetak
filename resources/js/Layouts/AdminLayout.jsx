@@ -7,6 +7,9 @@ export default function AdminLayout({ children }) {
     const [isMasterOpen, setIsMasterOpen] = useState(
         route().current('admin.pohons.*') || route().current('admin.petaks.*')
     );
+    const [isPengaturanOpen, setIsPengaturanOpen] = useState(
+        route().current('admin.activity-log.*')
+    );
 
     return (
         <div className="bg-background text-on-background font-body-md h-screen flex overflow-hidden w-full">
@@ -65,19 +68,41 @@ export default function AdminLayout({ children }) {
                             </Link>
                         </div>
                     </div>
-                    <Link
-                        href="#"
-                        className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps"
-                    >
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>settings</span>
-                        Pengaturan
-                    </Link>
+                    {user.roles?.includes('admin_cdk') && (
+                        <div className="flex flex-col">
+                            <button
+                                onClick={() => setIsPengaturanOpen(!isPengaturanOpen)}
+                                className="flex items-center justify-between px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps w-full"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>settings</span>
+                                    Pengaturan
+                                </div>
+                                <span className={`material-symbols-outlined transition-transform duration-200 ${isPengaturanOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                            </button>
+                            
+                            <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ease-in-out ${isPengaturanOpen ? 'max-h-40 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                                <Link
+                                    href={route('admin.activity-log.index')}
+                                    className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.activity-log.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                                >
+                                    <span className="material-symbols-outlined text-sm">history</span>
+                                    Log Aktivitas
+                                </Link>
+                                <a
+                                    href="/admin/error-log"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-3 px-4 py-2 ml-4 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps"
+                                >
+                                    <span className="material-symbols-outlined text-sm">error</span>
+                                    Error Log
+                                </a>
+                            </div>
+                        </div>
+                    )}
                 </nav>
                 <div className="mt-auto pt-4">
-                    <button className="w-full flex items-center justify-center gap-2 bg-[#FB8500] text-white py-3 rounded-lg font-bold min-h-[48px] hover:bg-opacity-90 active:scale-95 transition-all mb-4">
-                        <span className="material-symbols-outlined">download</span>
-                        Ekspor Data
-                    </button>
                     <Link
                         href={route('logout')}
                         method="post"
@@ -150,19 +175,41 @@ export default function AdminLayout({ children }) {
                             </Link>
                         </div>
                     </div>
-                    <Link
-                        href="#"
-                        className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps"
-                    >
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>settings</span>
-                        Pengaturan
-                    </Link>
+                    {user.roles?.includes('admin_cdk') && (
+                        <div className="flex flex-col">
+                            <button
+                                onClick={() => setIsPengaturanOpen(!isPengaturanOpen)}
+                                className="flex items-center justify-between px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps w-full"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>settings</span>
+                                    Pengaturan
+                                </div>
+                                <span className={`material-symbols-outlined transition-transform duration-200 ${isPengaturanOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                            </button>
+                            
+                            <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ease-in-out ${isPengaturanOpen ? 'max-h-40 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                                <Link
+                                    href={route('admin.activity-log.index')}
+                                    className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.activity-log.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                                >
+                                    <span className="material-symbols-outlined text-sm">history</span>
+                                    Log Aktivitas
+                                </Link>
+                                <a
+                                    href="/admin/error-log"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-3 px-4 py-2 ml-4 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps"
+                                >
+                                    <span className="material-symbols-outlined text-sm">error</span>
+                                    Error Log
+                                </a>
+                            </div>
+                        </div>
+                    )}
                 </nav>
                 <div className="mt-auto pt-4">
-                    <button className="w-full flex items-center justify-center gap-2 bg-[#FB8500] text-white py-3 rounded-lg font-bold min-h-[48px] hover:bg-opacity-90 active:scale-95 transition-all mb-4">
-                        <span className="material-symbols-outlined">download</span>
-                        Ekspor Data
-                    </button>
                     <Link
                         href={route('logout')}
                         method="post"

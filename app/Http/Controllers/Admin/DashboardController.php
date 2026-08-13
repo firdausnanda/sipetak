@@ -11,7 +11,7 @@ use App\Models\Petak;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
+    private function buildQuery(Request $request)
     {
         $query = Batang::with(['pohon.kelompok', 'pohon.petak', 'pohon.jenisPohon', 'creator'])
             ->select('batangs.*');
@@ -61,6 +61,13 @@ class DashboardController extends Controller
             });
         }
 
+        return $query;
+    }
+
+    public function index(Request $request)
+    {
+        $query = $this->buildQuery($request);
+
         $sort = $request->input('sort', 'created_at');
         $direction = $request->input('direction', 'desc');
 
@@ -79,8 +86,8 @@ class DashboardController extends Controller
         $perPage = $request->input('per_page', 10);
         $batangs = $query->paginate($perPage)->withQueryString();
         
+        $currentUser = auth()->user();
         $kelompoksQuery = Kelompok::orderBy('nama_kelompok');
-        // Fixing the column name from nama_petak to no_petak
         $petaksQuery = Petak::orderBy('no_petak');
 
         if ($currentUser->hasRole('admin_kelompok')) {
@@ -97,5 +104,29 @@ class DashboardController extends Controller
             'petaks' => $petaks,
             'filters' => $request->only(['kelompok_id', 'petak_id', 'start_date', 'end_date', 'sort', 'direction', 'search', 'per_page'])
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        $query = $this->buildQuery($request);
+        
+        $sort = $request->input('sort', 'created_at');
+        $direction = $request->input('direction', 'desc');
+
+        $batangColumns = ['no_batang', 'panjang', 'diameter_ujung', 'diameter_pangkal', 'mutu', 'created_at'];
+        $pohonColumns = ['tanggal'];
+
+        if (in_array($sort, $batangColumns)) {
+            $query->orderBy("batangs.{$sort}", $direction);
+        } elseif (in_array($sort, $pohonColumns)) {
+            $query->join('pohons', 'batangs.pohon_id', '=', 'pohons.id')
+                  ->orderBy("pohons.{$sort}", $direction);
+        } else {
+            $query->latest('batangs.created_at');
+        }
+
+        $filename = "laporan_hasil_tebangan_" . date('Y-m-d_H-i-s') . ".xlsx";
+        
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\LaporanHasilTebanganExport($query), $filename);
     }
 }

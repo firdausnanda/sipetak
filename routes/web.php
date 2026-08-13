@@ -99,9 +99,11 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PohonController as AdminPohonController;
 use App\Http\Controllers\Admin\PetakController as AdminPetakController;
+use App\Http\Controllers\Admin\ActivityLogController;
 
 Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/export', [DashboardController::class, 'export'])->name('dashboard.export');
     
     // User Management
     Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);
@@ -111,6 +113,11 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok'])->prefix
     
     // Master Petak
     Route::resource('petaks', AdminPetakController::class)->except(['create', 'show', 'edit']);
+});
+
+Route::middleware(['auth', 'verified', 'role:admin_cdk'])->prefix('admin')->name('admin.')->group(function () {
+    // Log
+    Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
 });
 
 Route::middleware('auth')->group(function () {
