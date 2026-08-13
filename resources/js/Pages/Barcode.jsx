@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 
 export default function Barcode() {
     const { data, setData, post, processing } = useForm({
+        no_barcode: '',
         no_pohon: '',
         petak_id: '',
         jenis_pohon_id: '',
@@ -60,15 +61,19 @@ export default function Barcode() {
     const handleScan = (result) => {
         if (result && result.length > 0) {
             const code = result[0].rawValue;
-            setData('no_pohon', code);
+            setData('no_barcode', code);
             setIsScanning(false);
             playBeep();
         }
     };
 
     const handleAddBatang = () => {
+        if (!data.no_barcode) {
+            Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Silakan scan barcode terlebih dahulu!' });
+            return;
+        }
         if (!data.no_pohon) {
-            Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Silakan scan barcode pohon terlebih dahulu!' });
+            Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Silakan isi No. Pohon terlebih dahulu!' });
             return;
         }
         if (!tempBatang.no_batang || !tempBatang.panjang || !tempBatang.diameter_pangkal || !tempBatang.diameter_ujung || !tempBatang.mutu) {
@@ -94,8 +99,12 @@ export default function Barcode() {
     const handleSubmit = (e) => {
         e.preventDefault();
         
+        if (!data.no_barcode) {
+            Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Silakan scan barcode terlebih dahulu!' });
+            return;
+        }
         if (!data.no_pohon) {
-            Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Silakan scan barcode pohon terlebih dahulu!' });
+            Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Silakan isi No. Pohon terlebih dahulu!' });
             return;
         }
         if (data.batangs.length === 0) {
@@ -106,6 +115,7 @@ export default function Barcode() {
         post(route('barcode.store'), {
             onSuccess: () => {
                 Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Data berhasil disimpan!', timer: 2000, showConfirmButton: false });
+                setData('no_barcode', '');
                 setData('no_pohon', '');
                 setData('batangs', []);
                 setIsScanning(true);
@@ -139,10 +149,10 @@ export default function Barcode() {
                                 <span className="material-symbols-outlined text-3xl">check</span>
                             </div>
                             <p className="text-white font-headline-sm">Barcode Berhasil Dipindai!</p>
-                            <p className="text-outline font-data-mono bg-surface/20 px-4 py-2 rounded break-all">{data.no_pohon}</p>
+                            <p className="text-outline font-data-mono bg-surface/20 px-4 py-2 rounded break-all">{data.no_barcode}</p>
                             <button 
                                 type="button"
-                                onClick={() => { setIsScanning(true); setData('no_pohon', ''); }}
+                                onClick={() => { setIsScanning(true); setData('no_barcode', ''); }}
                                 className="mt-4 px-6 py-2 bg-[#FB8500] text-white rounded-full font-label-caps hover:bg-[#e87a00] transition-colors flex items-center gap-2"
                             >
                                 <span className="material-symbols-outlined text-[18px]">qr_code_scanner</span>
@@ -157,19 +167,32 @@ export default function Barcode() {
                     {/* Global Fields */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="flex flex-col">
-                            <label className="font-label-caps text-label-caps text-[#6D4C41] mb-1">No. Pohon</label>
+                            <label className="font-label-caps text-label-caps text-[#6D4C41] mb-1">No. Barcode</label>
                             <input 
                                 className="h-touch-target border border-outline-variant rounded bg-surface-container px-3 text-[#1B4332] font-data-mono text-data-mono focus:ring-2 focus:ring-[#FB8500] focus:border-[#FB8500] focus:outline-none" 
                                 readOnly 
                                 type="text" 
-                                value={data.no_pohon || 'Menunggu scan...'} 
+                                value={data.no_barcode || 'Menunggu scan...'} 
                             />
                         </div>
+                        <div className="flex flex-col">
+                            <label className="font-label-caps text-label-caps text-[#6D4C41] mb-1">No. Pohon</label>
+                            <input 
+                                className="h-touch-target border border-outline-variant rounded bg-surface-bright px-3 text-[#1B4332] font-data-mono text-data-mono focus:ring-2 focus:ring-[#FB8500] focus:border-[#FB8500] focus:outline-none" 
+                                placeholder="e.g. 12" 
+                                type="text" 
+                                value={data.no_pohon}
+                                onChange={e => setData('no_pohon', e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-4">
                         <div className="flex flex-col">
                             <label className="font-label-caps text-label-caps text-[#6D4C41] mb-1">No. Batang</label>
                             <input 
                                 className="h-touch-target border border-outline-variant rounded bg-surface-bright px-3 text-[#1B4332] font-data-mono text-data-mono focus:ring-2 focus:ring-[#FB8500] focus:border-[#FB8500] focus:outline-none" 
-                                placeholder="1" 
+                                placeholder="e.g. 239" 
                                 type="number" 
                                 inputMode="numeric"
                                 pattern="[0-9]*"

@@ -24,7 +24,7 @@ export default function Show({ pohon }) {
                     <div className="flex items-start justify-between relative z-10">
                         <div className="flex flex-col gap-2">
                             <span className="inline-flex items-center px-3 py-1 rounded-sm bg-[#FB8500]/10 text-[#FB8500] font-label-caps text-label-caps border border-[#FB8500]/20 w-fit">
-                                NO. PETAK {pohon.petak?.nama_petak || 'N/A'}
+                                NO. PETAK <span className="inline-flex items-center px-3 py-1 rounded-sm bg-[#1B4332]/10 text-[#1B4332] font-label-caps text-label-caps border border-[#FB8500]/20 w-fit ms-2">{pohon.petak?.no_petak || 'N/A'}</span> 
                             </span>
                             <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary-container">{pohon.jenis_pohon?.nama_jenis || 'N/A'}</h2>
                         </div>

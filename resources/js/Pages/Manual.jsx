@@ -103,7 +103,7 @@ export default function Manual() {
                                         className="w-full h-touch-target border border-outline-variant rounded-DEFAULT bg-surface-container-lowest px-4 text-on-surface font-data-mono text-data-mono focus:outline-none focus:border-transparent transition-all" 
                                         id="nomorPohon" 
                                         name="nomorPohon" 
-                                        placeholder="e.g. P-2023-001" 
+                                        placeholder="e.g. 2023" 
                                         value={data.no_pohon}
                                         onChange={e => setData('no_pohon', e.target.value)}
                                         required 
@@ -120,7 +120,7 @@ export default function Manual() {
                                         className="w-full h-touch-target border border-outline-variant rounded-DEFAULT bg-surface-container-lowest px-4 text-on-surface font-data-mono text-data-mono focus:outline-none focus:border-transparent transition-all" 
                                         id="nomorBatang" 
                                         name="nomorBatang" 
-                                        placeholder="e.g. LOG-2023-X99" 
+                                        placeholder="e.g. 99" 
                                         value={tempBatang.no_batang}
                                         onChange={e => setTempBatang({...tempBatang, no_batang: e.target.value})}
                                         required 

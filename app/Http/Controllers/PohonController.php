@@ -11,6 +11,7 @@ class PohonController extends Controller
     public function storeBarcode(Request $request)
     {
         $validated = $request->validate([
+            'no_barcode' => 'required|string',
             'no_pohon' => 'required|string',
             'petak_id' => 'required|exists:petaks,id',
             'jenis_pohon_id' => 'required|exists:jenis_pohons,id',
@@ -31,7 +32,7 @@ class PohonController extends Controller
                 'jenis_pohon_id' => $validated['jenis_pohon_id'],
                 'tanggal' => now()->toDateString(),
                 'tipe' => 'barcode',
-                'no_barcode' => $validated['no_pohon'],
+                'no_barcode' => $validated['no_barcode'],
                 'no_pohon' => $validated['no_pohon'],
             ]);
 
