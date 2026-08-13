@@ -1,6 +1,8 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function Login({ status, canResetPassword }) {
+    const [showPassword, setShowPassword] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
@@ -24,13 +26,17 @@ export default function Login({ status, canResetPassword }) {
                 {/* Background Image Placeholder with Forestry Theme prompt */}
                 <div 
                     className="absolute inset-0 w-full h-full bg-cover bg-center" 
-                    style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuA0AvkcHTnJ5-CEax7kpvxuqBFgIMPdYtjZqD4xpXB7bBbWfVjrf42JAMUjQjtqS0p7BJPNWlBgHJTIxSZVhJaVzH1ooxt4w-0Tl6tl0JaLwsQChtBHNAfQ-rZs594cARbCaXeKzy6wiACzoxc5llQ7DakENWinlypZgA-YNf_0l0dAWaXY1VWHmrCD5uQj2y69ccABFMsizP-dYRx3kO42RBbUlSYVW7Wc-VeGzUHzciZazMyVrDpN0g')" }}
+                    style={{ backgroundImage: "url('/img/login.webp')" }}
                 ></div>
                 <div className="absolute inset-0 bg-primary-container bg-opacity-80"></div>
                 <div className="relative z-10 p-margin-desktop h-full flex flex-col justify-between text-on-primary">
                     <div>
                         <div className="flex items-center gap-2 mb-4">
-                            <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>forest</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-9 h-9">
+                                <path d="M16 12L22 21H18V24H14V21H10L16 12Z" />
+                                <path d="M8 12L14 21H11V24H7V21H3L8 12Z" />
+                                <path d="M12 2L19 13H15V24H9V13H5L12 2Z" />
+                            </svg>
                             <h1 className="font-display text-display tracking-tight font-bold">SIPETAK</h1>
                         </div>
                         <p className="font-headline-md text-headline-md max-w-md text-primary-fixed-dim">Sistem Informasi Penebangan dan Taksasi Kayu</p>
@@ -51,7 +57,11 @@ export default function Login({ status, canResetPassword }) {
             <div className="flex-1 flex flex-col justify-center items-center px-margin-mobile md:px-margin-desktop py-12 md:py-0 bg-surface md:min-h-screen">
                 {/* Mobile Header (Visible only on small screens) */}
                 <div className="w-full max-w-md mb-8 flex flex-col items-center md:hidden text-center">
-                    <span className="material-symbols-outlined text-4xl text-primary mb-2" style={{ fontVariationSettings: "'FILL' 1" }}>forest</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-9 h-9 text-primary mb-2">
+                        <path d="M16 12L22 21H18V24H14V21H10L16 12Z" />
+                        <path d="M8 12L14 21H11V24H7V21H3L8 12Z" />
+                        <path d="M12 2L19 13H15V24H9V13H5L12 2Z" />
+                    </svg>
                     <h1 className="font-display text-display text-primary font-bold">SIPETAK</h1>
                     <p className="font-body-md text-body-md text-on-surface-variant mt-2">Sistem Informasi Penebangan dan Taksasi Kayu</p>
                 </div>
@@ -71,7 +81,9 @@ export default function Login({ status, canResetPassword }) {
                             <label className="font-label-caps text-label-caps text-secondary uppercase tracking-wider" htmlFor="email">ID Operator / Nama Pengguna (Email)</label>
                             <div className="relative">
                                 <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <span className="material-symbols-outlined text-on-surface-variant">person</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-on-surface-variant">
+                                        <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" />
+                                    </svg>
                                 </span>
                                 <input 
                                     className={`block w-full h-touch-target pl-10 pr-10 border-outline-variant rounded-DEFAULT bg-surface text-on-surface focus:ring-2 focus:ring-[#FB8500] focus:border-[#FB8500] sm:text-sm font-data-mono ${errors.email ? 'border-error' : ''}`}
@@ -89,7 +101,9 @@ export default function Login({ status, canResetPassword }) {
                                         onClick={() => setData('email', '')} 
                                         type="button"
                                     >
-                                        <span className="material-symbols-outlined text-sm">close</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
                                     </button>
                                 )}
                             </div>
@@ -101,7 +115,9 @@ export default function Login({ status, canResetPassword }) {
                             <label className="font-label-caps text-label-caps text-secondary uppercase tracking-wider" htmlFor="password">PIN Akses / Kata Sandi</label>
                             <div className="relative">
                                 <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <span className="material-symbols-outlined text-on-surface-variant">lock</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-on-surface-variant">
+                                        <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" />
+                                    </svg>
                                 </span>
                                 <input 
                                     className={`block w-full h-touch-target pl-10 pr-10 border-outline-variant rounded-DEFAULT bg-surface text-on-surface focus:ring-2 focus:ring-[#FB8500] focus:border-[#FB8500] sm:text-sm font-data-mono ${errors.password ? 'border-error' : ''}`}
@@ -109,10 +125,26 @@ export default function Login({ status, canResetPassword }) {
                                     name="password" 
                                     placeholder="••••••••" 
                                     required 
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     value={data.password}
                                     onChange={(e) => setData('password', e.target.value)}
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-on-surface-variant hover:text-on-surface focus:outline-none"
+                                >
+                                    {showPassword ? (
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                        </svg>
+                                    ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                        </svg>
+                                    )}
+                                </button>
                             </div>
                             {errors.password && <div className="text-sm text-error mt-1">{errors.password}</div>}
                         </div>

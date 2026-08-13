@@ -32,21 +32,21 @@ Route::get('/dashboard', function (Request $request) {
         'jenisPohons' => $jenisPohons,
         'namaKelompok' => $kelompok ? $kelompok->nama_kelompok : 'Belum Ada Kelompok',
     ]);
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', 'role:user'])->name('dashboard');
 Route::get('/barcode', function () {
     return Inertia::render('Barcode');
-})->middleware(['auth', 'verified'])->name('barcode');
+})->middleware(['auth', 'verified', 'role:user'])->name('barcode');
 
 Route::post('/barcode', [PohonController::class, 'storeBarcode'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'role:user'])
     ->name('barcode.store');
 
 Route::get('/manual', function () {
     return Inertia::render('Manual');
-})->middleware(['auth', 'verified'])->name('manual');
+})->middleware(['auth', 'verified', 'role:user'])->name('manual');
 
 Route::post('/manual', [PohonController::class, 'storeManual'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'role:user'])
     ->name('manual.store');
 
 Route::get('/history', function (Request $request) {
@@ -85,7 +85,7 @@ Route::get('/history', function (Request $request) {
         'pohons' => $pohons,
         'filters' => ['filter' => $filter, 'search' => $search]
     ]);
-})->middleware(['auth', 'verified'])->name('history');
+})->middleware(['auth', 'verified', 'role:user'])->name('history');
 
 Route::get('/history/{id}', function (Illuminate\Http\Request $request, $id) {
     $pohon = App\Models\Pohon::with(['petak', 'jenisPohon', 'kelompok', 'batangs'])->findOrFail($id);
@@ -93,11 +93,11 @@ Route::get('/history/{id}', function (Illuminate\Http\Request $request, $id) {
         abort(403);
     }
     return Inertia::render('History/Show', ['pohon' => $pohon]);
-})->middleware(['auth', 'verified'])->name('history.show');
+})->middleware(['auth', 'verified', 'role:user'])->name('history.show');
 
 Route::get('/admin/dashboard', function () {
     return Inertia::render('Admin/Dashboard');
-})->middleware(['auth', 'verified'])->name('admin.dashboard');
+})->middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok'])->name('admin.dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

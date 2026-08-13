@@ -60,7 +60,9 @@ export default function History({ auth, pohons = { data: [] }, filters = {} }) {
                 <section className="flex flex-col gap-4 mb-6">
                     {/* Search Bar */}
                     <div className="relative w-full">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-outline material-symbols-outlined pointer-events-none" style={{ fontVariationSettings: "'FILL' 1" }}>search</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-outline pointer-events-none">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
                         <input 
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -71,7 +73,9 @@ export default function History({ auth, pohons = { data: [] }, filters = {} }) {
                         />
                         {search && (
                             <button onClick={clearSearch} aria-label="Clear search" className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center text-outline hover:text-on-surface rounded-full transition-colors">
-                                <span className="material-symbols-outlined text-lg">close</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
                             </button>
                         )}
                     </div>
@@ -103,7 +107,11 @@ export default function History({ auth, pohons = { data: [] }, filters = {} }) {
                             <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
                                 <div className="flex gap-4 items-center">
                                     <div className="h-12 w-12 rounded-lg bg-surface-container-high flex items-center justify-center text-[#6D4C41] border border-outline-variant">
-                                        <span className="material-symbols-outlined">forest</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                                            <path d="M12 22v-5"/>
+                                            <path d="M9 22h6"/>
+                                            <path d="M12 17l-5-5h2l-4-4h4l-3-3 6 4 6-4-3 3h4l-4 4h2z"/>
+                                        </svg>
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
@@ -117,14 +125,19 @@ export default function History({ auth, pohons = { data: [] }, filters = {} }) {
                                     <div className="flex flex-col">
                                         <span className="font-label-caps text-label-caps text-on-surface-variant mb-1">WAKTU INPUT</span>
                                         <span className="font-body-md text-body-md text-on-surface flex items-center gap-1">
-                                            <span className="material-symbols-outlined text-[16px] text-outline">schedule</span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-outline">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
                                             {new Date(pohon.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                                         </span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="font-label-caps text-label-caps text-on-surface-variant mb-1">STATUS</span>
                                         <span className="font-body-md text-body-md text-green-700 flex items-center gap-1 font-semibold">
-                                            <span className="material-symbols-outlined text-[18px]">cloud_done</span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 16.5l-3-3 1.5-1.5 1.5 1.5 4.5-4.5 1.5 1.5-6 6z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                                            </svg>
                                             Sukses
                                         </span>
                                     </div>
@@ -151,7 +164,11 @@ export default function History({ auth, pohons = { data: [] }, filters = {} }) {
                             disabled={loading}
                             className="h-touch-target px-8 rounded-full border border-outline-variant bg-surface text-on-surface hover:bg-surface-container-high transition-colors font-label-caps text-label-caps flex items-center gap-2 disabled:opacity-50">
                             {loading ? 'MEMUAT...' : 'MUAT LEBIH BANYAK'}
-                            {!loading && <span className="material-symbols-outlined text-[18px]">expand_more</span>}
+                            {!loading && (
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                </svg>
+                            )}
                         </button>
                     </div>
                 )}

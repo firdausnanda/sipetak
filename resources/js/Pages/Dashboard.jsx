@@ -91,7 +91,10 @@ export default function Dashboard({ petaks = [], jenisPohons = [], namaKelompok 
                     <p className="font-body-lg text-body-lg text-on-surface-variant">{user.name}</p>
                 </div>
                 <div className="hidden md:flex items-center space-x-3 bg-surface-container rounded-lg px-4 py-2 border border-outline-variant">
-                    <span className="material-symbols-outlined text-[#1B4332]" style={{ fontVariationSettings: "'FILL' 1" }}>cloud_done</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-[#1B4332]">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 16.5l-3-3 1.5-1.5 1.5 1.5 4.5-4.5 1.5 1.5-6 6z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                    </svg>
                     <span className="font-data-mono text-data-mono text-[#1B4332]">Sistem Online</span>
                 </div>
             </div>
@@ -157,12 +160,17 @@ export default function Dashboard({ petaks = [], jenisPohons = [], namaKelompok 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mt-8">
                 {/* Barcode Logging Action */}
                 <Link href={route('barcode')} className="h-32 flex flex-col items-center justify-center bg-[#FB8500] hover:bg-[#E07700] text-white rounded-xl shadow-md transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#FB8500] focus:ring-offset-2">
-                    <span className="material-symbols-outlined text-4xl mb-2" style={{ fontVariationSettings: "'FILL' 1" }}>barcode_scanner</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 mb-2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
+                    </svg>
                     <span className="font-headline-md text-headline-lg-mobile md:text-headline-md">Pohon Berbarcode</span>
                 </Link>
                 {/* Manual Logging Action */}
                 <Link href={route('manual')} className="h-32 flex flex-col items-center justify-center bg-surface border-2 border-[#FB8500] text-[#FB8500] hover:bg-surface-container-low rounded-xl shadow-sm transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#FB8500] focus:ring-offset-2">
-                    <span className="material-symbols-outlined text-4xl mb-2">edit_document</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 mb-2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg>
                     <span className="font-headline-md text-headline-lg-mobile md:text-headline-md">Pohon Non Barcode</span>
                 </Link>
             </div>
@@ -172,9 +180,15 @@ export default function Dashboard({ petaks = [], jenisPohons = [], namaKelompok 
                 <h3 className="font-label-caps text-label-caps text-on-surface-variant mb-2">Status User</h3>
                 <div className="flex items-center space-x-4">
                     <div className="flex items-center">
-                        <span className={`material-symbols-outlined mr-2 ${signalStrength === 'good' ? 'text-green-600' : signalStrength === 'fair' ? 'text-yellow-500' : signalStrength === 'poor' ? 'text-red-500' : 'text-gray-400'}`} style={{ fontVariationSettings: "'FILL' 1" }}>
-                            {signalStrength === 'offline' ? 'signal_cellular_off' : 'signal_cellular_alt'}
-                        </span>
+                        {signalStrength === 'offline' ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-6 h-6 mr-2 ${signalStrength === 'good' ? 'text-green-600' : signalStrength === 'fair' ? 'text-yellow-500' : signalStrength === 'poor' ? 'text-red-500' : 'text-gray-400'}`}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18M9.522 9.522C8.618 10.426 8 11.642 8 13M14.478 14.478c.904-.904 1.522-2.12 1.522-3.478m4.949-4.95A11.956 11.956 0 0012 3.5a11.956 11.956 0 00-7.949 3.05M21 12c0 2.485-1.006 4.735-2.636 6.364" />
+                            </svg>
+                        ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-6 h-6 mr-2 ${signalStrength === 'good' ? 'text-green-600' : signalStrength === 'fair' ? 'text-yellow-500' : signalStrength === 'poor' ? 'text-red-500' : 'text-gray-400'}`}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M8.288 15.038a5.25 5.25 0 0 1 7.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 0 1 1.06 0Z" />
+                            </svg>
+                        )}
                         <span className="font-data-mono text-data-mono cursor-pointer select-none">
                             Sinyal: {signalStrength === 'good' ? 'Bagus' : signalStrength === 'fair' ? 'Cukup' : signalStrength === 'poor' ? 'Jelek' : 'Offline'}
                         </span>
