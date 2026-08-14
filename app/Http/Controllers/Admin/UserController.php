@@ -18,7 +18,7 @@ class UserController extends Controller
         $query = User::with(['roles', 'kelompok']);
         $currentUser = auth()->user();
 
-        if ($currentUser->hasRole('admin_kelompok')) {
+        if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis'])) {
             $query->where('kelompok_id', $currentUser->kelompok_id);
         }
 
@@ -56,7 +56,7 @@ class UserController extends Controller
         $rolesQuery = Role::whereIn('name', ['user', 'admin_cdk', 'admin_kelompok', 'ganis']);
         $kelompoksQuery = Kelompok::orderBy('nama_kelompok');
 
-        if ($currentUser->hasRole('admin_kelompok')) {
+        if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis'])) {
             $rolesQuery->whereIn('name', ['user', 'admin_kelompok', 'ganis']);
             $kelompoksQuery->where('id', $currentUser->kelompok_id);
         }
@@ -80,7 +80,7 @@ class UserController extends Controller
             abort(403, 'Unauthorized role assignment.');
         }
 
-        if ($currentUser->hasRole('admin_kelompok')) {
+        if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis'])) {
             $request->merge(['kelompok_id' => $currentUser->kelompok_id]);
         }
 
@@ -112,7 +112,7 @@ class UserController extends Controller
             abort(403, 'Unauthorized role assignment.');
         }
 
-        if ($currentUser->hasRole('admin_kelompok')) {
+        if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis'])) {
             if ($user->kelompok_id !== $currentUser->kelompok_id) {
                 abort(403, 'Unauthorized access to user.');
             }
@@ -144,7 +144,7 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $currentUser = auth()->user();
-        if ($currentUser->hasRole('admin_kelompok') && $user->kelompok_id !== $currentUser->kelompok_id) {
+        if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id !== $currentUser->kelompok_id) {
             abort(403, 'Unauthorized access to user.');
         }
 
