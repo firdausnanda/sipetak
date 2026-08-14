@@ -1,8 +1,14 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, FileText, Calendar, Users, Map, Info, TreePine, Printer, Box } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, FileText, Calendar, Users, Map, Info, TreePine, Printer, Box, Edit } from 'lucide-react';
+import Modal from '@/Components/Modal';
+import PrimaryButton from '@/Components/PrimaryButton';
+import SecondaryButton from '@/Components/SecondaryButton';
 
 export default function Show({ dokumen }) {
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+
     const formatDate = (dateString) => {
         if (!dateString) return '-';
         const date = new Date(dateString);
@@ -36,10 +42,14 @@ export default function Show({ dokumen }) {
                         </p>
                     </div>
                 </div>
-                <div className="flex gap-3 print:hidden">
-                    <button onClick={() => window.print()} className="flex items-center gap-2 bg-surface-container-high text-primary px-4 py-2 rounded-lg hover:bg-surface-container-highest transition-colors font-bold shadow-sm">
+                <div className="flex gap-3">
+                    <Link href={route('admin.dokumen_angkutans.edit', dokumen.id)} className="flex items-center gap-2 bg-white border border-outline-variant text-on-surface px-4 py-2 rounded-lg hover:bg-surface-container-low transition-colors font-bold shadow-sm">
+                        <Edit className="w-4 h-4" />
+                        Edit Data
+                    </Link>
+                    <button onClick={() => setIsExportModalOpen(true)} className="flex items-center gap-2 bg-surface-container-high text-primary px-4 py-2 rounded-lg hover:bg-surface-container-highest transition-colors font-bold shadow-sm">
                         <Printer className="w-4 h-4" />
-                        Cetak Dokumen
+                        Export PDF
                     </button>
                 </div>
             </div>
@@ -83,7 +93,12 @@ export default function Show({ dokumen }) {
                                 </div>
                                 <div>
                                     <div className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Kelompok</div>
-                                    <div className="font-medium text-on-surface">{dokumen.kelompok?.nama_kelompok || '-'}</div>
+                                    <div className="flex items-center gap-3">
+                                        {dokumen.kelompok?.logo_url && (
+                                            <img src={dokumen.kelompok.logo_url.startsWith('/') ? dokumen.kelompok.logo_url : `/storage/${dokumen.kelompok.logo_url}`} alt="Logo" className="w-8 h-8 rounded-full object-cover border border-outline-variant" />
+                                        )}
+                                        <div className="font-medium text-on-surface">{dokumen.kelompok?.nama_kelompok || '-'}</div>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -216,7 +231,70 @@ export default function Show({ dokumen }) {
                 </div>
             </div>
             
+            
             <div className="h-24 md:h-8"></div>
+
+            <Modal show={isExportModalOpen} onClose={() => setIsExportModalOpen(false)}>
+                <div class="p-6">
+                    <h2 className="text-lg font-bold text-primary mb-4 border-b border-outline-variant pb-2">Konfirmasi Export Dokumen</h2>
+                    
+                    <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 mb-6">
+                        <h3 className="font-bold text-sm mb-3 text-on-surface-variant uppercase tracking-wider">Ringkasan Halaman 1</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm">
+                            <div>
+                                <span className="text-on-surface-variant block text-xs">Pengirim (KTH)</span>
+                                <span className="font-medium text-on-surface">{dokumen.kelompok?.nama_kelompok || '-'}</span>
+                            </div>
+                            <div>
+                                <span className="text-on-surface-variant block text-xs">Nomor Petak</span>
+                                <span className="font-medium text-on-surface">{dokumen.petaks?.map(p => p.no_petak).join(', ') || '-'}</span>
+                            </div>
+                            <div>
+                                <span className="text-on-surface-variant block text-xs">Tujuan Bongkar TPK</span>
+                                <span className="font-medium text-on-surface">{dokumen.tujuan_bongkar?.nama_tpk || '-'}</span>
+                            </div>
+                            <div>
+                                <span className="text-on-surface-variant block text-xs">Penerbit Dokumen</span>
+                                <span className="font-medium text-on-surface">{dokumen.penerbit?.nama || '-'} ({dokumen.penerbit?.no_register || '-'})</span>
+                            </div>
+                            <div>
+                                <span className="text-on-surface-variant block text-xs">Alat Angkut</span>
+                                <span className="font-medium text-on-surface">{dokumen.jenis_angkutan || '-'} (Nopol: {dokumen.nopol_angkutan || '-'})</span>
+                            </div>
+                            <div>
+                                <span className="text-on-surface-variant block text-xs">Masa Berlaku</span>
+                                <span className="font-medium text-on-surface">{dokumen.masa_berlaku_hari || 1} Hari</span>
+                            </div>
+                            <div>
+                                <span className="text-on-surface-variant block text-xs">Kayu Diangkut</span>
+                                <span className="font-medium text-on-surface">
+                                    {dokumen.pohons?.map(p => p.jenis_pohon?.nama_jenis || '-').filter((value, index, self) => self.indexOf(value) === index).join(', ') || '-'} 
+                                    {' '} ({totalBatang} Batang)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p className="text-on-surface-variant mb-6 font-medium">
+                        Apakah Anda yakin data pada dokumen ini sudah sesuai dan siap untuk dicetak?
+                    </p>
+                    <div className="flex justify-end gap-3 mt-6">
+                        <SecondaryButton onClick={() => setIsExportModalOpen(false)}>
+                            Batal
+                        </SecondaryButton>
+                        <a 
+                            href={route('admin.dokumen_angkutans.pdf', dokumen.id)} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            onClick={() => setIsExportModalOpen(false)}
+                            className="inline-flex items-center px-4 py-2 bg-primary border border-transparent rounded-md font-semibold text-xs text-on-primary uppercase tracking-widest hover:bg-primary/90 focus:bg-primary/90 active:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition ease-in-out duration-150"
+                        >
+                            <Printer className="w-4 h-4 mr-2" />
+                            Ya, Export PDF
+                        </a>
+                    </div>
+                </div>
+            </Modal>
         </AdminLayout>
     );
 }

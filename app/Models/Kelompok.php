@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
+/**
+ * @property string|null $logo_url
+ */
+
 class Kelompok extends Model
 {
     use LogsActivity;

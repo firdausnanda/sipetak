@@ -1,11 +1,12 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import Dropdown from '@/Components/Dropdown';
 
 export default function AdminLayout({ children }) {
     const user = usePage().props.auth.user;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [isMasterOpen, setIsMasterOpen] = useState(
-        route().current('admin.pohons.*') || route().current('admin.petaks.*')
+        route().current('admin.pohons.*') || route().current('admin.petaks.*') || route().current('admin.penerbits.*') || route().current('admin.tujuan_bongkars.*')
     );
     const [isPengaturanOpen, setIsPengaturanOpen] = useState(
         route().current('admin.activity-log.*')
@@ -65,6 +66,20 @@ export default function AdminLayout({ children }) {
                             >
                                 <span className="material-symbols-outlined text-sm">map</span>
                                 Petak
+                            </Link>
+                            <Link
+                                href={route('admin.penerbits.index')}
+                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.penerbits.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                            >
+                                <span className="material-symbols-outlined text-sm">business</span>
+                                Tenaga Teknis
+                            </Link>
+                            <Link
+                                href={route('admin.tujuan_bongkars.index')}
+                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.tujuan_bongkars.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                            >
+                                <span className="material-symbols-outlined text-sm">location_on</span>
+                                Tujuan Bongkar
                             </Link>
                         </div>
                     </div>
@@ -182,6 +197,20 @@ export default function AdminLayout({ children }) {
                                 <span className="material-symbols-outlined text-sm">map</span>
                                 Petak
                             </Link>
+                            <Link
+                                href={route('admin.penerbits.index')}
+                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.penerbits.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                            >
+                                <span className="material-symbols-outlined text-sm">business</span>
+                                Tenaga Teknis
+                            </Link>
+                            <Link
+                                href={route('admin.tujuan_bongkars.index')}
+                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.tujuan_bongkars.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                            >
+                                <span className="material-symbols-outlined text-sm">location_on</span>
+                                Tujuan Bongkar
+                            </Link>
                         </div>
                     </div>
                     {user.roles?.includes('admin_cdk') && (
@@ -262,8 +291,21 @@ export default function AdminLayout({ children }) {
                             <span className="material-symbols-outlined">notifications</span>
                             <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
                         </button>
-                        <div className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant flex items-center justify-center bg-primary text-on-primary font-bold ml-2">
-                            {user.name.charAt(0)}
+                        <div className="ml-2 relative">
+                            <Dropdown>
+                                <Dropdown.Trigger>
+                                    <button className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant flex items-center justify-center bg-primary text-on-primary font-bold transition duration-150 ease-in-out hover:opacity-80 focus:outline-none">
+                                        {user.name.charAt(0)}
+                                    </button>
+                                </Dropdown.Trigger>
+
+                                <Dropdown.Content>
+                                    <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
+                                    <Dropdown.Link href={route('logout')} method="post" as="button">
+                                        Logout
+                                    </Dropdown.Link>
+                                </Dropdown.Content>
+                            </Dropdown>
                         </div>
                     </div>
                 </header>

@@ -3,17 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Petak;
+use App\Models\TujuanBongkar;
 use App\Models\Kelompok;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Validation\Rule;
 
-class PetakController extends Controller
+class TujuanBongkarController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Petak::with(['kelompok']);
+        $query = TujuanBongkar::with(['kelompok']);
         $currentUser = auth()->user();
 
         if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis'])) {
@@ -22,16 +21,16 @@ class PetakController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where('no_petak', 'like', "%{$search}%");
+            $query->where('nama_tpk', 'like', "%{$search}%");
         }
 
         if ($request->filled('kelompok_id')) {
             $query->where('kelompok_id', $request->kelompok_id);
         }
 
-        $sort = $request->input('sort', 'no_petak');
+        $sort = $request->input('sort', 'nama_tpk');
         $direction = $request->input('direction', 'asc');
-        $allowedSorts = ['no_petak', 'created_at'];
+        $allowedSorts = ['nama_tpk', 'created_at'];
 
         if (in_array($sort, $allowedSorts)) {
             $query->orderBy($sort, $direction);
@@ -40,7 +39,7 @@ class PetakController extends Controller
         }
         
         $perPage = $request->input('per_page', 10);
-        $petaks = $query->paginate($perPage)->withQueryString();
+        $tujuanBongkars = $query->paginate($perPage)->withQueryString();
         
         $kelompoksQuery = Kelompok::orderBy('nama_kelompok');
         if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis'])) {
@@ -48,8 +47,8 @@ class PetakController extends Controller
         }
         $kelompoks = $kelompoksQuery->get();
 
-        return Inertia::render('Admin/Petak/Index', [
-            'petaks' => $petaks,
+        return Inertia::render('Admin/TujuanBongkar/Index', [
+            'tujuanBongkars' => $tujuanBongkars,
             'kelompoks' => $kelompoks,
             'filters' => $request->only(['search', 'per_page', 'kelompok_id', 'sort', 'direction'])
         ]);
@@ -64,21 +63,22 @@ class PetakController extends Controller
 
         $request->validate([
             'kelompok_id' => 'required|exists:kelompoks,id',
-            'no_petak' => 'required|string|max:255',
+            'nama_tpk' => 'required|string|max:255',
+            'titik_koordinat' => 'nullable|string|max:255',
         ]);
 
-        Petak::create($request->all());
+        TujuanBongkar::create($request->all());
 
-        return redirect()->route('admin.petaks.index')->with('success', 'Petak berhasil ditambahkan.');
+        return redirect()->route('admin.tujuan_bongkars.index')->with('success', 'Tujuan Bongkar berhasil ditambahkan.');
     }
 
     public function update(Request $request, $id)
     {
-        $petak = Petak::findOrFail($id);
+        $tujuanBongkar = TujuanBongkar::findOrFail($id);
         $currentUser = auth()->user();
 
         if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis'])) {
-            if ($petak->kelompok_id !== $currentUser->kelompok_id) {
+            if ($tujuanBongkar->kelompok_id !== $currentUser->kelompok_id) {
                 abort(403, 'Unauthorized access to data.');
             }
             $request->merge(['kelompok_id' => $currentUser->kelompok_id]);
@@ -86,25 +86,26 @@ class PetakController extends Controller
 
         $request->validate([
             'kelompok_id' => 'required|exists:kelompoks,id',
-            'no_petak' => 'required|string|max:255',
+            'nama_tpk' => 'required|string|max:255',
+            'titik_koordinat' => 'nullable|string|max:255',
         ]);
 
-        $petak->update($request->all());
+        $tujuanBongkar->update($request->all());
 
-        return redirect()->route('admin.petaks.index')->with('success', 'Petak berhasil diperbarui.');
+        return redirect()->route('admin.tujuan_bongkars.index')->with('success', 'Tujuan Bongkar berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
-        $petak = Petak::findOrFail($id);
+        $tujuanBongkar = TujuanBongkar::findOrFail($id);
         $currentUser = auth()->user();
         
-        if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis']) && $petak->kelompok_id !== $currentUser->kelompok_id) {
+        if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis']) && $tujuanBongkar->kelompok_id !== $currentUser->kelompok_id) {
             abort(403, 'Unauthorized access to data.');
         }
 
-        $petak->delete();
+        $tujuanBongkar->delete();
 
-        return redirect()->route('admin.petaks.index')->with('success', 'Petak berhasil dihapus.');
+        return redirect()->route('admin.tujuan_bongkars.index')->with('success', 'Tujuan Bongkar berhasil dihapus.');
     }
 }

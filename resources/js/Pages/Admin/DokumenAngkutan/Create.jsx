@@ -10,14 +10,19 @@ import Select from 'react-select';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { id } from 'date-fns/locale/id';
 import 'react-datepicker/dist/react-datepicker.css';
-import { FileText, Map, Save, Calendar, CheckSquare } from 'lucide-react';
+import { FileText, Map, Save, Calendar, CheckSquare, Truck, BookOpen } from 'lucide-react';
 
 registerLocale('id', id);
 
-export default function Create({ petaks, pohons, selectedPetakIds, auth }) {
+export default function Create({ petaks, pohons, selectedPetakIds, penerbits, tujuan_bongkars, auth }) {
     const { data, setData, post, processing, errors } = useForm({
         no_dokumen: '',
         tanggal: '',
+        penerbit_id: '',
+        tujuan_bongkar_id: '',
+        jenis_angkutan: 'Truk',
+        nopol_angkutan: '',
+        masa_berlaku_hari: 1,
         petak_ids: selectedPetakIds || [],
         pohon_ids: []
     });
@@ -119,6 +124,74 @@ export default function Create({ petaks, pohons, selectedPetakIds, auth }) {
                                 required
                             />
                             <InputError message={errors.tanggal} className="mt-2" />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-6 mb-6">
+                    <h3 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                        <BookOpen className="w-5 h-5" /> Informasi Tambahan
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <InputLabel value="Penerbit Dokumen" />
+                            <Select
+                                options={penerbits.map(p => ({ value: p.id, label: `${p.nama} (${p.no_register || '-'})` }))}
+                                onChange={(val) => setData('penerbit_id', val ? val.value : '')}
+                                placeholder="Pilih Penerbit..."
+                                className="mt-1"
+                                isClearable
+                            />
+                            <InputError message={errors.penerbit_id} className="mt-2" />
+                        </div>
+                        <div>
+                            <InputLabel value="Tujuan Bongkar (TPK)" />
+                            <Select
+                                options={tujuan_bongkars.map(t => ({ value: t.id, label: t.nama_tpk }))}
+                                onChange={(val) => setData('tujuan_bongkar_id', val ? val.value : '')}
+                                placeholder="Pilih Tujuan Bongkar..."
+                                className="mt-1"
+                                isClearable
+                            />
+                            <InputError message={errors.tujuan_bongkar_id} className="mt-2" />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <InputLabel htmlFor="jenis_angkutan" value="Jenis Angkutan" />
+                            <TextInput
+                                id="jenis_angkutan"
+                                type="text"
+                                value={data.jenis_angkutan}
+                                className="mt-1 block w-full"
+                                onChange={(e) => setData('jenis_angkutan', e.target.value)}
+                                placeholder="Contoh: Truk"
+                            />
+                            <InputError message={errors.jenis_angkutan} className="mt-2" />
+                        </div>
+                        <div>
+                            <InputLabel htmlFor="nopol_angkutan" value="Nomor Polisi" />
+                            <TextInput
+                                id="nopol_angkutan"
+                                type="text"
+                                value={data.nopol_angkutan}
+                                className="mt-1 block w-full"
+                                onChange={(e) => setData('nopol_angkutan', e.target.value)}
+                                placeholder="Contoh: B 1234 CD"
+                            />
+                            <InputError message={errors.nopol_angkutan} className="mt-2" />
+                        </div>
+                        <div>
+                            <InputLabel htmlFor="masa_berlaku_hari" value="Masa Berlaku (Hari)" />
+                            <TextInput
+                                id="masa_berlaku_hari"
+                                type="number"
+                                min="1"
+                                value={data.masa_berlaku_hari}
+                                className="mt-1 block w-full"
+                                onChange={(e) => setData('masa_berlaku_hari', e.target.value)}
+                            />
+                            <InputError message={errors.masa_berlaku_hari} className="mt-2" />
                         </div>
                     </div>
                 </div>

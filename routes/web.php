@@ -101,6 +101,8 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PohonController as AdminPohonController;
 use App\Http\Controllers\Admin\PetakController as AdminPetakController;
+use App\Http\Controllers\Admin\PenerbitController as AdminPenerbitController;
+use App\Http\Controllers\Admin\TujuanBongkarController as AdminTujuanBongkarController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\DokumenAngkutanController;
 
@@ -116,10 +118,17 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok|ganis'])->
     
     // Master Petak
     Route::resource('petaks', AdminPetakController::class)->except(['create', 'show', 'edit']);
+    
+    // Master Penerbit
+    Route::resource('penerbits', AdminPenerbitController::class)->except(['create', 'show', 'edit']);
+    
+    // Master Tujuan Bongkar
+    Route::resource('tujuan_bongkars', AdminTujuanBongkarController::class)->except(['create', 'show', 'edit']);
 });
 
 Route::middleware(['auth', 'verified', 'role:admin_cdk|ganis'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('dokumen_angkutans', DokumenAngkutanController::class)->only(['index', 'create', 'store', 'show']);
+    Route::get('/dokumen-angkutans/{id}/pdf', [DokumenAngkutanController::class, 'exportPdf'])->name('dokumen_angkutans.pdf');
+    Route::resource('dokumen_angkutans', DokumenAngkutanController::class)->except(['destroy']);
 });
 
 Route::middleware(['auth', 'verified', 'role:admin_cdk'])->prefix('admin')->name('admin.')->group(function () {

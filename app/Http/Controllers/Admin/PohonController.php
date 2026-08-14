@@ -16,7 +16,7 @@ class PohonController extends Controller
         $query = JenisPohon::with(['kelompok']);
         $currentUser = auth()->user();
 
-        if ($currentUser->hasRole('admin_kelompok')) {
+        if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis'])) {
             $query->where('kelompok_id', $currentUser->kelompok_id);
         }
 
@@ -43,7 +43,7 @@ class PohonController extends Controller
         $jenisPohons = $query->paginate($perPage)->withQueryString();
         
         $kelompoksQuery = Kelompok::orderBy('nama_kelompok');
-        if ($currentUser->hasRole('admin_kelompok')) {
+        if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis'])) {
             $kelompoksQuery->where('id', $currentUser->kelompok_id);
         }
         $kelompoks = $kelompoksQuery->get();
@@ -58,7 +58,7 @@ class PohonController extends Controller
     public function store(Request $request)
     {
         $currentUser = auth()->user();
-        if ($currentUser->hasRole('admin_kelompok')) {
+        if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis'])) {
             $request->merge(['kelompok_id' => $currentUser->kelompok_id]);
         }
 
@@ -77,7 +77,7 @@ class PohonController extends Controller
         $jenisPohon = JenisPohon::findOrFail($id);
         $currentUser = auth()->user();
 
-        if ($currentUser->hasRole('admin_kelompok')) {
+        if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis'])) {
             if ($jenisPohon->kelompok_id !== $currentUser->kelompok_id) {
                 abort(403, 'Unauthorized access to data.');
             }
@@ -99,7 +99,7 @@ class PohonController extends Controller
         $jenisPohon = JenisPohon::findOrFail($id);
         $currentUser = auth()->user();
         
-        if ($currentUser->hasRole('admin_kelompok') && $jenisPohon->kelompok_id !== $currentUser->kelompok_id) {
+        if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis']) && $jenisPohon->kelompok_id !== $currentUser->kelompok_id) {
             abort(403, 'Unauthorized access to data.');
         }
 

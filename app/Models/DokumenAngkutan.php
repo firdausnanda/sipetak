@@ -35,4 +35,14 @@ class DokumenAngkutan extends Model
     {
         return $this->hasMany(Pohon::class);
     }
+
+    public function penerbit()
+    {
+        return $this->belongsTo(Penerbit::class);
+    }
+
+    public function tujuanBongkar()
+    {
+        return $this->belongsTo(TujuanBongkar::class);
+    }
 }
