@@ -18,11 +18,11 @@ class JenisPohonSeeder extends Seeder
         $now = now();
 
         $data = [
+            ['kelompok_id' => $kelompokId, 'nama_jenis' => 'Balsa', 'created_at' => $now, 'updated_at' => $now, 'created_by' => 1],
             ['kelompok_id' => $kelompokId, 'nama_jenis' => 'Jati', 'created_at' => $now, 'updated_at' => $now, 'created_by' => 1],
             ['kelompok_id' => $kelompokId, 'nama_jenis' => 'Sengon', 'created_at' => $now, 'updated_at' => $now, 'created_by' => 1],
             ['kelompok_id' => $kelompokId, 'nama_jenis' => 'Mahoni', 'created_at' => $now, 'updated_at' => $now, 'created_by' => 1],
             ['kelompok_id' => $kelompokId, 'nama_jenis' => 'Akasia', 'created_at' => $now, 'updated_at' => $now, 'created_by' => 1],
-            ['kelompok_id' => $kelompokId, 'nama_jenis' => 'Gmelina', 'created_at' => $now, 'updated_at' => $now, 'created_by' => 1],
         ];
 
         DB::table('jenis_pohons')->insert($data);
