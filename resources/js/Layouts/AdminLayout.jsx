@@ -12,9 +12,9 @@ export default function AdminLayout({ children }) {
     );
 
     return (
-        <div className="bg-background text-on-background font-body-md h-screen flex overflow-hidden w-full">
+        <div className="bg-background text-on-background font-body-md h-screen flex overflow-hidden w-full print:h-auto print:overflow-visible">
             {/* SideNavBar */}
-            <aside className="w-64 flex-shrink-0 h-full flex flex-col p-base gap-base z-40 bg-surface-container border-r border-outline-variant hidden md:flex">
+            <aside className="w-64 flex-shrink-0 h-full flex flex-col p-base gap-base z-40 bg-surface-container border-r border-outline-variant hidden md:flex print:hidden">
                 <div className="px-base py-4 flex items-center gap-3 border-b border-outline-variant pb-6 mb-2">
                     <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-on-primary">
                         <span className="material-symbols-outlined">forest</span>
@@ -100,6 +100,15 @@ export default function AdminLayout({ children }) {
                                 </a>
                             </div>
                         </div>
+                    )}
+                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
+                        <Link
+                            href={route('admin.dokumen_angkutans.index')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dokumen_angkutans.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
+                            Dokumen Angkutan
+                        </Link>
                     )}
                 </nav>
                 <div className="mt-auto pt-4">
@@ -208,6 +217,15 @@ export default function AdminLayout({ children }) {
                             </div>
                         </div>
                     )}
+                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
+                        <Link
+                            href={route('admin.dokumen_angkutans.index')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dokumen_angkutans.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
+                            Dokumen Angkutan
+                        </Link>
+                    )}
                 </nav>
                 <div className="mt-auto pt-4">
                     <Link
@@ -223,9 +241,9 @@ export default function AdminLayout({ children }) {
             </aside>
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
+            <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0 print:h-auto print:overflow-visible">
                 {/* TopNavBar */}
-                <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-8 py-3 bg-surface border-b border-outline-variant min-h-[72px]">
+                <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-8 py-3 bg-surface border-b border-outline-variant min-h-[72px] print:hidden">
                     <div className="flex items-center gap-4">
                         {/* Mobile Menu Button */}
                         <button 
@@ -251,7 +269,7 @@ export default function AdminLayout({ children }) {
                 </header>
 
                 {/* Page Content */}
-                <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-margin-desktop bg-background w-full">
+                <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-margin-desktop bg-background w-full print:w-full print:p-0 print:overflow-visible">
                     {children}
                 </main>
             </div>

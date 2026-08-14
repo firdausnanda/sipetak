@@ -26,4 +26,9 @@ class Petak extends Model
     {
         return $this->belongsTo(Kelompok::class);
     }
+
+    public function dokumenAngkutans()
+    {
+        return $this->belongsToMany(DokumenAngkutan::class, 'dokumen_angkutan_petak');
+    }
 }

@@ -23,12 +23,23 @@ export default function Manual() {
         const storedPetak = localStorage.getItem('sesi_petak');
         const storedJenis = localStorage.getItem('sesi_jenis_pohon');
         
-        if (!storedPetak || !storedJenis) {
-            router.visit(route('dashboard'));
+        const p = parseInt(storedPetak);
+        const j = parseInt(storedJenis);
+
+        if (!p || !j || isNaN(p) || isNaN(j)) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Sesi Tidak Valid',
+                text: 'Silakan pilih Nomor Petak dan Jenis Pohon terlebih dahulu di Dashboard.',
+                timer: 2500,
+                showConfirmButton: false
+            }).then(() => {
+                router.visit(route('dashboard'));
+            });
             return;
         }
 
-        setData({ ...data, petak_id: storedPetak, jenis_pohon_id: storedJenis });
+        setData({ ...data, petak_id: p, jenis_pohon_id: j });
     }, []);
 
     const handleAddBatang = () => {
@@ -59,6 +70,11 @@ export default function Manual() {
     const handleSubmit = (e) => {
         e.preventDefault();
         
+        if (!data.petak_id || !data.jenis_pohon_id || isNaN(data.petak_id) || isNaN(data.jenis_pohon_id)) {
+            Swal.fire({ icon: 'error', title: 'Sesi Tidak Valid', text: 'Parameter sesi tidak valid. Silakan kembali ke Dashboard untuk mengatur ulang.' });
+            return;
+        }
+        
         if (!data.no_pohon) {
             Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Silakan isi Nomor Pohon!' });
             return;
@@ -75,7 +91,13 @@ export default function Manual() {
                 setData('batangs', []);
             },
             onError: (err) => {
-                Swal.fire({ icon: 'error', title: 'Gagal', text: err.error || 'Terjadi kesalahan saat menyimpan data.' });
+                let errorMessage = 'Terjadi kesalahan saat menyimpan data.';
+                if (err && err.error) {
+                    errorMessage = err.error;
+                } else if (err && typeof err === 'object' && Object.keys(err).length > 0) {
+                    errorMessage = Object.values(err).join('\n');
+                }
+                Swal.fire({ icon: 'error', title: 'Gagal', text: errorMessage });
             }
         });
     };
@@ -107,7 +129,9 @@ export default function Manual() {
                                         value={data.no_pohon}
                                         onChange={e => setData('no_pohon', e.target.value)}
                                         required 
-                                        type="text" 
+                                        type="number"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
                                     />
                                 </div>
                             </div>
@@ -202,10 +226,10 @@ export default function Manual() {
                                             required
                                         >
                                             <option disabled value="">Pilih Mutu</option>
-                                            <option value="P">Grade P (Premium)</option>
-                                            <option value="D">Grade D (Defective)</option>
-                                            <option value="T">Grade T</option>
-                                            <option value="M">Grade M</option>
+                                            <option value="P">P</option>
+                                            <option value="D">D</option>
+                                            <option value="T">T</option>
+                                            <option value="M">M</option>
                                         </select>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -216,10 +240,22 @@ export default function Manual() {
                             
                             {/* Action Area */}
                             <div className="pt-6 mt-4 border-t border-outline-variant flex justify-end">
-                                <button type="button" onClick={handleAddBatang} className="h-touch-target px-8 bg-[#FB8500] text-white font-headline-md text-headline-md-mobile rounded-DEFAULT hover:bg-[#e67a00] active:scale-95 transition-all w-full md:w-auto shadow-sm flex items-center justify-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                    </svg>
+                                <button 
+                                    type="button" 
+                                    onClick={handleAddBatang} 
+                                    disabled={processing}
+                                    className={`h-touch-target px-8 bg-[#FB8500] text-white font-headline-md text-headline-md-mobile rounded-DEFAULT transition-all w-full md:w-auto shadow-sm flex items-center justify-center gap-2 ${processing ? 'opacity-50 pointer-events-none' : 'hover:bg-[#e67a00] active:scale-95'}`}
+                                >
+                                    {processing ? (
+                                        <svg className="animate-spin w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                    )}
                                     Tambah Batang
                                 </button>
                             </div>
@@ -249,11 +285,19 @@ export default function Manual() {
                                             <button 
                                                 type="button"
                                                 onClick={() => handleRemoveBatang(idx)}
-                                                className="w-10 h-10 flex items-center justify-center text-error hover:bg-error-container rounded-full active:scale-95 transition-transform"
+                                                disabled={processing}
+                                                className={`w-10 h-10 flex items-center justify-center text-error rounded-full transition-transform ${processing ? 'opacity-50 pointer-events-none' : 'hover:bg-error-container active:scale-95'}`}
                                             >
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                                </svg>
+                                                {processing ? (
+                                                    <svg className="animate-spin w-6 h-6 text-error" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                ) : (
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                    </svg>
+                                                )}
                                             </button>
                                         </div>
                                     ))}
@@ -265,11 +309,18 @@ export default function Manual() {
                                 type="button" 
                                 onClick={handleSubmit}
                                 disabled={processing}
-                                className="h-touch-target w-full bg-primary text-white font-headline-md text-headline-md-mobile rounded-DEFAULT hover:bg-[#013d28] active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                                className={`h-touch-target w-full bg-primary text-white font-headline-md text-headline-md-mobile rounded-DEFAULT transition-all shadow-sm flex items-center justify-center gap-2 ${processing ? 'opacity-50 pointer-events-none' : 'hover:bg-[#013d28] active:scale-95'}`}
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
-                                </svg>
+                                {processing ? (
+                                    <svg className="animate-spin w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                                    </svg>
+                                )}
                                 {processing ? 'Menyimpan...' : 'Simpan Semua Data'}
                             </button>
                         </div>

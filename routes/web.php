@@ -9,7 +9,7 @@ use Inertia\Inertia;
 Route::get('/', function () {
     if (auth()->check()) {
         $user = auth()->user();
-        if ($user->hasRole(['admin_cdk', 'admin_kelompok'])) {
+        if ($user->hasRole(['admin_cdk', 'admin_kelompok', 'ganis'])) {
             return redirect()->route('admin.dashboard');
         }
         return redirect()->route('dashboard');
@@ -102,8 +102,9 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PohonController as AdminPohonController;
 use App\Http\Controllers\Admin\PetakController as AdminPetakController;
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\DokumenAngkutanController;
 
-Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok|ganis'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/export', [DashboardController::class, 'export'])->name('dashboard.export');
     
@@ -115,6 +116,10 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok'])->prefix
     
     // Master Petak
     Route::resource('petaks', AdminPetakController::class)->except(['create', 'show', 'edit']);
+});
+
+Route::middleware(['auth', 'verified', 'role:admin_cdk|ganis'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('dokumen_angkutans', DokumenAngkutanController::class)->only(['index', 'create', 'store', 'show']);
 });
 
 Route::middleware(['auth', 'verified', 'role:admin_cdk'])->prefix('admin')->name('admin.')->group(function () {

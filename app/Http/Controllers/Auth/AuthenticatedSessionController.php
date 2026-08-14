@@ -33,7 +33,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        if ($request->user()->hasAnyRole(['admin_cdk', 'admin_kelompok'])) {
+        if ($request->user()->hasAnyRole(['admin_cdk', 'admin_kelompok', 'ganis'])) {
             return redirect()->intended(route('admin.dashboard', absolute: false));
         }
 

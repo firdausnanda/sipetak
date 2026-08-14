@@ -2,10 +2,12 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, usePage, Link } from '@inertiajs/react';
 import Select from 'react-select';
 import { useEffect, useState } from 'react';
+import Swal from 'sweetalert2';
 
 export default function Dashboard({ petaks = [], jenisPohons = [], namaKelompok = 'User Dashboard' }) {
     const user = usePage().props.auth.user;
     const [signalStrength, setSignalStrength] = useState('good'); // 'good', 'fair', 'poor', 'offline'
+    const [clickedAction, setClickedAction] = useState(null);
     
     const storedPetak = localStorage.getItem('sesi_petak');
     const defaultPetak = storedPetak ? parseInt(storedPetak) : (petaks.length > 0 ? petaks[0].id : '');
@@ -17,6 +19,19 @@ export default function Dashboard({ petaks = [], jenisPohons = [], namaKelompok 
         nomor_petak: defaultPetak,
         jenis_pohon: defaultJenis
     });
+
+    const handleActionClick = (e, action) => {
+        if (!data.nomor_petak || !data.jenis_pohon) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Perhatian',
+                text: 'Silakan pilih Nomor Petak dan Jenis Pohon terlebih dahulu!'
+            });
+            return;
+        }
+        setClickedAction(action);
+    };
 
     useEffect(() => {
         const updateNetworkStatus = () => {
@@ -159,19 +174,45 @@ export default function Dashboard({ petaks = [], jenisPohons = [], namaKelompok 
             {/* Action Buttons Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mt-8">
                 {/* Barcode Logging Action */}
-                <Link href={route('barcode')} className="h-32 flex flex-col items-center justify-center bg-[#FB8500] hover:bg-[#E07700] text-white rounded-xl shadow-md transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#FB8500] focus:ring-offset-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 mb-2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
-                    </svg>
-                    <span className="font-headline-md text-headline-lg-mobile md:text-headline-md">Pohon Berbarcode</span>
+                <Link 
+                    href={route('barcode')} 
+                    onClick={(e) => handleActionClick(e, 'barcode')}
+                    className={`h-32 flex flex-col items-center justify-center text-white rounded-xl shadow-md transition-transform focus:outline-none focus:ring-2 focus:ring-[#FB8500] focus:ring-offset-2 ${clickedAction === 'barcode' ? 'bg-[#E07700] opacity-75 pointer-events-none' : 'bg-[#FB8500] hover:bg-[#E07700] active:scale-95'}`}
+                >
+                    {clickedAction === 'barcode' ? (
+                        <svg className="animate-spin w-10 h-10 mb-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 mb-2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
+                        </svg>
+                    )}
+                    <span className="font-headline-md text-headline-lg-mobile md:text-headline-md">
+                        {clickedAction === 'barcode' ? 'Memproses...' : 'Pohon Berbarcode'}
+                    </span>
                 </Link>
                 {/* Manual Logging Action */}
-                <Link href={route('manual')} className="h-32 flex flex-col items-center justify-center bg-surface border-2 border-[#FB8500] text-[#FB8500] hover:bg-surface-container-low rounded-xl shadow-sm transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#FB8500] focus:ring-offset-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 mb-2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                    </svg>
-                    <span className="font-headline-md text-headline-lg-mobile md:text-headline-md">Pohon Non Barcode</span>
+                <Link 
+                    href={route('manual')} 
+                    onClick={(e) => handleActionClick(e, 'manual')}
+                    className={`h-32 flex flex-col items-center justify-center bg-surface border-2 text-[#FB8500] rounded-xl shadow-sm transition-transform focus:outline-none focus:ring-2 focus:ring-[#FB8500] focus:ring-offset-2 ${clickedAction === 'manual' ? 'border-[#E07700] text-[#E07700] opacity-75 pointer-events-none' : 'border-[#FB8500] hover:bg-surface-container-low active:scale-95'}`}
+                >
+                    {clickedAction === 'manual' ? (
+                        <svg className="animate-spin w-10 h-10 mb-2 text-[#E07700]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 mb-2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                        </svg>
+                    )}
+                    <span className="font-headline-md text-headline-lg-mobile md:text-headline-md">
+                        {clickedAction === 'manual' ? 'Memproses...' : 'Pohon Non Barcode'}
+                    </span>
                 </Link>
             </div>
 

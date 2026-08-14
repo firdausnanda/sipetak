@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Mattiverse\Userstamps\Traits\Userstamps;
-
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
-class Pohon extends Model
+class DokumenAngkutan extends Model
 {
     use Userstamps, LogsActivity;
+
     protected $guarded = [];
 
     public function getActivitylogOptions(): LogOptions
@@ -21,28 +21,18 @@ class Pohon extends Model
             ->dontLogEmptyChanges();
     }
 
-    public function batangs()
-    {
-        return $this->hasMany(Batang::class);
-    }
-
-    public function petak()
-    {
-        return $this->belongsTo(Petak::class);
-    }
-
-    public function jenisPohon()
-    {
-        return $this->belongsTo(JenisPohon::class);
-    }
-
     public function kelompok()
     {
         return $this->belongsTo(Kelompok::class);
     }
 
-    public function dokumenAngkutan()
+    public function petaks()
     {
-        return $this->belongsTo(DokumenAngkutan::class);
+        return $this->belongsToMany(Petak::class, 'dokumen_angkutan_petak');
+    }
+
+    public function pohons()
+    {
+        return $this->hasMany(Pohon::class);
     }
 }

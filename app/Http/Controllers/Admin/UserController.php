@@ -53,11 +53,11 @@ class UserController extends Controller
         $perPage = $request->input('per_page', 10);
         $users = $query->paginate($perPage)->withQueryString();
         
-        $rolesQuery = Role::whereIn('name', ['user', 'admin_cdk', 'admin_kelompok']);
+        $rolesQuery = Role::whereIn('name', ['user', 'admin_cdk', 'admin_kelompok', 'ganis']);
         $kelompoksQuery = Kelompok::orderBy('nama_kelompok');
 
         if ($currentUser->hasRole('admin_kelompok')) {
-            $rolesQuery->whereIn('name', ['user', 'admin_kelompok']);
+            $rolesQuery->whereIn('name', ['user', 'admin_kelompok', 'ganis']);
             $kelompoksQuery->where('id', $currentUser->kelompok_id);
         }
 
@@ -75,11 +75,13 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $currentUser = auth()->user();
+        
+        if (! $currentUser->hasRole('admin_cdk') && $request->role === 'admin_cdk') {
+            abort(403, 'Unauthorized role assignment.');
+        }
+
         if ($currentUser->hasRole('admin_kelompok')) {
             $request->merge(['kelompok_id' => $currentUser->kelompok_id]);
-            if ($request->role === 'admin_cdk') {
-                abort(403, 'Unauthorized role assignment.');
-            }
         }
 
         $request->validate([
@@ -105,14 +107,16 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $currentUser = auth()->user();
+        
+        if (! $currentUser->hasRole('admin_cdk') && $request->role === 'admin_cdk') {
+            abort(403, 'Unauthorized role assignment.');
+        }
+
         if ($currentUser->hasRole('admin_kelompok')) {
             if ($user->kelompok_id !== $currentUser->kelompok_id) {
                 abort(403, 'Unauthorized access to user.');
             }
             $request->merge(['kelompok_id' => $currentUser->kelompok_id]);
-            if ($request->role === 'admin_cdk') {
-                abort(403, 'Unauthorized role assignment.');
-            }
         }
 
         $request->validate([
