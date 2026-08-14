@@ -15,7 +15,14 @@ class DokumenAngkutanController extends Controller
 {
     public function index()
     {
-        $dokumens = DokumenAngkutan::with(['kelompok', 'petaks'])->latest()->paginate(10);
+        $user = Auth::user();
+        $query = DokumenAngkutan::with(['kelompok', 'petaks'])->latest();
+        
+        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
+            $query->where('kelompok_id', $user->kelompok_id);
+        }
+
+        $dokumens = $query->paginate(10);
         return Inertia::render('Admin/DokumenAngkutan/Index', [
             'dokumens' => $dokumens
         ]);
@@ -25,7 +32,7 @@ class DokumenAngkutanController extends Controller
     {
         $user = Auth::user();
         
-        if ($user->hasRole('ganis') && $user->kelompok_id) {
+        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
             $petaks = Petak::where('kelompok_id', $user->kelompok_id)->get();
         } else {
             $petaks = Petak::all();
@@ -38,7 +45,7 @@ class DokumenAngkutanController extends Controller
             $query = Pohon::whereIn('petak_id', $selectedPetakIds)
                           ->whereNull('dokumen_angkutan_id')
                           ->with(['jenisPohon', 'petak']);
-            if ($user->hasRole('ganis') && $user->kelompok_id) {
+            if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
                 $query->where('kelompok_id', $user->kelompok_id);
             }
             $pohons = $query->get();
@@ -91,6 +98,7 @@ class DokumenAngkutanController extends Controller
 
     public function show($id)
     {
+        $user = Auth::user();
         $dokumen = DokumenAngkutan::with([
             'kelompok',
             'petaks',
@@ -98,6 +106,10 @@ class DokumenAngkutanController extends Controller
             'pohons.petak',
             'pohons.batangs'
         ])->findOrFail($id);
+
+        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id && $dokumen->kelompok_id !== $user->kelompok_id) {
+            abort(403, 'Unauthorized access to this document.');
+        }
 
         return Inertia::render('Admin/DokumenAngkutan/Show', [
             'dokumen' => $dokumen
