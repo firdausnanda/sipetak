@@ -1,11 +1,17 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import AdminLayout from '@/Layouts/AdminLayout';
+import { Head, Link, usePage } from '@inertiajs/react';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 
 export default function Edit({ mustVerifyEmail, status }) {
+    const { auth } = usePage().props;
+    const isAdmin = auth.user.roles && auth.user.roles.some(role => ['admin_cdk', 'admin_kelompok', 'ganis'].includes(role));
+    
+    const Layout = isAdmin ? AdminLayout : AuthenticatedLayout;
+
     return (
-        <AuthenticatedLayout>
+        <Layout>
             <Head title="SIPETAK - Profil" />
 
             <div className="py-1 bg-surface-container-lowest">
@@ -44,6 +50,6 @@ export default function Edit({ mustVerifyEmail, status }) {
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </Layout>
     );
 }
