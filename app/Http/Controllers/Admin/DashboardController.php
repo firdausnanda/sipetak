@@ -110,20 +110,9 @@ class DashboardController extends Controller
     {
         $query = $this->buildQuery($request);
         
-        $sort = $request->input('sort', 'created_at');
-        $direction = $request->input('direction', 'desc');
-
-        $batangColumns = ['no_batang', 'panjang', 'diameter_ujung', 'diameter_pangkal', 'mutu', 'created_at'];
-        $pohonColumns = ['tanggal'];
-
-        if (in_array($sort, $batangColumns)) {
-            $query->orderBy("batangs.{$sort}", $direction);
-        } elseif (in_array($sort, $pohonColumns)) {
-            $query->join('pohons', 'batangs.pohon_id', '=', 'pohons.id')
-                  ->orderBy("pohons.{$sort}", $direction);
-        } else {
-            $query->latest('batangs.created_at');
-        }
+        $query->join('pohons', 'batangs.pohon_id', '=', 'pohons.id')
+              ->orderBy('pohons.no_pohon', 'asc')
+              ->orderBy('batangs.no_batang', 'asc');
 
         $filename = "laporan_hasil_tebangan_" . date('Y-m-d_H-i-s') . ".xlsx";
         
