@@ -8,6 +8,16 @@ use Illuminate\Support\Facades\DB;
 
 class PohonController extends Controller
 {
+    public function createBarcode()
+    {
+        return \Inertia\Inertia::render('Barcode');
+    }
+
+    public function createManual()
+    {
+        return \Inertia\Inertia::render('Manual');
+    }
+
     public function storeBarcode(Request $request)
     {
         $validated = $request->validate([

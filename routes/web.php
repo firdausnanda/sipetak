@@ -2,102 +2,12 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PohonController;
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HistoryController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
-Route::get('/', function () {
-    if (auth()->check()) {
-        $user = auth()->user();
-        if ($user->hasRole(['admin_cdk', 'admin_kelompok', 'ganis'])) {
-            return redirect()->route('admin.dashboard');
-        }
-        return redirect()->route('dashboard');
-    }
-    return redirect()->route('login');
-});
-
-use App\Models\Petak;
-use App\Models\JenisPohon;
-use App\Models\Kelompok;
-use Illuminate\Http\Request;
-
-Route::get('/dashboard', function (Request $request) {
-    $user = $request->user();
-    
-    $petaks = Petak::where('kelompok_id', $user->kelompok_id)->get();
-    $jenisPohons = JenisPohon::where('kelompok_id', $user->kelompok_id)->get();
-    $kelompok = Kelompok::find($user->kelompok_id);
-
-    return Inertia::render('Dashboard', [
-        'petaks' => $petaks,
-        'jenisPohons' => $jenisPohons,
-        'namaKelompok' => $kelompok ? $kelompok->nama_kelompok : 'Belum Ada Kelompok',
-    ]);
-})->middleware(['auth', 'verified', 'role:user'])->name('dashboard');
-Route::get('/barcode', function () {
-    return Inertia::render('Barcode');
-})->middleware(['auth', 'verified', 'role:user'])->name('barcode');
-
-Route::post('/barcode', [PohonController::class, 'storeBarcode'])
-    ->middleware(['auth', 'verified', 'role:user'])
-    ->name('barcode.store');
-
-Route::get('/manual', function () {
-    return Inertia::render('Manual');
-})->middleware(['auth', 'verified', 'role:user'])->name('manual');
-
-Route::post('/manual', [PohonController::class, 'storeManual'])
-    ->middleware(['auth', 'verified', 'role:user'])
-    ->name('manual.store');
-
-Route::get('/history', function (Request $request) {
-    $user = $request->user();
-    $filter = $request->has('filter') ? $request->query('filter') : 'today';
-    $search = $request->query('search');
-
-    $query = App\Models\Pohon::with(['petak', 'jenisPohon'])
-        ->where('kelompok_id', $user->kelompok_id);
-
-    if ($search) {
-        $query->where(function ($q) use ($search) {
-            $q->whereHas('petak', function ($q2) use ($search) {
-                $q2->where('nama_petak', 'like', "%{$search}%");
-            })->orWhereHas('jenisPohon', function ($q3) use ($search) {
-                $q3->where('nama_jenis', 'like', "%{$search}%");
-            });
-        });
-    }
-
-    if ($filter === 'today') {
-        $query->whereDate('created_at', \Carbon\Carbon::today());
-    } elseif ($filter === 'yesterday') {
-        $query->whereDate('created_at', \Carbon\Carbon::yesterday());
-    } elseif ($filter === 'this_week') {
-        $query->whereBetween('created_at', [\Carbon\Carbon::now()->startOfWeek(), \Carbon\Carbon::now()->endOfWeek()]);
-    }
-
-    $pohons = $query->latest()->paginate(10);
-
-    if ($request->wantsJson()) {
-        return response()->json($pohons);
-    }
-
-    return Inertia::render('History', [
-        'pohons' => $pohons,
-        'filters' => ['filter' => $filter, 'search' => $search]
-    ]);
-})->middleware(['auth', 'verified', 'role:user'])->name('history');
-
-Route::get('/history/{id}', function (Illuminate\Http\Request $request, $id) {
-    $pohon = App\Models\Pohon::with(['petak', 'jenisPohon', 'kelompok', 'batangs'])->findOrFail($id);
-    if ($pohon->kelompok_id !== $request->user()->kelompok_id) {
-        abort(403);
-    }
-    return Inertia::render('History/Show', ['pohon' => $pohon]);
-})->middleware(['auth', 'verified', 'role:user'])->name('history.show');
-
-use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PohonController as AdminPohonController;
 use App\Http\Controllers\Admin\PetakController as AdminPetakController;
@@ -106,9 +16,39 @@ use App\Http\Controllers\Admin\TujuanBongkarController as AdminTujuanBongkarCont
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\DokumenAngkutanController;
 
+Route::get('/', [HomeController::class, 'index']);
+
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified', 'role:user'])
+    ->name('dashboard');
+
+Route::get('/barcode', [PohonController::class, 'createBarcode'])
+    ->middleware(['auth', 'verified', 'role:user'])
+    ->name('barcode');
+
+Route::post('/barcode', [PohonController::class, 'storeBarcode'])
+    ->middleware(['auth', 'verified', 'role:user'])
+    ->name('barcode.store');
+
+Route::get('/manual', [PohonController::class, 'createManual'])
+    ->middleware(['auth', 'verified', 'role:user'])
+    ->name('manual');
+
+Route::post('/manual', [PohonController::class, 'storeManual'])
+    ->middleware(['auth', 'verified', 'role:user'])
+    ->name('manual.store');
+
+Route::get('/history', [HistoryController::class, 'index'])
+    ->middleware(['auth', 'verified', 'role:user'])
+    ->name('history');
+
+Route::get('/history/{id}', [HistoryController::class, 'show'])
+    ->middleware(['auth', 'verified', 'role:user'])
+    ->name('history.show');
+
 Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok|ganis'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard/export', [DashboardController::class, 'export'])->name('dashboard.export');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/export', [AdminDashboardController::class, 'export'])->name('dashboard.export');
     
     // User Management
     Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);
