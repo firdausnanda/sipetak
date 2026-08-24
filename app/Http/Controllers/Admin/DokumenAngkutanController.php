@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Inertia\Inertia;
 
+use App\Models\Kelompok;
+
 class DokumenAngkutanController extends Controller
 {
     public function index()
@@ -57,9 +59,11 @@ class DokumenAngkutanController extends Controller
         if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
             $penerbits = Penerbit::where('kelompok_id', $user->kelompok_id)->get();
             $tujuanBongkars = TujuanBongkar::where('kelompok_id', $user->kelompok_id)->get();
+            $kelompoks = [];
         } else {
             $penerbits = Penerbit::all();
             $tujuanBongkars = TujuanBongkar::all();
+            $kelompoks = Kelompok::all();
         }
 
         return Inertia::render('Admin/DokumenAngkutan/Create', [
@@ -68,12 +72,15 @@ class DokumenAngkutanController extends Controller
             'selectedPetakIds' => $selectedPetakIds,
             'penerbits' => $penerbits,
             'tujuan_bongkars' => $tujuanBongkars,
+            'kelompoks' => $kelompoks,
         ]);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $user = Auth::user();
+
+        $rules = [
             'no_dokumen' => 'required|string|max:255',
             'tanggal' => 'required|date',
             'penerbit_id' => 'required|exists:penerbits,id',
@@ -85,14 +92,18 @@ class DokumenAngkutanController extends Controller
             'petak_ids.*' => 'exists:petaks,id',
             'pohon_ids' => 'required|array|min:1',
             'pohon_ids.*' => 'exists:pohons,id',
-        ]);
+        ];
 
-        $user = Auth::user();
+        if (!$user->kelompok_id) {
+            $rules['kelompok_id'] = 'required|exists:kelompoks,id';
+        }
+
+        $request->validate($rules);
 
         DB::beginTransaction();
         try {
             $dokumen = DokumenAngkutan::create([
-                'kelompok_id' => $user->kelompok_id ?? 1,
+                'kelompok_id' => $user->kelompok_id ?? $request->kelompok_id,
                 'no_dokumen' => $request->no_dokumen,
                 'tanggal' => $request->tanggal,
                 'penerbit_id' => $request->penerbit_id,

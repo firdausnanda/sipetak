@@ -14,8 +14,9 @@ import { FileText, Map, Save, Calendar, CheckSquare, Truck, BookOpen } from 'luc
 
 registerLocale('id', id);
 
-export default function Create({ petaks, pohons, selectedPetakIds, penerbits, tujuan_bongkars, auth }) {
+export default function Create({ petaks, pohons, selectedPetakIds, penerbits, tujuan_bongkars, auth, kelompoks }) {
     const { data, setData, post, processing, errors } = useForm({
+        kelompok_id: '',
         no_dokumen: '',
         tanggal: '',
         penerbit_id: '',
@@ -86,6 +87,21 @@ export default function Create({ petaks, pohons, selectedPetakIds, penerbits, tu
                     <h3 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
                         <FileText className="w-5 h-5" /> Data Dokumen
                     </h3>
+                    
+                    {!auth.user.kelompok_id && (
+                        <div className="mb-6">
+                            <InputLabel value="Kelompok" />
+                            <Select
+                                options={kelompoks?.map(k => ({ value: k.id, label: k.nama_kelompok })) || []}
+                                onChange={(val) => setData('kelompok_id', val ? val.value : '')}
+                                placeholder="Pilih Kelompok..."
+                                className="mt-1"
+                                isClearable
+                            />
+                            <InputError message={errors.kelompok_id} className="mt-2" />
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <InputLabel htmlFor="no_dokumen" value="Nomor Dokumen" />
