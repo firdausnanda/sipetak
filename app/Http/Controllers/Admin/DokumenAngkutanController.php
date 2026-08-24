@@ -223,6 +223,7 @@ class DokumenAngkutanController extends Controller
         // Optional: customize paper size/orientation
         // $pdf->setPaper('a4', 'portrait');
 
-        return $pdf->stream('Dokumen_Angkutan_' . $dokumen->no_dokumen . '.pdf');
+        $safeNoDokumen = str_replace(['/', '\\'], '_', $dokumen->no_dokumen);
+        return $pdf->stream('Dokumen_Angkutan_' . $safeNoDokumen . '.pdf');
     }
 }
