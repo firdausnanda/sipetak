@@ -1,12 +1,27 @@
 import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Dropdown from '@/Components/Dropdown';
+import Swal from 'sweetalert2';
 
 export default function AdminLayout({ children }) {
-    const user = usePage().props.auth.user;
+    const { auth, flash, errors } = usePage().props;
+    const user = auth.user;
+
+    useEffect(() => {
+        if (flash?.success) {
+            Swal.fire({ icon: 'success', title: 'Berhasil', text: flash.success, timer: 3000, showConfirmButton: false });
+        }
+        if (flash?.error) {
+            Swal.fire({ icon: 'error', title: 'Gagal', text: flash.error });
+        }
+        if (errors?.error) {
+            Swal.fire({ icon: 'error', title: 'Gagal', text: errors.error });
+        }
+    }, [flash, errors]);
+
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [isMasterOpen, setIsMasterOpen] = useState(
-        route().current('admin.pohons.*') || route().current('admin.petaks.*') || route().current('admin.penerbits.*') || route().current('admin.tujuan_bongkars.*')
+        route().current('admin.pohons.*') || route().current('admin.petaks.*') || route().current('admin.penerbits.*') || route().current('admin.tujuan_bongkars.*') || route().current('admin.rencana_tebangs.*') || route().current('admin.tabel_volumes.*')
     );
     const [isPengaturanOpen, setIsPengaturanOpen] = useState(
         route().current('admin.activity-log.*')
@@ -16,14 +31,8 @@ export default function AdminLayout({ children }) {
         <div className="bg-background text-on-background font-body-md h-screen flex overflow-hidden w-full print:h-auto print:overflow-visible">
             {/* SideNavBar */}
             <aside className="w-64 flex-shrink-0 h-full flex flex-col p-base gap-base z-40 bg-surface-container border-r border-outline-variant hidden md:flex print:hidden">
-                <div className="px-base py-4 flex items-center gap-3 border-b border-outline-variant pb-6 mb-2">
-                    <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-on-primary">
-                        <span className="material-symbols-outlined">forest</span>
-                    </div>
-                    <div>
-                        <h1 className="font-headline-md text-headline-md font-bold text-primary">SIPETAK</h1>
-                        <p className="font-label-caps text-label-caps text-on-surface-variant">Admin Panel</p>
-                    </div>
+                <div className="px-base py-4 flex items-center justify-center border-b border-outline-variant pb-6 mb-2">
+                    <img src="/img/logo.png" alt="SIPETAK" className="h-8 w-auto object-contain" />
                 </div>
                 <nav className="flex-1 flex flex-col gap-2 overflow-y-auto">
                     <Link
@@ -33,6 +42,34 @@ export default function AdminLayout({ children }) {
                         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
                         Laporan
                     </Link>
+                    <Link
+                        href={route('mobile.dashboard')}
+                        className={`flex items-center gap-3 px-4 py-3 ${route().current('mobile.dashboard') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                    >
+                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>monitoring</span>
+                        Monitoring Operasional
+                    </Link>
+                    <Link
+                        href={route('operations.index')}
+                        className={`flex items-center gap-3 px-4 py-3 ${route().current('operations.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                    >
+                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>request_quote</span>
+                        Prestasi & Upah
+                    </Link>
+                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
+                        <Link
+                            href={route('admin.dokumen_angkutans.index')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dokumen_angkutans.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
+                            Dokumen Angkutan
+                        </Link>
+                    )}
+                    
+                    <div className="px-4 py-2 w-full">
+                        <div className="h-[1px] w-full bg-outline-variant rounded-full"></div>
+                    </div>
+
                     <Link
                         href={route('admin.users.index')}
                         className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.users.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
@@ -52,7 +89,7 @@ export default function AdminLayout({ children }) {
                             <span className={`material-symbols-outlined transition-transform duration-200 ${isMasterOpen ? 'rotate-180' : ''}`}>expand_more</span>
                         </button>
                         
-                        <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ease-in-out ${isMasterOpen ? 'max-h-40 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                        <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ease-in-out ${isMasterOpen ? 'max-h-[32rem] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
                             <Link
                                 href={route('admin.pohons.index')}
                                 className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.pohons.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
@@ -80,6 +117,20 @@ export default function AdminLayout({ children }) {
                             >
                                 <span className="material-symbols-outlined text-sm">location_on</span>
                                 Tujuan Bongkar
+                            </Link>
+                            <Link
+                                href={route('admin.rencana_tebangs.index')}
+                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.rencana_tebangs.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                            >
+                                <span className="material-symbols-outlined text-sm">list_alt</span>
+                                Rencana Tebang
+                            </Link>
+                            <Link
+                                href={route('admin.tabel_volumes.index')}
+                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.tabel_volumes.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                            >
+                                <span className="material-symbols-outlined text-sm">grid_on</span>
+                                Tabel Volume
                             </Link>
                         </div>
                     </div>
@@ -115,15 +166,6 @@ export default function AdminLayout({ children }) {
                                 </a>
                             </div>
                         </div>
-                    )}
-                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
-                        <Link
-                            href={route('admin.dokumen_angkutans.index')}
-                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dokumen_angkutans.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                        >
-                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
-                            Dokumen Angkutan
-                        </Link>
                     )}
                 </nav>
                 <div className="mt-auto pt-4">
@@ -146,14 +188,8 @@ export default function AdminLayout({ children }) {
             
             {/* Mobile Sidebar Content */}
             <aside className={`md:hidden fixed left-0 top-0 h-full flex flex-col p-base gap-base z-50 bg-surface-container border-r border-outline-variant w-64 transform transition-transform duration-300 ease-in-out ${showingNavigationDropdown ? 'translate-x-0' : '-translate-x-full'}`}>
-                <div className="px-base py-4 flex items-center gap-3 border-b border-outline-variant pb-6 mb-2">
-                    <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-on-primary">
-                        <span className="material-symbols-outlined">forest</span>
-                    </div>
-                    <div>
-                        <h1 className="font-headline-md text-headline-md font-bold text-primary">SIPETAK</h1>
-                        <p className="font-label-caps text-label-caps text-on-surface-variant">Management System</p>
-                    </div>
+                <div className="px-base py-4 flex items-center justify-center border-b border-outline-variant pb-6 mb-2">
+                    <img src="/img/logo.png" alt="SIPETAK" className="h-8 w-auto object-contain" />
                 </div>
                 <nav className="flex-1 flex flex-col gap-2 overflow-y-auto">
                     <Link
@@ -163,6 +199,34 @@ export default function AdminLayout({ children }) {
                         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
                         Laporan
                     </Link>
+                    <Link
+                        href={route('mobile.dashboard')}
+                        className={`flex items-center gap-3 px-4 py-3 ${route().current('mobile.dashboard') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                    >
+                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>monitoring</span>
+                        Monitoring Operasional
+                    </Link>
+                    <Link
+                        href={route('operations.index')}
+                        className={`flex items-center gap-3 px-4 py-3 ${route().current('operations.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                    >
+                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>request_quote</span>
+                        Prestasi & Upah
+                    </Link>
+                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
+                        <Link
+                            href={route('admin.dokumen_angkutans.index')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dokumen_angkutans.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
+                            Dokumen Angkutan
+                        </Link>
+                    )}
+                    
+                    <div className="px-4 py-2 w-full">
+                        <div className="h-[1px] w-full bg-outline-variant rounded-full"></div>
+                    </div>
+
                     <Link
                         href={route('admin.users.index')}
                         className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.users.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
@@ -182,7 +246,7 @@ export default function AdminLayout({ children }) {
                             <span className={`material-symbols-outlined transition-transform duration-200 ${isMasterOpen ? 'rotate-180' : ''}`}>expand_more</span>
                         </button>
                         
-                        <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ease-in-out ${isMasterOpen ? 'max-h-40 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                        <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ease-in-out ${isMasterOpen ? 'max-h-[32rem] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
                             <Link
                                 href={route('admin.pohons.index')}
                                 className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.pohons.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
@@ -210,6 +274,20 @@ export default function AdminLayout({ children }) {
                             >
                                 <span className="material-symbols-outlined text-sm">location_on</span>
                                 Tujuan Bongkar
+                            </Link>
+                            <Link
+                                href={route('admin.rencana_tebangs.index')}
+                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.rencana_tebangs.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                            >
+                                <span className="material-symbols-outlined text-sm">list_alt</span>
+                                Rencana Tebang
+                            </Link>
+                            <Link
+                                href={route('admin.tabel_volumes.index')}
+                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.tabel_volumes.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                            >
+                                <span className="material-symbols-outlined text-sm">grid_on</span>
+                                Tabel Volume
                             </Link>
                         </div>
                     </div>
@@ -245,15 +323,6 @@ export default function AdminLayout({ children }) {
                                 </a>
                             </div>
                         </div>
-                    )}
-                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
-                        <Link
-                            href={route('admin.dokumen_angkutans.index')}
-                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dokumen_angkutans.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                        >
-                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
-                            Dokumen Angkutan
-                        </Link>
                     )}
                 </nav>
                 <div className="mt-auto pt-4">

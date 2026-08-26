@@ -15,6 +15,9 @@ use App\Http\Controllers\Admin\PenerbitController as AdminPenerbitController;
 use App\Http\Controllers\Admin\TujuanBongkarController as AdminTujuanBongkarController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\DokumenAngkutanController;
+use App\Http\Controllers\DashboardMonitoringController;
+use App\Http\Controllers\DailyOperationController;
+
 
 Route::get('/', [HomeController::class, 'index']);
 
@@ -37,6 +40,10 @@ Route::get('/manual', [PohonController::class, 'createManual'])
 Route::post('/manual', [PohonController::class, 'storeManual'])
     ->middleware(['auth', 'verified', 'role:user'])
     ->name('manual.store');
+
+Route::get('/api/rencana-tebang/check-barcode', [App\Http\Controllers\Admin\RencanaTebangController::class, 'checkBarcode'])
+    ->middleware(['auth', 'verified'])
+    ->name('api.rencana_tebang.check_barcode');
 
 Route::get('/history', [HistoryController::class, 'index'])
     ->middleware(['auth', 'verified', 'role:user'])
@@ -64,6 +71,18 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok|ganis'])->
     
     // Master Tujuan Bongkar
     Route::resource('tujuan_bongkars', AdminTujuanBongkarController::class)->except(['create', 'show', 'edit']);
+    
+    // Rencana Tebang
+    Route::get('rencana-tebangs', [App\Http\Controllers\Admin\RencanaTebangController::class, 'index'])->name('rencana_tebangs.index');
+    Route::get('rencana-tebangs/template', [App\Http\Controllers\Admin\RencanaTebangController::class, 'template'])->name('rencana_tebangs.template');
+    Route::post('rencana-tebangs/import', [App\Http\Controllers\Admin\RencanaTebangController::class, 'import'])->name('rencana_tebangs.import');
+    Route::delete('rencana-tebangs/{id}', [App\Http\Controllers\Admin\RencanaTebangController::class, 'destroy'])->name('rencana_tebangs.destroy');
+
+    // Tabel Volume
+    Route::get('tabel-volumes', [App\Http\Controllers\Admin\TabelVolumeController::class, 'index'])->name('tabel_volumes.index');
+    Route::get('tabel-volumes/template', [App\Http\Controllers\Admin\TabelVolumeController::class, 'template'])->name('tabel_volumes.template');
+    Route::post('tabel-volumes/import', [App\Http\Controllers\Admin\TabelVolumeController::class, 'import'])->name('tabel_volumes.import');
+    Route::delete('tabel-volumes/{id}', [App\Http\Controllers\Admin\TabelVolumeController::class, 'destroy'])->name('tabel_volumes.destroy');
 });
 
 Route::middleware(['auth', 'verified', 'role:admin_cdk|ganis'])->prefix('admin')->name('admin.')->group(function () {
@@ -74,6 +93,20 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|ganis'])->prefix('admin')
 Route::middleware(['auth', 'verified', 'role:admin_cdk'])->prefix('admin')->name('admin.')->group(function () {
     // Log
     Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Mobile-first Monitoring Dashboard
+    Route::get('/mobile/dashboard', [DashboardMonitoringController::class, 'index'])
+        ->name('mobile.dashboard')
+        ->middleware('can:view_felling_progress');
+    
+    // Daily Operations
+    Route::get('/operations', [App\Http\Controllers\DailyOperationController::class, 'index'])->name('operations.index');
+    Route::get('/operations/create', [App\Http\Controllers\DailyOperationController::class, 'create'])->name('operations.create');
+    Route::get('/operations/fetch-results', [App\Http\Controllers\DailyOperationController::class, 'fetchResults'])->name('operations.fetch_results');
+    Route::post('/operations', [App\Http\Controllers\DailyOperationController::class, 'store'])->name('operations.store');
+    Route::put('/operations/{id}/mark-paid', [App\Http\Controllers\DailyOperationController::class, 'markAsPaid'])->name('operations.mark_paid');
 });
 
 Route::middleware('auth')->group(function () {

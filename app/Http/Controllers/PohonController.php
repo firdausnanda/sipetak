@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pohon;
+use App\Models\RencanaTebang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class PohonController extends Controller
 {
@@ -20,6 +22,15 @@ class PohonController extends Controller
 
     public function storeBarcode(Request $request)
     {
+        if ($request->has('batangs')) {
+            $batangs = $request->input('batangs');
+            foreach ($batangs as &$batang) {
+                if (isset($batang['panjang'])) $batang['panjang'] = str_replace(',', '.', $batang['panjang']);
+                if (isset($batang['diameter_pangkal'])) $batang['diameter_pangkal'] = str_replace(',', '.', $batang['diameter_pangkal']);
+                if (isset($batang['diameter_ujung'])) $batang['diameter_ujung'] = str_replace(',', '.', $batang['diameter_ujung']);
+            }
+            $request->merge(['batangs' => $batangs]);
+        }
         $validated = $request->validate([
             'no_barcode' => 'required|string',
             'no_pohon' => 'required|string',
@@ -32,6 +43,17 @@ class PohonController extends Controller
             'batangs.*.diameter_ujung' => 'required|numeric',
             'batangs.*.mutu' => 'required|in:P,D,T,M',
         ]);
+
+        // Cek Rencana Tebang
+        $rencana = RencanaTebang::where('kelompok_id', $request->user()->kelompok_id)
+            ->where('no_barcode', $validated['no_barcode'])
+            ->first();
+            
+        if ($rencana && $rencana->no_pohon != $validated['no_pohon']) {
+            throw ValidationException::withMessages([
+                'no_pohon' => 'No Pohon tidak sesuai dengan data Rencana Tebang untuk barcode ini (Seharusnya: ' . $rencana->no_pohon . ').'
+            ]);
+        }
 
         try {
             DB::beginTransaction();
@@ -46,8 +68,10 @@ class PohonController extends Controller
                 'no_pohon' => $validated['no_pohon'],
             ]);
 
-            foreach ($validated['batangs'] as $batang) {
-                $pohon->batangs()->create($batang);
+            foreach ($validated['batangs'] as $batangData) {
+                $batang = $pohon->batangs()->make($batangData);
+                $batang->calculateVolume();
+                $batang->save();
             }
 
             DB::commit();
@@ -61,6 +85,15 @@ class PohonController extends Controller
 
     public function storeManual(Request $request)
     {
+        if ($request->has('batangs')) {
+            $batangs = $request->input('batangs');
+            foreach ($batangs as &$batang) {
+                if (isset($batang['panjang'])) $batang['panjang'] = str_replace(',', '.', $batang['panjang']);
+                if (isset($batang['diameter_pangkal'])) $batang['diameter_pangkal'] = str_replace(',', '.', $batang['diameter_pangkal']);
+                if (isset($batang['diameter_ujung'])) $batang['diameter_ujung'] = str_replace(',', '.', $batang['diameter_ujung']);
+            }
+            $request->merge(['batangs' => $batangs]);
+        }
         $validated = $request->validate([
             'no_pohon' => 'required|string',
             'petak_id' => 'required|exists:petaks,id',
@@ -85,8 +118,10 @@ class PohonController extends Controller
                 'no_pohon' => $validated['no_pohon'],
             ]);
 
-            foreach ($validated['batangs'] as $batang) {
-                $pohon->batangs()->create($batang);
+            foreach ($validated['batangs'] as $batangData) {
+                $batang = $pohon->batangs()->make($batangData);
+                $batang->calculateVolume();
+                $batang->save();
             }
 
             DB::commit();

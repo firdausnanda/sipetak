@@ -69,12 +69,35 @@ export default function Barcode() {
         }
     };
 
-    const handleScan = (result) => {
+    const handleScan = async (result) => {
         if (result && result.length > 0) {
             const code = result[0].rawValue;
             setData('no_barcode', code);
             setIsScanning(false);
             playBeep();
+
+            try {
+                const response = await window.axios.get(route('api.rencana_tebang.check_barcode', { barcode: code }));
+                if (response.data.found) {
+                    const foundData = response.data.data;
+                    setData(data => ({
+                        ...data,
+                        no_barcode: code,
+                        no_pohon: foundData.no_pohon,
+                    }));
+                    Swal.fire({ 
+                        icon: 'info', 
+                        title: 'Data Ditemukan', 
+                        text: `No Pohon ${foundData.no_pohon} otomatis diisi dari Rencana Tebang.`,
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                }
+            } catch (error) {
+                console.error("Gagal memeriksa barcode:", error);
+            }
         }
     };
 

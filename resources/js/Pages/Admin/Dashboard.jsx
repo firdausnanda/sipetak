@@ -277,16 +277,15 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
                                     <div className="flex items-center justify-end">Panjang (m) <SortIcon column="panjang" /></div>
                                 </th>
                                 <th 
-                                    className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant text-right cursor-pointer hover:bg-surface-container transition-colors select-none"
-                                    onClick={() => handleSort('diameter_ujung')}
+                                    className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant text-right"
                                 >
-                                    <div className="flex items-center justify-end">D. Ujung <SortIcon column="diameter_ujung" /></div>
+                                    <div className="flex items-center justify-end">D. Ujung / Pangkal</div>
                                 </th>
                                 <th 
                                     className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant text-right cursor-pointer hover:bg-surface-container transition-colors select-none"
-                                    onClick={() => handleSort('diameter_pangkal')}
+                                    onClick={() => handleSort('volume')}
                                 >
-                                    <div className="flex items-center justify-end">D. Pangkal <SortIcon column="diameter_pangkal" /></div>
+                                    <div className="flex items-center justify-end">Volume (m³) <SortIcon column="volume" /></div>
                                 </th>
                                 <th 
                                     className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant text-center cursor-pointer hover:bg-surface-container transition-colors select-none"
@@ -334,8 +333,8 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
                                         </td>
                                         <td className="py-4 px-4 text-right text-sm">{batang.no_batang}</td>
                                         <td className="py-4 px-4 text-right font-data-mono text-data-mono text-sm whitespace-nowrap">{batang.panjang}</td>
-                                        <td className="py-4 px-4 text-right font-data-mono text-data-mono text-sm whitespace-nowrap">{batang.diameter_ujung}</td>
-                                        <td className="py-4 px-4 text-right font-data-mono text-data-mono text-sm whitespace-nowrap">{batang.diameter_pangkal}</td>
+                                        <td className="py-4 px-4 text-right font-data-mono text-data-mono text-sm whitespace-nowrap">{batang.diameter_ujung} / {batang.diameter_pangkal}</td>
+                                        <td className="py-4 px-4 text-right font-data-mono text-data-mono text-sm whitespace-nowrap">{batang.volume || '-'}</td>
                                         <td className="py-4 px-4 text-center whitespace-nowrap">
                                             {renderMutuBadge(batang.mutu)}
                                         </td>
