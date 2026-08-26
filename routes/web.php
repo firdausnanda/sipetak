@@ -92,6 +92,16 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok|ganis'])->
 Route::middleware(['auth', 'verified', 'role:admin_cdk|ganis'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dokumen-angkutans/{id}/pdf', [DokumenAngkutanController::class, 'exportPdf'])->name('dokumen_angkutans.pdf');
     Route::resource('dokumen_angkutans', DokumenAngkutanController::class)->except(['destroy']);
+    
+    // Lampiran SKSHHK
+    Route::get('/lampiran-skshhk', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'index'])->name('lampiran_skshhk.index');
+    Route::get('/lampiran-skshhk/create', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'create'])->name('lampiran_skshhk.create');
+    Route::post('/lampiran-skshhk', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'store'])->name('lampiran_skshhk.store');
+    Route::get('/lampiran-skshhk/{id}/edit', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'edit'])->name('lampiran_skshhk.edit');
+    Route::put('/lampiran-skshhk/{id}', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'update'])->name('lampiran_skshhk.update');
+    Route::delete('/lampiran-skshhk/{id}', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'destroy'])->name('lampiran_skshhk.destroy');
+    Route::get('/lampiran-skshhk/{id}/export-pdf', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'exportPdf'])->name('lampiran_skshhk.export_pdf');
+    Route::get('/api/lampiran-skshhk/available-trees', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'getAvailableTrees'])->name('lampiran_skshhk.available_trees');
 });
 
 Route::middleware(['auth', 'verified', 'role:admin_cdk'])->prefix('admin')->name('admin.')->group(function () {

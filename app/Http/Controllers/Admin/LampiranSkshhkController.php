@@ -1,0 +1,271 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\DokumenAngkutan;
+use App\Models\Skshhk;
+use App\Models\Pohon;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+
+class LampiranSkshhkController extends Controller
+{
+    public function index()
+    {
+        $user = Auth::user();
+        
+        $query = Skshhk::withCount('pohons')
+            ->withSum(['pohons as total_volume' => function ($q) {
+                $q->join('batangs', 'pohons.id', '=', 'batangs.pohon_id');
+            }], 'batangs.volume')
+            ->latest();
+
+        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
+            // Filter SKSHHK by user's kelompok via trees' dokumen angkutan
+            $query->whereHas('pohons.dokumenAngkutan', function($q) use ($user) {
+                $q->where('kelompok_id', $user->kelompok_id);
+            });
+        }
+
+        $skshhks = $query->paginate(10);
+        return Inertia::render('Admin/LampiranSkshhk/Index', [
+            'skshhks' => $skshhks
+        ]);
+    }
+
+    public function create()
+    {
+        $user = Auth::user();
+        $dokumenQuery = DokumenAngkutan::select('id', 'no_dokumen', 'tanggal')->orderBy('tanggal', 'desc');
+        
+        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
+            $dokumenQuery->where('kelompok_id', $user->kelompok_id);
+        }
+        
+        $dokumenAngkutans = $dokumenQuery->get();
+
+        return Inertia::render('Admin/LampiranSkshhk/Form', [
+            'dokumenAngkutans' => $dokumenAngkutans,
+            'skshhk' => null,
+            'selectedPohons' => []
+        ]);
+    }
+
+    public function getAvailableTrees(Request $request)
+    {
+        $user = Auth::user();
+        $dokumenId = $request->query('dokumen_id');
+
+        if (!$dokumenId) {
+            return response()->json([]);
+        }
+
+        $dokumen = DokumenAngkutan::findOrFail($dokumenId);
+
+        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id && $dokumen->kelompok_id !== $user->kelompok_id) {
+            abort(403);
+        }
+
+        $pohons = Pohon::with(['jenisPohon', 'batangs'])
+            ->where('dokumen_angkutan_id', $dokumenId)
+            ->whereNull('skshhk_id')
+            ->get();
+
+        return response()->json($pohons);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'no_skshhk' => 'required|string|max:255',
+            'tanggal' => 'required|date',
+            'pohon_ids' => 'array',
+            'pohon_ids.*' => 'exists:pohons,id',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $skshhk = Skshhk::create([
+                'no_skshhk' => $request->no_skshhk,
+                'tanggal' => $request->tanggal,
+            ]);
+
+            if (!empty($request->pohon_ids)) {
+                Pohon::whereIn('id', $request->pohon_ids)
+                    ->update(['skshhk_id' => $skshhk->id]);
+            }
+
+            DB::commit();
+            return redirect()->route('admin.lampiran_skshhk.index')->with('success', 'SKSHHK berhasil dibuat.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal membuat SKSHHK: ' . $e->getMessage());
+        }
+    }
+
+    public function edit($id)
+    {
+        $user = Auth::user();
+        $skshhk = Skshhk::findOrFail($id);
+
+        $dokumenQuery = DokumenAngkutan::select('id', 'no_dokumen', 'tanggal')->orderBy('tanggal', 'desc');
+        
+        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
+            $dokumenQuery->where('kelompok_id', $user->kelompok_id);
+            // Additionally check if this skshhk belongs to them
+            $hasUnauthorized = Pohon::where('skshhk_id', $skshhk->id)
+                ->whereHas('dokumenAngkutan', function($q) use ($user) {
+                    $q->where('kelompok_id', '!=', $user->kelompok_id);
+                })->exists();
+            if ($hasUnauthorized) {
+                abort(403);
+            }
+        }
+        
+        $dokumenAngkutans = $dokumenQuery->get();
+
+        $selectedPohons = Pohon::with(['jenisPohon', 'dokumenAngkutan', 'batangs'])
+            ->where('skshhk_id', $skshhk->id)
+            ->get();
+
+        return Inertia::render('Admin/LampiranSkshhk/Form', [
+            'dokumenAngkutans' => $dokumenAngkutans,
+            'skshhk' => $skshhk,
+            'selectedPohons' => $selectedPohons
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'no_skshhk' => 'required|string|max:255',
+            'tanggal' => 'required|date',
+            'pohon_ids' => 'array',
+            'pohon_ids.*' => 'exists:pohons,id',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $skshhk = Skshhk::findOrFail($id);
+            $skshhk->update([
+                'no_skshhk' => $request->no_skshhk,
+                'tanggal' => $request->tanggal,
+            ]);
+
+            // Detach all trees first
+            Pohon::where('skshhk_id', $skshhk->id)->update(['skshhk_id' => null]);
+
+            // Attach new trees
+            if (!empty($request->pohon_ids)) {
+                Pohon::whereIn('id', $request->pohon_ids)
+                    ->update(['skshhk_id' => $skshhk->id]);
+            }
+
+            DB::commit();
+            return redirect()->route('admin.lampiran_skshhk.index')->with('success', 'SKSHHK berhasil diperbarui.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal memperbarui SKSHHK: ' . $e->getMessage());
+        }
+    }
+
+    public function destroy($id)
+    {
+        DB::beginTransaction();
+        try {
+            $skshhk = Skshhk::findOrFail($id);
+            Pohon::where('skshhk_id', $skshhk->id)->update(['skshhk_id' => null]);
+            $skshhk->delete();
+
+            DB::commit();
+            return redirect()->route('admin.lampiran_skshhk.index')->with('success', 'SKSHHK berhasil dihapus.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menghapus SKSHHK: ' . $e->getMessage());
+        }
+    }
+
+    public function exportPdf($id)
+    {
+        $user = Auth::user();
+        $skshhk = Skshhk::with([
+            'pohons.jenisPohon', 
+            'pohons.batangs',
+            'pohons.dokumenAngkutan.kelompok'
+        ])->findOrFail($id);
+
+        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
+            $hasUnauthorized = Pohon::where('skshhk_id', $skshhk->id)
+                ->whereHas('dokumenAngkutan', function($q) use ($user) {
+                    $q->where('kelompok_id', '!=', $user->kelompok_id);
+                })->exists();
+            if ($hasUnauthorized) {
+                abort(403, 'Unauthorized access to this document.');
+            }
+        }
+
+        // Determine Logo and Kelompok from the first tree's dokumen angkutan
+        $firstTree = $skshhk->pohons->first();
+        $dokumen = $firstTree ? $firstTree->dokumenAngkutan : null;
+        
+        $skshhkData = [];
+        
+        // Prepare Rekap
+        $rekap = [
+            'P' => ['jumlah' => 0, 'volume' => 0],
+            'D' => ['jumlah' => 0, 'volume' => 0],
+            'T' => ['jumlah' => 0, 'volume' => 0],
+            'M' => ['jumlah' => 0, 'volume' => 0],
+        ];
+
+        // Prepare Details
+        $details = [];
+        $no = 1;
+
+        foreach ($skshhk->pohons as $pohon) {
+            foreach ($pohon->batangs as $batang) {
+                // Rekap
+                if (isset($rekap[$batang->mutu])) {
+                    $rekap[$batang->mutu]['jumlah']++;
+                    $rekap[$batang->mutu]['volume'] += $batang->volume;
+                }
+
+                // Details
+                $idBarcode = '';
+                if ($pohon->tipe === 'barcode' && $pohon->no_barcode) {
+                    $idBarcode = $pohon->no_barcode . '.' . str_pad($batang->no_batang, 2, '0', STR_PAD_LEFT);
+                } else {
+                    $idBarcode = ($pohon->no_pohon ?? 'NON-BARCODE') . '.' . str_pad($batang->no_batang, 2, '0', STR_PAD_LEFT);
+                }
+
+                $avgDiameter = floor(($batang->diameter_pangkal + $batang->diameter_ujung) / 2);
+
+                $details[] = [
+                    'no' => $no++,
+                    'id_barcode' => $idBarcode,
+                    'jenis' => $pohon->jenisPohon ? $pohon->jenisPohon->nama_jenis : '-',
+                    'panjang' => $batang->panjang,
+                    'diameter' => $avgDiameter,
+                    'volume' => $batang->volume,
+                    'mutu' => $batang->mutu,
+                ];
+            }
+        }
+        
+        $skshhkData[] = [
+            'skshhk' => $skshhk,
+            'rekap' => $rekap,
+            'details' => $details,
+        ];
+
+        $pdf = Pdf::loadView('pdf.lampiran-skshhk', compact('dokumen', 'skshhkData'));
+        $pdf->setPaper('A4', 'portrait');
+
+        $safeNoSkshhk = str_replace(['/', '\\'], '_', $skshhk->no_skshhk);
+        return $pdf->stream('Lampiran_SKSHHK_' . $safeNoSkshhk . '.pdf');
+    }
+}

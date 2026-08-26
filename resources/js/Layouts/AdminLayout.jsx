@@ -32,7 +32,7 @@ export default function AdminLayout({ children }) {
             {/* SideNavBar */}
             <aside className="w-64 flex-shrink-0 h-full flex flex-col p-base gap-base z-40 bg-surface-container border-r border-outline-variant hidden md:flex print:hidden">
                 <div className="px-base py-4 flex items-center justify-center border-b border-outline-variant pb-6 mb-2">
-                    <img src="/img/logo.png" alt="SIPETAK" className="h-8 w-auto object-contain" />
+                    <img src="/img/logo.webp" alt="SIPETAK" className="h-8 w-auto object-contain" />
                 </div>
                 <nav className="flex-1 flex flex-col gap-2 overflow-y-auto">
                     <Link
@@ -57,13 +57,22 @@ export default function AdminLayout({ children }) {
                         Prestasi & Upah
                     </Link>
                     {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
-                        <Link
-                            href={route('admin.dokumen_angkutans.index')}
-                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dokumen_angkutans.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                        >
-                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
-                            Dokumen Angkutan
-                        </Link>
+                        <>
+                            <Link
+                                href={route('admin.dokumen_angkutans.index')}
+                                className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dokumen_angkutans.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                            >
+                                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
+                                Dokumen Angkutan
+                            </Link>
+                            <Link
+                                href={route('admin.lampiran_skshhk.index')}
+                                className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.lampiran_skshhk.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                            >
+                                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>attachment</span>
+                                Lampiran SKSHHK
+                            </Link>
+                        </>
                     )}
                     
                     <div className="px-4 py-2 w-full">
@@ -189,7 +198,7 @@ export default function AdminLayout({ children }) {
             {/* Mobile Sidebar Content */}
             <aside className={`md:hidden fixed left-0 top-0 h-full flex flex-col p-base gap-base z-50 bg-surface-container border-r border-outline-variant w-64 transform transition-transform duration-300 ease-in-out ${showingNavigationDropdown ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="px-base py-4 flex items-center justify-center border-b border-outline-variant pb-6 mb-2">
-                    <img src="/img/logo.png" alt="SIPETAK" className="h-8 w-auto object-contain" />
+                    <img src="/img/logo.webp" alt="SIPETAK" className="h-8 w-auto object-contain" />
                 </div>
                 <nav className="flex-1 flex flex-col gap-2 overflow-y-auto">
                     <Link
@@ -214,13 +223,22 @@ export default function AdminLayout({ children }) {
                         Prestasi & Upah
                     </Link>
                     {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
-                        <Link
-                            href={route('admin.dokumen_angkutans.index')}
-                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dokumen_angkutans.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                        >
-                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
-                            Dokumen Angkutan
-                        </Link>
+                        <>
+                            <Link
+                                href={route('admin.dokumen_angkutans.index')}
+                                className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dokumen_angkutans.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                            >
+                                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
+                                Dokumen Angkutan
+                            </Link>
+                            <Link
+                                href={route('admin.lampiran_skshhk.index')}
+                                className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.lampiran_skshhk.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                            >
+                                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>attachment</span>
+                                Lampiran SKSHHK
+                            </Link>
+                        </>
                     )}
                     
                     <div className="px-4 py-2 w-full">

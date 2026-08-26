@@ -45,4 +45,9 @@ class Pohon extends Model
     {
         return $this->belongsTo(DokumenAngkutan::class);
     }
+
+    public function skshhk()
+    {
+        return $this->belongsTo(Skshhk::class);
+    }
 }

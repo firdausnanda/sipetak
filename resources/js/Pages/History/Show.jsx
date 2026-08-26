@@ -66,6 +66,7 @@ export default function Show({ pohon }) {
                                     <th className="p-4 font-bold">No. Batang</th>
                                     <th className="p-4 font-bold">Panjang (m)</th>
                                     <th className="p-4 font-bold">Diameter (cm)</th>
+                                    <th className="p-4 font-bold">Volume (m³)</th>
                                     <th className="p-4 font-bold">Mutu</th>
                                 </tr>
                             </thead>
@@ -75,13 +76,14 @@ export default function Show({ pohon }) {
                                         <td className="p-4">{batang.no_batang.toString().padStart(2, '0')}</td>
                                         <td className="p-4">{batang.panjang}</td>
                                         <td className="p-4">{((parseFloat(batang.diameter_pangkal) + parseFloat(batang.diameter_ujung)) / 2).toFixed(1)}</td>
+                                        <td className="p-4">{batang.volume}</td>
                                         <td className="p-4">
                                             <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high border border-outline font-bold">{batang.mutu}</span>
                                         </td>
                                     </tr>
                                 ))}
                                 {(!pohon.batangs || pohon.batangs.length === 0) && (
-                                    <tr><td colSpan="4" className="p-4 text-center text-on-surface-variant">Tidak ada data batang.</td></tr>
+                                    <tr><td colSpan="5" className="p-4 text-center text-on-surface-variant">Tidak ada data batang.</td></tr>
                                 )}
                             </tbody>
                         </table>
@@ -96,8 +98,8 @@ export default function Show({ pohon }) {
                                         <span className="font-data-mono font-bold text-lg text-primary-container">{batang.no_batang.toString().padStart(2, '0')}</span>
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="font-data-mono text-data-mono text-on-surface">P: {batang.panjang}m | D: {((parseFloat(batang.diameter_pangkal) + parseFloat(batang.diameter_ujung)) / 2).toFixed(1)}cm</span>
-                                        <span className="font-label-caps text-[10px] text-on-surface-variant">PANJANG | DIAMETER</span>
+                                        <span className="font-data-mono text-data-mono text-on-surface">P: {batang.panjang}m | D: {((parseFloat(batang.diameter_pangkal) + parseFloat(batang.diameter_ujung)) / 2).toFixed(1)}cm | V: {batang.volume}m³</span>
+                                        <span className="font-label-caps text-[10px] text-on-surface-variant">PANJANG | DIAMETER | VOLUME</span>
                                     </div>
                                 </div>
                                 <div className="flex flex-col items-center">

@@ -21,5 +21,8 @@ class MonitoringRoleSeeder extends Seeder
 
         $role = Role::firstOrCreate(['name' => 'monitoring_viewer']);
         $role->givePermissionTo($permissions);
+
+        $adminCdkRole = Role::firstOrCreate(['name' => 'admin_cdk']);
+        $adminCdkRole->givePermissionTo($permissions);
     }
 }
