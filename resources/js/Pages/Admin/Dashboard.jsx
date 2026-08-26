@@ -325,7 +325,7 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
                                         </td>
                                         <td className="py-4 px-4 text-sm whitespace-nowrap text-on-surface-variant">{batang.pohon?.tanggal || '-'}</td>
                                         <td className="py-4 px-4 whitespace-nowrap">
-                                            <div className="font-bold text-sm text-on-surface">Petak {batang.pohon?.petak?.no_petak || '-'}</div>
+                                            <div className="font-bold text-sm text-on-surface">{batang.pohon?.petak?.no_petak || '-'}</div>
                                             <div className="text-xs text-on-surface-variant mt-1 flex items-center gap-1">
                                                 <TreePine className="w-[14px] h-[14px]" />
                                                 {batang.pohon?.jenis_pohon?.nama_jenis || '-'}
