@@ -45,6 +45,10 @@ Route::get('/api/rencana-tebang/check-barcode', [App\Http\Controllers\Admin\Renc
     ->middleware(['auth', 'verified'])
     ->name('api.rencana_tebang.check_barcode');
 
+Route::get('/api/pohon/check', [PohonController::class, 'checkPohon'])
+    ->middleware(['auth', 'verified'])
+    ->name('api.pohon.check');
+
 Route::get('/history', [HistoryController::class, 'index'])
     ->middleware(['auth', 'verified', 'role:user'])
     ->name('history');

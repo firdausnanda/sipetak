@@ -42,7 +42,7 @@ export default function Manual() {
         setData({ ...data, petak_id: p, jenis_pohon_id: j });
     }, []);
 
-    const handleAddBatang = () => {
+    const handleAddBatang = async () => {
         if (!data.no_pohon) {
             Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Silakan isi Nomor Pohon terlebih dahulu!' });
             return;
@@ -51,6 +51,22 @@ export default function Manual() {
             Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Lengkapi semua data batang!' });
             return;
         }
+
+        try {
+            const p = parseInt(localStorage.getItem('sesi_petak'));
+            const checkResp = await window.axios.get(route('api.pohon.check', { no_pohon: data.no_pohon, petak_id: p }));
+            if (checkResp.data.exists) {
+                Swal.fire({ 
+                    icon: 'error', 
+                    title: 'Perhatian', 
+                    text: checkResp.data.diangkut ? 'Pohon sudah diangkut!' : 'Pohon sudah ditebang!',
+                });
+                return;
+            }
+        } catch (error) {
+            console.error("Gagal memeriksa status pohon:", error);
+        }
+
         setData('batangs', [...data.batangs, tempBatang]);
         setTempBatang({
             no_batang: '',

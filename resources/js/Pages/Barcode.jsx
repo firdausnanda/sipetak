@@ -85,6 +85,19 @@ export default function Barcode() {
                         no_barcode: code,
                         no_pohon: foundData.no_pohon,
                     }));
+
+                    // Check if already exist
+                    const p = parseInt(localStorage.getItem('sesi_petak'));
+                    const checkResp = await window.axios.get(route('api.pohon.check', { no_pohon: foundData.no_pohon, petak_id: p }));
+                    if (checkResp.data.exists) {
+                        Swal.fire({ 
+                            icon: 'error', 
+                            title: 'Perhatian', 
+                            text: checkResp.data.diangkut ? 'Pohon sudah diangkut!' : 'Pohon sudah ditebang!',
+                        });
+                        return;
+                    }
+
                     Swal.fire({ 
                         icon: 'info', 
                         title: 'Data Ditemukan', 
@@ -101,7 +114,7 @@ export default function Barcode() {
         }
     };
 
-    const handleAddBatang = () => {
+    const handleAddBatang = async () => {
         if (!data.no_barcode) {
             Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Silakan scan barcode terlebih dahulu!' });
             return;
@@ -114,6 +127,22 @@ export default function Barcode() {
             Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Lengkapi semua data batang!' });
             return;
         }
+
+        try {
+            const p = parseInt(localStorage.getItem('sesi_petak'));
+            const checkResp = await window.axios.get(route('api.pohon.check', { no_pohon: data.no_pohon, petak_id: p }));
+            if (checkResp.data.exists) {
+                Swal.fire({ 
+                    icon: 'error', 
+                    title: 'Perhatian', 
+                    text: checkResp.data.diangkut ? 'Pohon sudah diangkut!' : 'Pohon sudah ditebang!',
+                });
+                return;
+            }
+        } catch (error) {
+            console.error("Gagal memeriksa status pohon:", error);
+        }
+
         setData('batangs', [...data.batangs, tempBatang]);
         setTempBatang({
             no_batang: '',

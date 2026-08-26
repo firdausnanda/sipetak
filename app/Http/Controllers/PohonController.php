@@ -10,6 +10,29 @@ use Illuminate\Validation\ValidationException;
 
 class PohonController extends Controller
 {
+    public function checkPohon(Request $request)
+    {
+        $no_pohon = $request->query('no_pohon');
+        $petak_id = $request->query('petak_id');
+        
+        $query = Pohon::where('kelompok_id', $request->user()->kelompok_id)
+            ->where('no_pohon', $no_pohon);
+            
+        if ($petak_id) {
+            $query->where('petak_id', $petak_id);
+        }
+            
+        $pohon = $query->first();
+
+        if ($pohon) {
+            return response()->json([
+                'exists' => true,
+                'diangkut' => !is_null($pohon->dokumen_angkutan_id)
+            ]);
+        }
+        return response()->json(['exists' => false]);
+    }
+
     public function createBarcode()
     {
         return \Inertia\Inertia::render('Barcode');
@@ -52,6 +75,17 @@ class PohonController extends Controller
         if ($rencana && $rencana->no_pohon != $validated['no_pohon']) {
             throw ValidationException::withMessages([
                 'no_pohon' => 'No Pohon tidak sesuai dengan data Rencana Tebang untuk barcode ini (Seharusnya: ' . $rencana->no_pohon . ').'
+            ]);
+        }
+
+        $existingPohon = Pohon::where('kelompok_id', $request->user()->kelompok_id)
+            ->where('no_pohon', $validated['no_pohon'])
+            ->where('petak_id', $validated['petak_id'])
+            ->first();
+
+        if ($existingPohon) {
+            throw ValidationException::withMessages([
+                'no_pohon' => $existingPohon->dokumen_angkutan_id ? 'Pohon sudah diangkut.' : 'Pohon sudah ditebang.'
             ]);
         }
 
@@ -105,6 +139,17 @@ class PohonController extends Controller
             'batangs.*.diameter_ujung' => 'required|numeric',
             'batangs.*.mutu' => 'required|in:P,D,T,M',
         ]);
+
+        $existingPohon = Pohon::where('kelompok_id', $request->user()->kelompok_id)
+            ->where('no_pohon', $validated['no_pohon'])
+            ->where('petak_id', $validated['petak_id'])
+            ->first();
+
+        if ($existingPohon) {
+            throw ValidationException::withMessages([
+                'no_pohon' => $existingPohon->dokumen_angkutan_id ? 'Pohon sudah diangkut.' : 'Pohon sudah ditebang.'
+            ]);
+        }
 
         try {
             DB::beginTransaction();
