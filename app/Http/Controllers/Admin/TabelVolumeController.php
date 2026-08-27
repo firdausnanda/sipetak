@@ -94,4 +94,24 @@ class TabelVolumeController extends Controller
         $tabelVolume->delete();
         return redirect()->back()->with('success', 'Data berhasil dihapus');
     }
+
+    public function generateVolume()
+    {
+        $batangs = \App\Models\Batang::with('pohon')->get();
+        $updatedCount = 0;
+        
+        foreach ($batangs as $batang) {
+            $volume = $batang->calculateVolume();
+            
+            if ($volume !== null) {
+                $batang->save();
+                $updatedCount++;
+            }
+        }
+
+        return response()->json([
+            'message' => "Proses generate volume selesai.",
+            'updated_count' => $updatedCount
+        ]);
+    }
 }
