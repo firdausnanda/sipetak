@@ -30,16 +30,11 @@ export default function Login({ status, canResetPassword }) {
                 ></div>
                 <div className="absolute inset-0 bg-primary-container bg-opacity-80"></div>
                 <div className="relative z-10 p-margin-desktop h-full flex flex-col justify-between text-on-primary">
-                    <div>
-                        <div className="flex items-center gap-2 mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-9 h-9">
-                                <path d="M16 12L22 21H18V24H14V21H10L16 12Z" />
-                                <path d="M8 12L14 21H11V24H7V21H3L8 12Z" />
-                                <path d="M12 2L19 13H15V24H9V13H5L12 2Z" />
-                            </svg>
-                            <h1 className="font-display text-display tracking-tight font-bold">SIPETAK</h1>
-                        </div>
-                        <p className="font-headline-md text-headline-md max-w-md text-primary-fixed-dim">Sistem Informasi Penebangan dan Taksasi Kayu</p>
+                    <div className="flex flex-col items-start gap-4">
+                        <img src="/img/logo-white.webp" alt="SIPETAK" className="h-16 md:h-20 w-auto object-contain drop-shadow-sm" />
+                        <p className="text-sm md:text-base leading-relaxed text-on-primary/90 font-semibold uppercase tracking-widest max-w-sm">
+                            Sistem Informasi Penebangan<br/>dan Taksasi Kayu
+                        </p>
                     </div>
                     
                     <div className="bg-surface-tint bg-opacity-30 p-6 rounded-xl border border-outline-variant backdrop-blur-sm inline-block self-start">
@@ -64,6 +59,8 @@ export default function Login({ status, canResetPassword }) {
                     </svg>
                     <h1 className="font-display text-display text-primary font-bold">SIPETAK</h1>
                     <p className="font-body-md text-body-md text-on-surface-variant mt-2">Sistem Informasi Penebangan dan Taksasi Kayu</p>
+                    <img src="/img/logo.webp" alt="SIPETAK" className="h-10 w-auto object-contain" />
+                    <p className="text-[10px] leading-tight text-on-surface-variant font-semibold text-center mt-2 uppercase tracking-wider">Sistem Informasi Penebangan<br/>dan Taksasi Kayu</p>
                 </div>
                 
                 <div className="w-full max-w-md bg-surface-container-lowest p-8 rounded-xl border border-outline-variant shadow-sm">
