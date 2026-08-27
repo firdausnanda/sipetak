@@ -37,6 +37,7 @@ class LaporanHasilTebanganExport implements FromCollection, WithHeadings, WithMa
             'Panjang (m)',
             'Diameter Ujung (cm)',
             'Diameter Pangkal (cm)',
+            'Volume (m³)',
             'Mutu',
             'Input Oleh',
         ];
@@ -56,6 +57,7 @@ class LaporanHasilTebanganExport implements FromCollection, WithHeadings, WithMa
             $batang->panjang,
             $batang->diameter_ujung,
             $batang->diameter_pangkal,
+            $batang->volume,
             $batang->mutu,
             $batang->creator->name ?? 'Sistem'
         ];

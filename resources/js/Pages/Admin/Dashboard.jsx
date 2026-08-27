@@ -2,13 +2,15 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, router, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import Select from 'react-select';
-import { Table as TableIcon, Users, Map, Search, ChevronsUpDown, ArrowUp, ArrowDown, PackageOpen, QrCode, TreePine, User, Calendar, SlidersHorizontal, X } from 'lucide-react';
+import { Table as TableIcon, Users, Map, Search, ChevronsUpDown, ArrowUp, ArrowDown, PackageOpen, QrCode, TreePine, User, Calendar, SlidersHorizontal, X, Loader2 } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { format, parseISO } from 'date-fns';
+import axios from 'axios';
 
 export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
     const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
     const [filterData, setFilterData] = useState({
         kelompok_id: filters.kelompok_id || '',
         petak_id: filters.petak_id || '',
@@ -23,6 +25,42 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
         no_batang: filters.no_batang || '',
         mutu: filters.mutu || ''
     });
+
+    const handleExport = async (e) => {
+        e.preventDefault();
+        setIsExporting(true);
+        
+        try {
+            const response = await axios.get(route('admin.dashboard.export', filterData), {
+                responseType: 'blob'
+            });
+            
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            
+            const contentDisposition = response.headers['content-disposition'];
+            let fileName = 'laporan_hasil_tebangan.xlsx';
+            if (contentDisposition) {
+                const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+                if (fileNameMatch && fileNameMatch.length === 2) {
+                    fileName = fileNameMatch[1];
+                }
+            }
+            
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            
+            link.parentNode.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Export failed:", error);
+            alert('Gagal mengunduh file ekspor.');
+        } finally {
+            setIsExporting(false);
+        }
+    };
 
     const kelompokOptions = [
         { value: '', label: 'Semua Kelompok' },
@@ -141,13 +179,18 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
                     <p className="font-body-md text-body-md text-on-surface-variant">Kelola dan tinjau data operasional penebangan harian.</p>
                 </div>
                 <div className="flex gap-3">
-                    <a 
-                        href={route('admin.dashboard.export', filterData)}
-                        className="flex items-center gap-2 bg-[#FB8500] text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors min-h-[48px] font-bold shadow-sm"
+                    <button 
+                        onClick={handleExport}
+                        disabled={isExporting}
+                        className="flex items-center gap-2 bg-[#FB8500] text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors min-h-[48px] font-bold shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                        <TableIcon className="w-[18px] h-[18px]" />
-                        Excel
-                    </a>
+                        {isExporting ? (
+                            <Loader2 className="w-[18px] h-[18px] animate-spin" />
+                        ) : (
+                            <TableIcon className="w-[18px] h-[18px]" />
+                        )}
+                        {isExporting ? 'Mengekspor...' : 'Excel'}
+                    </button>
                 </div>
             </div>
 
