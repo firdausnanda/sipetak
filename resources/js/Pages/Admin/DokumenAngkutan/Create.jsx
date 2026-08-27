@@ -10,7 +10,7 @@ import Select from 'react-select';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { id } from 'date-fns/locale/id';
 import 'react-datepicker/dist/react-datepicker.css';
-import { FileText, Map, Save, Calendar, CheckSquare, Truck, BookOpen } from 'lucide-react';
+import { FileText, Map, Save, Calendar, CheckSquare, Truck, BookOpen, Loader2 } from 'lucide-react';
 
 registerLocale('id', id);
 
@@ -49,11 +49,35 @@ export default function Create({ petaks, pohons, selectedPetakIds, penerbits, tu
         });
     };
 
+    const [searchInput, setSearchInput] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isSearching, setIsSearching] = useState(false);
+
+    useEffect(() => {
+        setIsSearching(true);
+        const timer = setTimeout(() => {
+            setSearchQuery(searchInput);
+            setIsSearching(false);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchInput]);
+
+    const filteredPohons = (pohons || []).filter(p => {
+        const query = searchQuery.toLowerCase();
+        return (p.no_pohon && p.no_pohon.toString().toLowerCase().includes(query)) || 
+               (p.no_barcode && p.no_barcode.toLowerCase().includes(query)) ||
+               (p.jenis_pohon?.nama_jenis && p.jenis_pohon.nama_jenis.toLowerCase().includes(query));
+    });
+
     const handleSelectAll = (e) => {
         if (e.target.checked) {
-            setData('pohon_ids', pohons.map(p => p.id));
+            // Only select the currently filtered trees (merge with already selected)
+            const newIds = new Set([...data.pohon_ids, ...filteredPohons.map(p => p.id)]);
+            setData('pohon_ids', Array.from(newIds));
         } else {
-            setData('pohon_ids', []);
+            // Unselect only the currently filtered trees
+            const filteredIds = filteredPohons.map(p => p.id);
+            setData('pohon_ids', data.pohon_ids.filter(id => !filteredIds.includes(id)));
         }
     };
 
@@ -238,20 +262,36 @@ export default function Create({ petaks, pohons, selectedPetakIds, penerbits, tu
                         </h3>
                         {pohons && pohons.length > 0 ? (
                             <div>
-                                <div className="mb-4 flex items-center gap-2 border-b border-outline-variant pb-2">
-                                    <input 
-                                        type="checkbox" 
-                                        id="selectAll"
-                                        className="rounded border-outline-variant text-primary focus:ring-primary w-5 h-5"
-                                        checked={data.pohon_ids.length === pohons.length && pohons.length > 0}
-                                        onChange={handleSelectAll}
-                                    />
-                                    <label htmlFor="selectAll" className="font-bold cursor-pointer">Pilih Semua ({pohons.length} Pohon)</label>
+                                <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant pb-4">
+                                    <div className="flex items-center gap-2">
+                                        <input 
+                                            type="checkbox" 
+                                            id="selectAll"
+                                            className="rounded border-outline-variant text-primary focus:ring-primary w-5 h-5"
+                                            checked={filteredPohons.length > 0 && filteredPohons.every(p => data.pohon_ids.includes(p.id))}
+                                            onChange={handleSelectAll}
+                                        />
+                                        <label htmlFor="selectAll" className="font-bold cursor-pointer">Pilih Semua yang Ditampilkan ({filteredPohons.length})</label>
+                                    </div>
+                                    <div className="w-full sm:w-64 relative">
+                                        <TextInput
+                                            type="text"
+                                            placeholder="Cari no pohon / barcode / jenis..."
+                                            value={searchInput}
+                                            onChange={(e) => setSearchInput(e.target.value)}
+                                            className="w-full pr-10"
+                                        />
+                                        {isSearching && (
+                                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-primary">
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                                 <InputError message={errors.pohon_ids} className="mt-2 mb-4" />
                                 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[400px] overflow-y-auto pr-2">
-                                    {pohons.map((pohon) => (
+                                    {filteredPohons.map((pohon) => (
                                         <div 
                                             key={pohon.id}
                                             className={`border rounded-lg p-3 flex items-start gap-3 cursor-pointer transition-colors ${data.pohon_ids.includes(pohon.id) ? 'bg-primary-container/20 border-primary' : 'border-outline-variant hover:bg-surface-container-lowest'}`}
@@ -264,12 +304,19 @@ export default function Create({ petaks, pohons, selectedPetakIds, penerbits, tu
                                                 onChange={() => {}} // handled by parent div click
                                             />
                                             <div>
-                                                <div className="font-bold text-sm">Pohon: {pohon.no_barcode || 'Tanpa Barcode'}</div>
+                                                <div className="font-bold text-sm">
+                                                    No Pohon: {pohon.no_pohon || '-'} {pohon.no_barcode ? `(Barcode: ${pohon.no_barcode})` : ''}
+                                                </div>
                                                 <div className="text-xs text-on-surface-variant mt-1">Jenis: {pohon.jenis_pohon?.nama_jenis || '-'}</div>
                                                 <div className="text-xs text-on-surface-variant">Petak: {pohon.petak?.no_petak || '-'}</div>
                                             </div>
                                         </div>
                                     ))}
+                                    {filteredPohons.length === 0 && (
+                                        <div className="col-span-full text-center py-4 text-on-surface-variant">
+                                            Tidak ada pohon yang cocok dengan pencarian Anda.
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ) : (
