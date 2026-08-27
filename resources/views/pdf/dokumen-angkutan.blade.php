@@ -118,13 +118,11 @@
             </td>
             <td>
                 <div class="title">
-                    KELOMPOK TANI HUTAN
                     {{ strtoupper($dokumen->kelompok->nama_kelompok ?? '....................') }}<br>
                     DOKUMEN ANGKUTAN KAYU
                 </div>
                 <div style="margin-top: 10px; text-align: center;">
                     NOMOR DOKUMEN : {{ $dokumen->no_dokumen }}<br>
-                    TANGGAL : {{ \Carbon\Carbon::parse($dokumen->tanggal)->locale('id')->translatedFormat('d F Y') }}
                 </div>
             </td>
         </tr>
@@ -138,7 +136,7 @@
                     <table style="width: 100%; border: none;">
                         <tr>
                             <td style="border: none; padding: 2px; width: 100px;">Nama</td>
-                            <td style="border: none; padding: 2px;">: 
+                            <td style="border: none; padding: 2px;">:
                                 {{ $dokumen->kelompok->nama_kelompok ?? '....' }}</td>
                         </tr>
                         <tr>
@@ -307,7 +305,10 @@
 
     <div style="text-align: center; margin-bottom: 20px;">
         <h3>DAFTAR ANGKUTAN KAYU</h3>
-        <p>Nomor Dokumen: {{ $dokumen->no_dokumen }}</p>
+        <div style="margin-top: 10px; text-align: center;">
+            NOMOR DOKUMEN : {{ $dokumen->no_dokumen }}<br>
+            TANGGAL : {{ \Carbon\Carbon::parse($dokumen->tanggal)->locale('id')->translatedFormat('d F Y') }}
+        </div>
     </div>
 
     @foreach ($dokumen->pohons as $index => $pohon)
@@ -354,11 +355,11 @@
                     @if (!empty($dokumen->penerbit->nama))
                         <img src="data:image/svg+xml;base64,{!! base64_encode(
                             QrCode::format('svg')->size(70)->margin(0)->generate('Dokumen No: ' . $dokumen->no_dokumen . ' | Penerbit: ' . ($dokumen->penerbit->nama ?? 'Ganis PKB')),
-                        ) !!}"
-                            alt="QR Tanda Tangan">
+                        ) !!}" alt="QR Tanda Tangan">
                     @endif
                 </div>
-                <p style="margin: 0; padding: 0; font-weight: bold; text-decoration: underline;">{{ $dokumen->penerbit->nama ?? '(Ganis PKB)' }}</p>
+                <p style="margin: 0; padding: 0; font-weight: bold; text-decoration: underline;">
+                    {{ $dokumen->penerbit->nama ?? '(Ganis PKB)' }}</p>
                 <p style="margin: 0; padding: 0;">No Reg: {{ $dokumen->penerbit->no_register ?? '....' }}</p>
             </td>
         </tr>
