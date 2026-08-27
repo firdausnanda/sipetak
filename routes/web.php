@@ -24,32 +24,6 @@ use App\Http\Controllers\VerificationController;
 
 Route::get('/verifikasi/{token}', [VerificationController::class, 'show'])->name('verifikasi.show');
 
-// Route sementara untuk generate UUID dokumen lama
-Route::get('/generate-legacy-uuid', function () {
-    $dokumenCount = 0;
-    $skshhkCount = 0;
-
-    \App\Models\DokumenAngkutan::whereNull('verification_token')->chunkById(100, function ($dokumens) use (&$dokumenCount) {
-        foreach ($dokumens as $dokumen) {
-            $dokumen->update(['verification_token' => (string) \Illuminate\Support\Str::uuid()]);
-            $dokumenCount++;
-        }
-    });
-
-    \App\Models\Skshhk::whereNull('verification_token')->chunkById(100, function ($skshhks) use (&$skshhkCount) {
-        foreach ($skshhks as $skshhk) {
-            $skshhk->update(['verification_token' => (string) \Illuminate\Support\Str::uuid()]);
-            $skshhkCount++;
-        }
-    });
-
-    return response()->json([
-        'message' => 'Berhasil generate UUID untuk dokumen lama.',
-        'dokumen_angkutan_updated' => $dokumenCount,
-        'skshhk_updated' => $skshhkCount
-    ]);
-});
-
 Route::get('/', [HomeController::class, 'index']);
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
