@@ -53,6 +53,10 @@ Route::get('/api/volume/calculate', [PohonController::class, 'calculateVolumeApi
     ->middleware(['auth', 'verified'])
     ->name('api.volume.calculate');
 
+Route::get('/api/pohon/cleanup', [PohonController::class, 'cleanupDuplicates'])
+    ->middleware(['auth', 'verified'])
+    ->name('api.pohon.cleanup');
+
 Route::get('/history', [HistoryController::class, 'index'])
     ->middleware(['auth', 'verified', 'role:user'])
     ->name('history');

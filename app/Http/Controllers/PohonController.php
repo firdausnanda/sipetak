@@ -25,9 +25,11 @@ class PohonController extends Controller
         $pohon = $query->first();
 
         if ($pohon) {
+            $diangkut = !is_null($pohon->dokumen_angkutan_id);
             return response()->json([
-                'exists' => true,
-                'diangkut' => !is_null($pohon->dokumen_angkutan_id)
+                // Kita hanya blok jika sudah diangkut
+                'exists' => $diangkut,
+                'diangkut' => $diangkut
             ]);
         }
         return response()->json(['exists' => false]);
@@ -83,26 +85,43 @@ class PohonController extends Controller
             ->where('petak_id', $validated['petak_id'])
             ->first();
 
-        if ($existingPohon) {
+        if ($existingPohon && $existingPohon->dokumen_angkutan_id) {
             throw ValidationException::withMessages([
-                'no_pohon' => $existingPohon->dokumen_angkutan_id ? 'Pohon sudah diangkut.' : 'Pohon sudah ditebang.'
+                'no_pohon' => 'Pohon sudah diangkut, tidak dapat menambah batang.'
+            ]);
+        }
+
+        if ($existingPohon && $existingPohon->jenis_pohon_id != $validated['jenis_pohon_id']) {
+            throw ValidationException::withMessages([
+                'jenis_pohon_id' => 'Jenis pohon berbeda dengan data pohon yang sudah ada.'
             ]);
         }
 
         try {
             DB::beginTransaction();
 
-            $pohon = Pohon::create([
-                'kelompok_id' => $request->user()->kelompok_id,
-                'petak_id' => $validated['petak_id'],
-                'jenis_pohon_id' => $validated['jenis_pohon_id'],
-                'tanggal' => now()->toDateString(),
-                'tipe' => 'barcode',
-                'no_barcode' => $validated['no_barcode'],
-                'no_pohon' => $validated['no_pohon'],
-            ]);
+            if ($existingPohon) {
+                $pohon = $existingPohon;
+            } else {
+                $pohon = Pohon::create([
+                    'kelompok_id' => $request->user()->kelompok_id,
+                    'petak_id' => $validated['petak_id'],
+                    'jenis_pohon_id' => $validated['jenis_pohon_id'],
+                    'tanggal' => now()->toDateString(),
+                    'tipe' => 'barcode',
+                    'no_barcode' => $validated['no_barcode'],
+                    'no_pohon' => $validated['no_pohon'],
+                ]);
+            }
 
             foreach ($validated['batangs'] as $batangData) {
+                $existingBatang = $pohon->batangs()->where('no_batang', $batangData['no_batang'])->first();
+                if ($existingBatang) {
+                    throw ValidationException::withMessages([
+                        'no_pohon' => 'Batang ke-' . $batangData['no_batang'] . ' sudah ada pada pohon ini.'
+                    ]);
+                }
+                
                 $batang = $pohon->batangs()->make($batangData);
                 $batang->calculateVolume();
                 $batang->save();
@@ -145,25 +164,42 @@ class PohonController extends Controller
             ->where('petak_id', $validated['petak_id'])
             ->first();
 
-        if ($existingPohon) {
+        if ($existingPohon && $existingPohon->dokumen_angkutan_id) {
             throw ValidationException::withMessages([
-                'no_pohon' => $existingPohon->dokumen_angkutan_id ? 'Pohon sudah diangkut.' : 'Pohon sudah ditebang.'
+                'no_pohon' => 'Pohon sudah diangkut, tidak dapat menambah batang.'
+            ]);
+        }
+
+        if ($existingPohon && $existingPohon->jenis_pohon_id != $validated['jenis_pohon_id']) {
+            throw ValidationException::withMessages([
+                'jenis_pohon_id' => 'Jenis pohon berbeda dengan data pohon yang sudah ada.'
             ]);
         }
 
         try {
             DB::beginTransaction();
 
-            $pohon = Pohon::create([
-                'kelompok_id' => $request->user()->kelompok_id,
-                'petak_id' => $validated['petak_id'],
-                'jenis_pohon_id' => $validated['jenis_pohon_id'],
-                'tanggal' => now()->toDateString(),
-                'tipe' => 'non_barcode',
-                'no_pohon' => $validated['no_pohon'],
-            ]);
+            if ($existingPohon) {
+                $pohon = $existingPohon;
+            } else {
+                $pohon = Pohon::create([
+                    'kelompok_id' => $request->user()->kelompok_id,
+                    'petak_id' => $validated['petak_id'],
+                    'jenis_pohon_id' => $validated['jenis_pohon_id'],
+                    'tanggal' => now()->toDateString(),
+                    'tipe' => 'non_barcode',
+                    'no_pohon' => $validated['no_pohon'],
+                ]);
+            }
 
             foreach ($validated['batangs'] as $batangData) {
+                $existingBatang = $pohon->batangs()->where('no_batang', $batangData['no_batang'])->first();
+                if ($existingBatang) {
+                    throw ValidationException::withMessages([
+                        'no_pohon' => 'Batang ke-' . $batangData['no_batang'] . ' sudah ada pada pohon ini.'
+                    ]);
+                }
+
                 $batang = $pohon->batangs()->make($batangData);
                 $batang->calculateVolume();
                 $batang->save();
@@ -205,5 +241,82 @@ class PohonController extends Controller
         return response()->json([
             'volume' => 0
         ]);
+    }
+
+    public function cleanupDuplicates()
+    {
+        // Find duplicates based on kelompok_id, petak_id, no_pohon
+        $duplicates = Pohon::select('kelompok_id', 'petak_id', 'no_pohon', DB::raw('count(*) as total'))
+            ->groupBy('kelompok_id', 'petak_id', 'no_pohon')
+            ->having('total', '>', 1)
+            ->get();
+
+        if ($duplicates->isEmpty()) {
+            return response()->json(['message' => 'Tidak ada data redundan ditemukan.']);
+        }
+
+        $mergedCount = 0;
+        $deletedCount = 0;
+
+        DB::beginTransaction();
+        try {
+            foreach ($duplicates as $duplicate) {
+                // Ambil semua record duplikat untuk pohon ini
+                $pohonRecords = Pohon::where('kelompok_id', $duplicate->kelompok_id)
+                    ->where('petak_id', $duplicate->petak_id)
+                    ->where('no_pohon', $duplicate->no_pohon)
+                    ->orderBy('id', 'asc') // yang paling pertama diinput jadi utama
+                    ->get();
+
+                // Cari record yang sudah diangkut (jika ada) untuk dijadikan record utama
+                $primary = $pohonRecords->firstWhere(function ($p) {
+                    return !is_null($p->dokumen_angkutan_id);
+                });
+
+                // Jika belum ada yang diangkut, gunakan record yang paling tua (pertama)
+                if (!$primary) {
+                    $primary = $pohonRecords->first();
+                }
+
+                $mergedCount++;
+
+                foreach ($pohonRecords as $record) {
+                    if ($record->id !== $primary->id) {
+                        // Pindahkan batangs ke record utama
+                        foreach ($record->batangs as $batang) {
+                            $batang->pohon_id = $primary->id;
+                            $batang->save();
+                        }
+                        
+                        // Copy data penting jika primary kosong
+                        if (is_null($primary->dokumen_angkutan_id) && !is_null($record->dokumen_angkutan_id)) {
+                            $primary->dokumen_angkutan_id = $record->dokumen_angkutan_id;
+                            $primary->save();
+                        }
+
+                        if (is_null($primary->skshhk_id) && !is_null($record->skshhk_id)) {
+                            $primary->skshhk_id = $record->skshhk_id;
+                            $primary->save();
+                        }
+
+                        // Hapus record duplikat
+                        $record->delete();
+                        $deletedCount++;
+                    }
+                }
+            }
+
+            DB::commit();
+            return response()->json([
+                'message' => 'Berhasil menggabungkan data.',
+                'groups_merged' => $mergedCount,
+                'redundant_records_deleted' => $deletedCount
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
