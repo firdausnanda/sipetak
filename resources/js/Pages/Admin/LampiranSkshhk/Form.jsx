@@ -1,6 +1,6 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import { ArrowLeft, Save, Square, CheckSquare, Loader2, X } from 'lucide-react';
+import { ArrowLeft, Save, Square, CheckSquare, Loader2, X, Search } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { useState, useEffect } from 'react';
 import DatePicker, { registerLocale } from 'react-datepicker';
@@ -22,8 +22,16 @@ export default function Form({ skshhk, dokumenAngkutans, selectedPohons }) {
     const [selectedDokumenId, setSelectedDokumenId] = useState('');
     const [availableTrees, setAvailableTrees] = useState([]);
     const [loadingTrees, setLoadingTrees] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const [selectedTreesData, setSelectedTreesData] = useState(selectedPohons || []);
+
+    const filteredAvailableTrees = availableTrees.filter(tree => {
+        const query = searchQuery.toLowerCase();
+        const barcodeMatch = tree.no_barcode && tree.no_barcode.toLowerCase().includes(query);
+        const noPohonMatch = tree.no_pohon && String(tree.no_pohon).toLowerCase().includes(query);
+        return barcodeMatch || noPohonMatch;
+    });
 
     const calculateVolume = (batangs) => {
         if (!batangs || !Array.isArray(batangs)) return '0.00';
@@ -63,6 +71,29 @@ export default function Form({ skshhk, dokumenAngkutans, selectedPohons }) {
             newTreesData.push(tree);
         }
 
+        setData('pohon_ids', newIds);
+        setSelectedTreesData(newTreesData);
+    };
+
+    const toggleAllTrees = () => {
+        const isAllSelected = filteredAvailableTrees.length > 0 && filteredAvailableTrees.every(tree => data.pohon_ids.includes(tree.id));
+        
+        let newIds = [...data.pohon_ids];
+        let newTreesData = [...selectedTreesData];
+
+        if (isAllSelected) {
+            filteredAvailableTrees.forEach(tree => {
+                newIds = newIds.filter(id => id !== tree.id);
+                newTreesData = newTreesData.filter(t => t.id !== tree.id);
+            });
+        } else {
+            filteredAvailableTrees.forEach(tree => {
+                if (!newIds.includes(tree.id)) {
+                    newIds.push(tree.id);
+                    newTreesData.push(tree);
+                }
+            });
+        }
         setData('pohon_ids', newIds);
         setSelectedTreesData(newTreesData);
     };
@@ -170,6 +201,19 @@ export default function Form({ skshhk, dokumenAngkutans, selectedPohons }) {
                             />
                         </div>
 
+                        {selectedDokumenId && (
+                            <div className="mb-4 relative">
+                                <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-outline" />
+                                <input
+                                    type="text"
+                                    placeholder="Cari berdasarkan Barcode atau No. Pohon..."
+                                    className="w-full border-outline-variant rounded-lg pl-10 p-2 focus:ring-primary focus:border-primary text-sm"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+                        )}
+
                         {loadingTrees ? (
                             <div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
                         ) : selectedDokumenId ? (
@@ -177,22 +221,33 @@ export default function Form({ skshhk, dokumenAngkutans, selectedPohons }) {
                                 <table className="w-full text-left text-sm">
                                     <thead className="bg-surface-container sticky top-0">
                                         <tr>
-                                            <th className="p-3 w-10">Pilih</th>
+                                            <th className="p-3 w-10">
+                                                <button type="button" onClick={toggleAllTrees} className="focus:outline-none">
+                                                    {filteredAvailableTrees.length > 0 && filteredAvailableTrees.every(tree => data.pohon_ids.includes(tree.id)) ? (
+                                                        <CheckSquare className="w-5 h-5 text-primary" />
+                                                    ) : (
+                                                        <Square className="w-5 h-5 text-outline" />
+                                                    )}
+                                                </button>
+                                            </th>
                                             <th className="p-3">Barcode / No</th>
                                             <th className="p-3">Jenis</th>
                                             <th className="p-3 text-right">Volume (m³)</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-outline-variant">
-                                        {availableTrees.length === 0 ? (
-                                            <tr><td colSpan="4" className="p-4 text-center text-on-surface-variant">Tidak ada kayu tersedia / belum dialokasikan di dokumen ini.</td></tr>
+                                        {filteredAvailableTrees.length === 0 ? (
+                                            <tr><td colSpan="4" className="p-4 text-center text-on-surface-variant">Tidak ada kayu tersedia / ditemukan.</td></tr>
                                         ) : (
-                                            availableTrees.map(pohon => (
+                                            filteredAvailableTrees.map(pohon => (
                                                 <tr key={pohon.id} className="hover:bg-surface-container-lowest cursor-pointer" onClick={() => toggleTree(pohon)}>
                                                     <td className="p-3">
                                                         {data.pohon_ids.includes(pohon.id) ? <CheckSquare className="w-5 h-5 text-primary" /> : <Square className="w-5 h-5 text-outline" />}
                                                     </td>
-                                                    <td className="p-3 font-mono">{pohon.tipe === 'barcode' ? pohon.no_barcode : pohon.no_pohon}</td>
+                                                    <td className="p-3 font-mono">
+                                                        <div>{pohon.no_barcode || '-'}</div>
+                                                        <div className="text-xs text-on-surface-variant">No. Pohon : <span className='text-red-700 font-bold'>{pohon.no_pohon || '-'}</span></div>
+                                                    </td>
                                                     <td className="p-3">{pohon.jenis_pohon?.nama_jenis || '-'}</td>
                                                     <td className="p-3 text-right">{calculateVolume(pohon.batangs)}</td>
                                                 </tr>
@@ -232,7 +287,10 @@ export default function Form({ skshhk, dokumenAngkutans, selectedPohons }) {
                                     ) : (
                                         selectedTreesData.map(pohon => (
                                             <tr key={pohon.id} className="hover:bg-surface-container-lowest">
-                                                <td className="p-3 font-mono">{pohon.tipe === 'barcode' ? pohon.no_barcode : pohon.no_pohon}</td>
+                                                <td className="p-3 font-mono">
+                                                    <div>{pohon.no_barcode || '-'}</div>
+                                                    <div className="text-xs text-on-surface-variant">{pohon.no_pohon || '-'}</div>
+                                                </td>
                                                 <td className="p-3">{pohon.jenis_pohon?.nama_jenis || pohon.jenisPohon?.nama_jenis || '-'}</td>
                                                 <td className="p-3 text-right">{calculateVolume(pohon.batangs)}</td>
                                                 <td className="p-3 text-center">
