@@ -24,16 +24,37 @@ class LampiranSkshhkController extends Controller
             }], 'batangs.volume')
             ->latest();
 
+        $summaryQuery = Skshhk::query();
+
         if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
             // Filter SKSHHK by user's kelompok via trees' dokumen angkutan
             $query->whereHas('pohons.dokumenAngkutan', function($q) use ($user) {
                 $q->where('kelompok_id', $user->kelompok_id);
             });
+            $summaryQuery->whereHas('pohons.dokumenAngkutan', function($q) use ($user) {
+                $q->where('kelompok_id', $user->kelompok_id);
+            });
         }
 
         $skshhks = $query->paginate(10);
+
+        // Calculate Summary
+        $allIds = $summaryQuery->pluck('id');
+        $totalPohon = Pohon::whereIn('skshhk_id', $allIds)->count();
+        $totalBatang = \App\Models\Batang::whereHas('pohon', function ($q) use ($allIds) {
+            $q->whereIn('skshhk_id', $allIds);
+        })->count();
+        $totalVolume = \App\Models\Batang::whereHas('pohon', function ($q) use ($allIds) {
+            $q->whereIn('skshhk_id', $allIds);
+        })->sum('volume');
+
         return Inertia::render('Admin/LampiranSkshhk/Index', [
-            'skshhks' => $skshhks
+            'skshhks' => $skshhks,
+            'summary' => [
+                'total_pohon' => $totalPohon,
+                'total_batang' => $totalBatang,
+                'total_volume' => $totalVolume
+            ]
         ]);
     }
 

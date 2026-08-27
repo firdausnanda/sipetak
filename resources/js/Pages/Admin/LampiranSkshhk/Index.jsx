@@ -1,9 +1,9 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Download, Edit, Trash2 } from 'lucide-react';
+import { Plus, Download, Edit, Trash2, TreePine, Database, Box } from 'lucide-react';
 import Swal from 'sweetalert2';
 
-export default function Index({ skshhks }) {
+export default function Index({ skshhks, summary = {} }) {
     const formatDate = (dateStr) => {
         if (!dateStr) return '-';
         const date = new Date(dateStr);
@@ -47,6 +47,57 @@ export default function Index({ skshhks }) {
                 >
                     <Plus className="w-5 h-5" /> Tambah SKSHHK
                 </Link>
+            </div>
+
+            {/* Stats/Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {/* Card Pohon */}
+                <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm relative overflow-hidden transition-all hover:shadow-md hover:border-[#10b981]/40 group">
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#10b981]/5 rounded-bl-[100px] -z-10 transition-transform group-hover:scale-110"></div>
+                    <div className="flex items-center justify-between relative z-10">
+                        <div className="flex flex-col">
+                            <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total Pohon</span>
+                            <span className="font-display text-[2rem] font-bold text-on-surface">
+                                {new Intl.NumberFormat('id-ID').format(summary.total_pohon || 0)} <span className="text-sm font-medium text-on-surface-variant">Pohon</span>
+                            </span>
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-[#10b981]/10 flex items-center justify-center text-[#10b981]">
+                            <TreePine className="w-6 h-6" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Card Batang */}
+                <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm relative overflow-hidden transition-all hover:shadow-md hover:border-[#f59e0b]/40 group">
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#f59e0b]/5 rounded-bl-[100px] -z-10 transition-transform group-hover:scale-110"></div>
+                    <div className="flex items-center justify-between relative z-10">
+                        <div className="flex flex-col">
+                            <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total Batang</span>
+                            <span className="font-display text-[2rem] font-bold text-on-surface">
+                                {new Intl.NumberFormat('id-ID').format(summary.total_batang || 0)} <span className="text-sm font-medium text-on-surface-variant">Batang</span>
+                            </span>
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-[#f59e0b]/10 flex items-center justify-center text-[#f59e0b]">
+                            <Database className="w-6 h-6" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Card Volume */}
+                <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm relative overflow-hidden transition-all hover:shadow-md hover:border-[#3b82f6]/40 group">
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#3b82f6]/5 rounded-bl-[100px] -z-10 transition-transform group-hover:scale-110"></div>
+                    <div className="flex items-center justify-between relative z-10">
+                        <div className="flex flex-col">
+                            <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total Volume</span>
+                            <span className="font-display text-[2rem] font-bold text-on-surface">
+                                {new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(summary.total_volume || 0)} <span className="text-sm font-medium text-on-surface-variant">m³</span>
+                            </span>
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-[#3b82f6]/10 flex items-center justify-center text-[#3b82f6]">
+                            <Box className="w-6 h-6" />
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden">
