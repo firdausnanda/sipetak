@@ -42,13 +42,15 @@ export default function AdminLayout({ children }) {
                         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
                         Laporan
                     </Link>
-                    <Link
-                        href={route('mobile.dashboard')}
-                        className={`flex items-center gap-3 px-4 py-3 ${route().current('mobile.dashboard') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                    >
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>monitoring</span>
-                        Monitoring Operasional
-                    </Link>
+                    {user.permissions?.includes('view_felling_progress') && (
+                        <Link
+                            href={route('mobile.dashboard')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('mobile.dashboard') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>monitoring</span>
+                            Monitoring Operasional
+                        </Link>
+                    )}
                     <Link
                         href={route('operations.index')}
                         className={`flex items-center gap-3 px-4 py-3 ${route().current('operations.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
@@ -57,22 +59,22 @@ export default function AdminLayout({ children }) {
                         Prestasi & Upah
                     </Link>
                     {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
-                        <>
-                            <Link
-                                href={route('admin.dokumen_angkutans.index')}
-                                className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dokumen_angkutans.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                            >
-                                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
-                                Dokumen Angkutan
-                            </Link>
-                            <Link
-                                href={route('admin.lampiran_skshhk.index')}
-                                className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.lampiran_skshhk.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                            >
-                                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>attachment</span>
-                                Lampiran SKSHHK
-                            </Link>
-                        </>
+                        <Link
+                            href={route('admin.dokumen_angkutans.index')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dokumen_angkutans.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
+                            Dokumen Angkutan
+                        </Link>
+                    )}
+                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis') || user.roles?.includes('admin_kelompok')) && (
+                        <Link
+                            href={route('admin.lampiran_skshhk.index')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.lampiran_skshhk.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>attachment</span>
+                            Lampiran SKSHHK
+                        </Link>
                     )}
                     
                     <div className="px-4 py-2 w-full">
@@ -208,13 +210,15 @@ export default function AdminLayout({ children }) {
                         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
                         Laporan
                     </Link>
-                    <Link
-                        href={route('mobile.dashboard')}
-                        className={`flex items-center gap-3 px-4 py-3 ${route().current('mobile.dashboard') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                    >
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>monitoring</span>
-                        Monitoring Operasional
-                    </Link>
+                    {user.permissions?.includes('view_felling_progress') && (
+                        <Link
+                            href={route('mobile.dashboard')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('mobile.dashboard') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>monitoring</span>
+                            Monitoring Operasional
+                        </Link>
+                    )}
                     <Link
                         href={route('operations.index')}
                         className={`flex items-center gap-3 px-4 py-3 ${route().current('operations.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
@@ -223,22 +227,22 @@ export default function AdminLayout({ children }) {
                         Prestasi & Upah
                     </Link>
                     {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
-                        <>
-                            <Link
-                                href={route('admin.dokumen_angkutans.index')}
-                                className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dokumen_angkutans.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                            >
-                                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
-                                Dokumen Angkutan
-                            </Link>
-                            <Link
-                                href={route('admin.lampiran_skshhk.index')}
-                                className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.lampiran_skshhk.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                            >
-                                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>attachment</span>
-                                Lampiran SKSHHK
-                            </Link>
-                        </>
+                        <Link
+                            href={route('admin.dokumen_angkutans.index')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dokumen_angkutans.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
+                            Dokumen Angkutan
+                        </Link>
+                    )}
+                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis') || user.roles?.includes('admin_kelompok')) && (
+                        <Link
+                            href={route('admin.lampiran_skshhk.index')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.lampiran_skshhk.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>attachment</span>
+                            Lampiran SKSHHK
+                        </Link>
                     )}
                     
                     <div className="px-4 py-2 w-full">

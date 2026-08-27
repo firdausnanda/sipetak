@@ -92,7 +92,9 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok|ganis'])->
 Route::middleware(['auth', 'verified', 'role:admin_cdk|ganis'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dokumen-angkutans/{id}/pdf', [DokumenAngkutanController::class, 'exportPdf'])->name('dokumen_angkutans.pdf');
     Route::resource('dokumen_angkutans', DokumenAngkutanController::class)->except(['destroy']);
-    
+});
+
+Route::middleware(['auth', 'verified', 'role:admin_cdk|ganis|admin_kelompok'])->prefix('admin')->name('admin.')->group(function () {
     // Lampiran SKSHHK
     Route::get('/lampiran-skshhk', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'index'])->name('lampiran_skshhk.index');
     Route::get('/lampiran-skshhk/create', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'create'])->name('lampiran_skshhk.create');

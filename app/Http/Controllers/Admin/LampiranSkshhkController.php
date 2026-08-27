@@ -148,9 +148,22 @@ class LampiranSkshhkController extends Controller
             'pohon_ids.*' => 'exists:pohons,id',
         ]);
 
+        $user = Auth::user();
+
         DB::beginTransaction();
         try {
             $skshhk = Skshhk::findOrFail($id);
+            
+            if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
+                $hasUnauthorized = Pohon::where('skshhk_id', $skshhk->id)
+                    ->whereHas('dokumenAngkutan', function($q) use ($user) {
+                        $q->where('kelompok_id', '!=', $user->kelompok_id);
+                    })->exists();
+                if ($hasUnauthorized) {
+                    abort(403);
+                }
+            }
+
             $skshhk->update([
                 'no_skshhk' => $request->no_skshhk,
                 'tanggal' => $request->tanggal,
@@ -175,9 +188,22 @@ class LampiranSkshhkController extends Controller
 
     public function destroy($id)
     {
+        $user = Auth::user();
+
         DB::beginTransaction();
         try {
             $skshhk = Skshhk::findOrFail($id);
+
+            if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
+                $hasUnauthorized = Pohon::where('skshhk_id', $skshhk->id)
+                    ->whereHas('dokumenAngkutan', function($q) use ($user) {
+                        $q->where('kelompok_id', '!=', $user->kelompok_id);
+                    })->exists();
+                if ($hasUnauthorized) {
+                    abort(403);
+                }
+            }
+
             Pohon::where('skshhk_id', $skshhk->id)->update(['skshhk_id' => null]);
             $skshhk->delete();
 
