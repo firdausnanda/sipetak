@@ -1,16 +1,65 @@
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Head, router, Link } from '@inertiajs/react';
+import { Head, router, Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import Select from 'react-select';
-import { Table as TableIcon, Users, Map, Search, ChevronsUpDown, ArrowUp, ArrowDown, PackageOpen, QrCode, TreePine, User, Calendar, SlidersHorizontal, X, Loader2 } from 'lucide-react';
+import { Table as TableIcon, Users, Map, Search, ChevronsUpDown, ArrowUp, ArrowDown, PackageOpen, QrCode, TreePine, User, Calendar, SlidersHorizontal, X, Loader2, Edit2 } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { format, parseISO } from 'date-fns';
 import axios from 'axios';
+import Modal from '@/Components/Modal';
+import TextInput from '@/Components/TextInput';
+import InputLabel from '@/Components/InputLabel';
+import InputError from '@/Components/InputError';
+import PrimaryButton from '@/Components/PrimaryButton';
+import SecondaryButton from '@/Components/SecondaryButton';
 
 export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
     const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
+    
+    // Edit Modal State
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingBatang, setEditingBatang] = useState(null);
+
+    const { data: editData, setData: setEditData, put: updateBatang, processing: isUpdating, errors: editErrors, reset: resetEdit, clearErrors: clearEditErrors } = useForm({
+        no_batang: '',
+        panjang: '',
+        diameter_ujung: '',
+        diameter_pangkal: '',
+        volume: '',
+        mutu: '',
+    });
+
+    const openEditModal = (batang) => {
+        setEditingBatang(batang);
+        setEditData({
+            no_batang: batang.no_batang,
+            panjang: batang.panjang,
+            diameter_ujung: batang.diameter_ujung,
+            diameter_pangkal: batang.diameter_pangkal,
+            volume: batang.volume,
+            mutu: batang.mutu,
+        });
+        setIsEditModalOpen(true);
+    };
+
+    const closeEditModal = () => {
+        setIsEditModalOpen(false);
+        setTimeout(() => {
+            resetEdit();
+            clearEditErrors();
+        }, 300);
+    };
+
+    const handleEditSubmit = (e) => {
+        e.preventDefault();
+        updateBatang(route('admin.dashboard.batang.update', editingBatang.id), {
+            preserveScroll: true,
+            onSuccess: () => closeEditModal(),
+        });
+    };
+
     const [filterData, setFilterData] = useState({
         kelompok_id: filters.kelompok_id || '',
         petak_id: filters.petak_id || '',
@@ -434,12 +483,14 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
                                     <div className="flex items-center justify-center">Mutu <SortIcon column="mutu" /></div>
                                 </th>
                                 <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Input Oleh</th>
+                                <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant text-center">Aksi</th>
                             </tr>
                         </thead>
+
                         <tbody className="font-body-md text-body-md text-[#1B4332] divide-y divide-outline-variant">
                             {batangs.data.length === 0 ? (
                                 <tr>
-                                    <td colSpan="9" className="py-12 text-center">
+                                    <td colSpan="10" className="py-12 text-center">
                                         <div className="flex flex-col items-center justify-center text-on-surface-variant">
                                             <PackageOpen className="w-12 h-12 mb-3 opacity-50" />
                                             <p className="font-bold text-lg mb-1">Tidak ada data ditemukan</p>
@@ -487,6 +538,15 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
                                                 {batang.creator?.name || 'Sistem'}
                                             </div>
                                         </td>
+                                        <td className="py-4 px-4 text-center whitespace-nowrap">
+                                            <button 
+                                                onClick={() => openEditModal(batang)}
+                                                className="text-primary hover:text-primary/80 transition-colors p-1"
+                                                title="Edit Batang"
+                                            >
+                                                <Edit2 className="w-[16px] h-[16px]" />
+                                            </button>
+                                        </td>
                                     </tr>
                                 ))
                             )}
@@ -516,6 +576,113 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
             </div>
             
             <div className="h-24 md:h-8"></div> {/* Bottom padding for scrolling */}
+            
+            {/* Edit Modal */}
+            <Modal show={isEditModalOpen} onClose={closeEditModal} maxWidth="2xl">
+                <form onSubmit={handleEditSubmit} className="p-6">
+                    <h2 className="text-lg font-bold text-gray-900 mb-6">
+                        Edit Data Batang {editingBatang ? `#${editingBatang.no_batang}` : ''}
+                    </h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <InputLabel htmlFor="no_batang" value="No. Batang" />
+                            <TextInput
+                                id="no_batang"
+                                type="text"
+                                className="mt-1 block w-full"
+                                value={editData.no_batang}
+                                onChange={(e) => setEditData('no_batang', e.target.value)}
+                                required
+                            />
+                            <InputError message={editErrors.no_batang} className="mt-2" />
+                        </div>
+                        
+                        <div>
+                            <InputLabel htmlFor="panjang" value="Panjang (m)" />
+                            <TextInput
+                                id="panjang"
+                                type="number"
+                                step="0.01"
+                                className="mt-1 block w-full"
+                                value={editData.panjang}
+                                onChange={(e) => setEditData('panjang', e.target.value)}
+                                required
+                            />
+                            <InputError message={editErrors.panjang} className="mt-2" />
+                        </div>
+
+                        <div>
+                            <InputLabel htmlFor="diameter_ujung" value="Diameter Ujung (cm)" />
+                            <TextInput
+                                id="diameter_ujung"
+                                type="number"
+                                step="0.01"
+                                className="mt-1 block w-full"
+                                value={editData.diameter_ujung}
+                                onChange={(e) => setEditData('diameter_ujung', e.target.value)}
+                                required
+                            />
+                            <InputError message={editErrors.diameter_ujung} className="mt-2" />
+                        </div>
+
+                        <div>
+                            <InputLabel htmlFor="diameter_pangkal" value="Diameter Pangkal (cm)" />
+                            <TextInput
+                                id="diameter_pangkal"
+                                type="number"
+                                step="0.01"
+                                className="mt-1 block w-full"
+                                value={editData.diameter_pangkal}
+                                onChange={(e) => setEditData('diameter_pangkal', e.target.value)}
+                                required
+                            />
+                            <InputError message={editErrors.diameter_pangkal} className="mt-2" />
+                        </div>
+
+                        <div>
+                            <InputLabel htmlFor="volume" value="Volume (m³)" />
+                            <TextInput
+                                id="volume"
+                                type="number"
+                                step="0.0001"
+                                className="mt-1 block w-full"
+                                value={editData.volume}
+                                onChange={(e) => setEditData('volume', e.target.value)}
+                                required
+                            />
+                            <InputError message={editErrors.volume} className="mt-2" />
+                        </div>
+
+                        <div>
+                            <InputLabel htmlFor="mutu" value="Mutu" />
+                            <select
+                                id="mutu"
+                                value={editData.mutu}
+                                onChange={(e) => setEditData('mutu', e.target.value)}
+                                className="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                required
+                            >
+                                <option value="">Pilih Mutu</option>
+                                <option value="P">P</option>
+                                <option value="D">D</option>
+                                <option value="T">T</option>
+                                <option value="M">M</option>
+                            </select>
+                            <InputError message={editErrors.mutu} className="mt-2" />
+                        </div>
+                    </div>
+
+                    <div className="mt-8 flex justify-end gap-3">
+                        <SecondaryButton onClick={closeEditModal} disabled={isUpdating}>
+                            Batal
+                        </SecondaryButton>
+                        <PrimaryButton disabled={isUpdating}>
+                            {isUpdating ? 'Menyimpan...' : 'Simpan Perubahan'}
+                        </PrimaryButton>
+                    </div>
+                </form>
+            </Modal>
         </AdminLayout>
     );
 }

@@ -64,6 +64,7 @@ Route::get('/history/{id}', [HistoryController::class, 'show'])
 Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok|ganis'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/export', [AdminDashboardController::class, 'export'])->name('dashboard.export');
+    Route::put('/dashboard/batangs/{id}', [AdminDashboardController::class, 'updateBatang'])->name('dashboard.batang.update');
     
     // User Management
     Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);

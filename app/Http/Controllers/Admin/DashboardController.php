@@ -139,4 +139,37 @@ class DashboardController extends Controller
         
         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\LaporanHasilTebanganExport($query), $filename);
     }
+
+    public function updateBatang(Request $request, $id)
+    {
+        $request->validate([
+            'no_batang' => 'required|string|max:255',
+            'panjang' => 'required|numeric',
+            'diameter_ujung' => 'required|numeric',
+            'diameter_pangkal' => 'required|numeric',
+            'volume' => 'required|numeric',
+            'mutu' => 'required|string|in:P,D,T,M',
+        ]);
+
+        $batang = Batang::findOrFail($id);
+
+        $currentUser = auth()->user();
+        if ($currentUser->hasRole('admin_kelompok')) {
+            $batang->load('pohon');
+            if ($batang->pohon->kelompok_id != $currentUser->kelompok_id) {
+                abort(403, 'Unauthorized action.');
+            }
+        }
+
+        $batang->update([
+            'no_batang' => $request->no_batang,
+            'panjang' => $request->panjang,
+            'diameter_ujung' => $request->diameter_ujung,
+            'diameter_pangkal' => $request->diameter_pangkal,
+            'volume' => $request->volume,
+            'mutu' => $request->mutu,
+        ]);
+
+        return redirect()->back()->with('success', 'Data batang berhasil diperbarui.');
+    }
 }
