@@ -21,7 +21,11 @@ class DokumenAngkutanController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $query = DokumenAngkutan::with(['kelompok', 'petaks'])->latest();
+        $query = DokumenAngkutan::with(['kelompok', 'petaks'])
+            ->withCount('pohons')
+            ->withCount('batangs')
+            ->withSum('batangs', 'volume')
+            ->latest();
         
         if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
             $query->where('kelompok_id', $user->kelompok_id);

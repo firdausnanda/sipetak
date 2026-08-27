@@ -56,7 +56,16 @@ export default function Index({ dokumens, auth }) {
                             ) : (
                                 dokumens.data.map((dokumen) => (
                                     <tr key={dokumen.id} className="even:bg-surface/30 odd:bg-surface-container-lowest hover:bg-surface-container transition-colors">
-                                        <td className="py-4 px-4 font-bold text-sm text-primary">{dokumen.no_dokumen}</td>
+                                        <td className="py-4 px-4">
+                                            <div className="font-bold text-[14px] text-primary mb-1.5">{dokumen.no_dokumen}</div>
+                                            <div className="flex items-center flex-wrap gap-2 text-[11.5px] text-on-surface-variant">
+                                                <span><span className="font-semibold text-on-surface">{dokumen.pohons_count || 0}</span> Pohon</span>
+                                                <span className="w-1 h-1 rounded-full bg-outline-variant"></span>
+                                                <span><span className="font-semibold text-on-surface">{dokumen.batangs_count || 0}</span> Batang</span>
+                                                <span className="w-1 h-1 rounded-full bg-outline-variant"></span>
+                                                <span><span className="font-bold text-[#FB8500]">{dokumen.batangs_sum_volume ? Number(dokumen.batangs_sum_volume).toFixed(2) : '0.00'}</span> m³</span>
+                                            </div>
+                                        </td>
                                         <td className="py-4 px-4 text-sm text-on-surface-variant">{formatDate(dokumen.tanggal)}</td>
                                         <td className="py-4 px-4 text-sm text-on-surface-variant">{dokumen.kelompok?.nama_kelompok || '-'}</td>
                                         <td className="py-4 px-4 text-sm text-on-surface-variant">
