@@ -128,23 +128,44 @@
         @endphp
 
         <!-- Page 1: Rekap -->
-        <div class="title" style="font-size: 18px; text-decoration: underline; margin-bottom: 20px; text-transform: uppercase;">
-            Lampiran
+        <table style="width: 100%; border: none; margin-bottom: 20px;">
+            <tr>
+                <td style="width: 90%; vertical-align: top; border: none;">
+                    <table style="width: 100%; border: none; font-size: 12px;">
+                        <tr><td style="border: none; padding: 2px; width: 100px;">Pemegang Izin</td><td style="border: none; padding: 2px;">: {{ $dokumen && $dokumen->kelompok ? $dokumen->kelompok->nama_kelompok : '' }}</td></tr>
+                        <tr><td style="border: none; padding: 2px;">Alamat</td><td style="border: none; padding: 2px;">: {{ $dokumen && $dokumen->kelompok ? $dokumen->kelompok->alamat : '' }}</td></tr>
+                        <tr><td style="border: none; padding: 2px;">Nomor Telepon</td><td style="border: none; padding: 2px;">: {{ $dokumen && $dokumen->kelompok ? $dokumen->kelompok->no_hp : '' }}</td></tr>
+                    </table>
+                </td>
+                <td style="width: 10%; vertical-align: top; border: none;"></td>
+            </tr>
+        </table>
+
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="font-weight: bold; font-size: 14px;">REKAP MUTU DAN VOLUME TOTAL</div>
+            <div style="font-weight: bold; font-size: 12px;">Nomor : {{ $skshhk->no_skshhk }}</div>
         </div>
 
+        <table style="width: 100%; border: none; margin-bottom: 10px;">
+            <tr>
+                <td style="width: 90%; vertical-align: bottom; border: none;">
+                    <table style="width: 100%; border: none; font-size: 12px;">
+                        <tr><td style="border: none; padding: 2px; width: 100px;">Provinsi</td><td style="border: none; padding: 2px;">: {{ $dokumen && $dokumen->kelompok ? $dokumen->kelompok->provinsi : '' }}</td></tr>
+                        <tr><td style="border: none; padding: 2px;">Kabupaten/Kota</td><td style="border: none; padding: 2px;">: {{ $dokumen && $dokumen->kelompok ? $dokumen->kelompok->kabupaten_kota : '' }}</td></tr>
+                    </table>
+                </td>
+                <td style="width: 10%; border: none;"></td>
+            </tr>
+        </table>
+
         <div style="width: 70%; margin: 0 auto;">
-            <div class="title" style="font-size: 18px;">REKAP MUTU DAN VOLUME TOTAL</div>
-            <div class="doc-no-rekap">
-                No. SKSHHK : {{ $skshhk->no_skshhk }} ( {{ \Carbon\Carbon::parse($skshhk->tanggal)->translatedFormat('d F Y') }} )
-            </div>
-            
             <table class="table-rekap" style="width: 100%;">
                 <thead>
                     <tr>
-                        <th style="width: 15%;">NO</th>
-                        <th style="width: 25%;">MUTU</th>
-                        <th style="width: 30%;">JUMLAH</th>
-                        <th style="width: 30%;">VOLUME</th>
+                        <th style="width: 10%;">NO</th>
+                        <th colspan="2" style="width: 40%;">MUTU</th>
+                        <th style="width: 25%;">JUMLAH</th>
+                        <th style="width: 25%;">VOLUME</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -153,20 +174,25 @@
                         $totalJumlah = 0;
                         $totalVolume = 0;
                     @endphp
-                    @foreach($rekap as $mutu => $mutuData)
+                    @foreach($rekap as $mutu => $subData)
+                        @foreach(['AI', 'AII', 'AIII'] as $index => $subKat)
                         <tr>
-                            <td class="text-center">{{ $i++ }}</td>
-                            <td class="text-center">{{ $mutu }}</td>
-                            <td class="text-center">{{ $mutuData['jumlah'] }}</td>
-                            <td class="text-right">{{ number_format($mutuData['volume'], 2, '.', '') }}</td>
+                            @if($index === 0)
+                            <td class="text-center" rowspan="3" style="vertical-align: middle;">{{ $i++ }}</td>
+                            <td class="text-center" rowspan="3" style="vertical-align: middle;">{{ $mutu }}</td>
+                            @endif
+                            <td class="text-center">{{ $subKat }}</td>
+                            <td class="text-center">{{ $subData[$subKat]['jumlah'] }}</td>
+                            <td class="text-right">{{ number_format($subData[$subKat]['volume'], 2, '.', '') }}</td>
                         </tr>
                         @php
-                            $totalJumlah += $mutuData['jumlah'];
-                            $totalVolume += $mutuData['volume'];
+                            $totalJumlah += $subData[$subKat]['jumlah'];
+                            $totalVolume += $subData[$subKat]['volume'];
                         @endphp
+                        @endforeach
                     @endforeach
                     <tr>
-                        <td colspan="2" class="text-right" style="font-weight: bold;">TOTAL</td>
+                        <td colspan="3" class="text-center" style="font-weight: bold;">Total</td>
                         <td class="text-center" style="font-weight: bold;">{{ $totalJumlah }}</td>
                         <td class="text-right" style="font-weight: bold;">{{ number_format($totalVolume, 2, '.', '') }}</td>
                     </tr>
@@ -177,14 +203,35 @@
         <div class="page-break"></div>
 
         <!-- Page 2+: Detail -->
-        <div class="title" style="font-size: 18px; text-decoration: underline; margin-bottom: 20px; text-transform: uppercase;">
-            Lampiran
+        <table style="width: 100%; border: none; margin-bottom: 5px;">
+            <tr>
+                <td style="width: 90%; vertical-align: top; border: none;">
+                    <table style="width: 100%; border: none; font-size: 12px;">
+                        <tr><td style="border: none; padding: 2px; width: 100px;">Pemegang Izin</td><td style="border: none; padding: 2px;">: {{ $dokumen && $dokumen->kelompok ? $dokumen->kelompok->nama_kelompok : '' }}</td></tr>
+                        <tr><td style="border: none; padding: 2px;">Alamat</td><td style="border: none; padding: 2px;">: {{ $dokumen && $dokumen->kelompok ? $dokumen->kelompok->alamat : '' }}</td></tr>
+                        <tr><td style="border: none; padding: 2px;">Nomor Telepon</td><td style="border: none; padding: 2px;">: {{ $dokumen && $dokumen->kelompok ? $dokumen->kelompok->no_hp : '' }}</td></tr>
+                    </table>
+                </td>
+                <td style="width: 10%; vertical-align: top; border: none;"></td>
+            </tr>
+        </table>
+
+        <div style="text-align: center; margin-bottom: 5px;">
+            <div style="font-weight: bold; font-size: 14px;">DAFTAR KAYU</div>
+            <div style="font-weight: bold; font-size: 12px;">Nomor : {{ $skshhk->no_skshhk }}</div>
         </div>
 
-        <div class="title" style="font-size: 16px;">DETAIL BARCODE</div>
-        <div class="doc-no">
-            No. SKSHHK : {{ $skshhk->no_skshhk }} ( {{ \Carbon\Carbon::parse($skshhk->tanggal)->translatedFormat('d F Y') }} )
-        </div>
+        <table style="width: 100%; border: none; margin-bottom: 0px;">
+            <tr>
+                <td style="width: 50%; vertical-align: bottom; border: none;">
+                    <table style="width: 100%; border: none; font-size: 12px; margin-bottom: 0px;">
+                        <tr><td style="border: none; padding: 2px; width: 100px;">Provinsi</td><td style="border: none; padding: 2px;">: {{ $dokumen && $dokumen->kelompok ? $dokumen->kelompok->provinsi : '' }}</td></tr>
+                        <tr><td style="border: none; padding: 2px;">Kabupaten/Kota</td><td style="border: none; padding: 2px;">: {{ $dokumen && $dokumen->kelompok ? $dokumen->kelompok->kabupaten_kota : '' }}</td></tr>
+                    </table>
+                </td>
+                <td style="width: 50%; border: none;"></td>
+            </tr>
+        </table>
         
         <table class="table-detail">
             <thead>
@@ -210,7 +257,31 @@
                         <td class="text-center">{{ $detail['mutu'] }}</td>
                     </tr>
                 @endforeach
+                <tr>
+                    <td colspan="5" class="text-center" style="font-weight: bold;">TOTAL</td>
+                    <td class="text-right" style="font-weight: bold;">{{ number_format(collect($details)->sum('volume'), 2, '.', '') }}</td>
+                    <td></td>
+                </tr>
             </tbody>
+        </table>
+
+        <table style="width: 100%; border: none; margin-top: 30px; page-break-inside: avoid;">
+            <tr>
+                <td style="width: 70%; border: none;"></td>
+                <td style="width: 30%; border: none; text-align: center;">
+                    <p style="margin: 0; padding: 0;">Penerbit,</p>
+                    <div style="margin: 10px 0; min-height: 70px;">
+                        @if ($dokumen && !empty($dokumen->penerbit->nama))
+                            <img src="data:image/svg+xml;base64,{!! base64_encode(
+                                \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(70)->margin(0)->generate('Dokumen No: ' . $skshhk->no_skshhk . ' | Penerbit: ' . ($dokumen->penerbit->nama ?? 'Ganis PKB')),
+                            ) !!}" alt="QR Tanda Tangan">
+                        @endif
+                    </div>
+                    <p style="margin: 0; padding: 0; font-weight: bold; text-decoration: underline;">
+                        {{ $dokumen->penerbit->nama ?? '(Ganis PKB)' }}</p>
+                    <p style="margin: 0; padding: 0;">No Reg: {{ $dokumen->penerbit->no_register ?? '....' }}</p>
+                </td>
+            </tr>
         </table>
 
         @if(!$loop->last)

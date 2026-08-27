@@ -241,12 +241,14 @@ class LampiranSkshhkController extends Controller
         $skshhkData = [];
         
         // Prepare Rekap
-        $rekap = [
-            'P' => ['jumlah' => 0, 'volume' => 0],
-            'D' => ['jumlah' => 0, 'volume' => 0],
-            'T' => ['jumlah' => 0, 'volume' => 0],
-            'M' => ['jumlah' => 0, 'volume' => 0],
-        ];
+        $rekap = [];
+        foreach(['P', 'D', 'T', 'M'] as $kat) {
+            $rekap[$kat] = [
+                'AI' => ['jumlah' => 0, 'volume' => 0],
+                'AII' => ['jumlah' => 0, 'volume' => 0],
+                'AIII' => ['jumlah' => 0, 'volume' => 0],
+            ];
+        }
 
         // Prepare Details
         $details = [];
@@ -254,10 +256,13 @@ class LampiranSkshhkController extends Controller
 
         foreach ($skshhk->pohons as $pohon) {
             foreach ($pohon->batangs as $batang) {
+                $avgDiameter = floor(($batang->diameter_pangkal + $batang->diameter_ujung) / 2);
+                $subKat = \App\Helpers\MutuHelper::getSubKategori($avgDiameter);
+
                 // Rekap
                 if (isset($rekap[$batang->mutu])) {
-                    $rekap[$batang->mutu]['jumlah']++;
-                    $rekap[$batang->mutu]['volume'] += $batang->volume;
+                    $rekap[$batang->mutu][$subKat]['jumlah']++;
+                    $rekap[$batang->mutu][$subKat]['volume'] += $batang->volume;
                 }
 
                 // Details
@@ -268,8 +273,6 @@ class LampiranSkshhkController extends Controller
                     $idBarcode = ($pohon->no_pohon ?? 'NON-BARCODE') . '.' . str_pad($batang->no_batang, 2, '0', STR_PAD_LEFT);
                 }
 
-                $avgDiameter = floor(($batang->diameter_pangkal + $batang->diameter_ujung) / 2);
-
                 $details[] = [
                     'no' => $no++,
                     'id_barcode' => $idBarcode,
@@ -277,7 +280,7 @@ class LampiranSkshhkController extends Controller
                     'panjang' => $batang->panjang,
                     'diameter' => $avgDiameter,
                     'volume' => $batang->volume,
-                    'mutu' => $batang->mutu,
+                    'mutu' => $batang->mutu . ' (' . $subKat . ')',
                 ];
             }
         }
