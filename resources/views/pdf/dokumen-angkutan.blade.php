@@ -137,7 +137,7 @@
                     <table style="width: 100%; border: none;">
                         <tr>
                             <td style="border: none; padding: 2px; width: 100px;">Nama</td>
-                            <td style="border: none; padding: 2px;">: KTH
+                            <td style="border: none; padding: 2px;">: 
                                 {{ $dokumen->kelompok->nama_kelompok ?? '....' }}</td>
                         </tr>
                         <tr>
