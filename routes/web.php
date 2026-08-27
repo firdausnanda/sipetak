@@ -53,9 +53,9 @@ Route::get('/api/volume/calculate', [PohonController::class, 'calculateVolumeApi
     ->middleware(['auth', 'verified'])
     ->name('api.volume.calculate');
 
-Route::get('/api/pohon/cleanup', [PohonController::class, 'cleanupDuplicates'])
-    ->middleware(['auth', 'verified'])
-    ->name('api.pohon.cleanup');
+// Route::get('/api/pohon/cleanup', [PohonController::class, 'cleanupDuplicates'])
+//     ->middleware(['auth', 'verified'])
+//     ->name('api.pohon.cleanup');
 
 Route::get('/history', [HistoryController::class, 'index'])
     ->middleware(['auth', 'verified', 'role:user'])
@@ -95,7 +95,7 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok|ganis'])->
     Route::get('tabel-volumes', [App\Http\Controllers\Admin\TabelVolumeController::class, 'index'])->name('tabel_volumes.index');
     Route::get('tabel-volumes/template', [App\Http\Controllers\Admin\TabelVolumeController::class, 'template'])->name('tabel_volumes.template');
     Route::post('tabel-volumes/import', [App\Http\Controllers\Admin\TabelVolumeController::class, 'import'])->name('tabel_volumes.import');
-    Route::get('tabel-volumes/generate-volume', [App\Http\Controllers\Admin\TabelVolumeController::class, 'generateVolume'])->name('tabel_volumes.generate_volume');
+    // Route::get('tabel-volumes/generate-volume', [App\Http\Controllers\Admin\TabelVolumeController::class, 'generateVolume'])->name('tabel_volumes.generate_volume');
     Route::delete('tabel-volumes/{id}', [App\Http\Controllers\Admin\TabelVolumeController::class, 'destroy'])->name('tabel_volumes.destroy');
 });
 
