@@ -256,7 +256,7 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
                     <table className="w-full text-left border-collapse min-w-[800px]">
                         <thead className="bg-surface-container-low border-b border-outline-variant sticky top-0 z-10">
                             <tr>
-                                <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Kelompok & Barcode</th>
+                                <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Kelompok, Pohon & Barcode</th>
                                 <th 
                                     className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant cursor-pointer hover:bg-surface-container transition-colors select-none"
                                     onClick={() => handleSort('tanggal')}
@@ -312,11 +312,14 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
                                     <tr key={batang.id} className="even:bg-surface/30 odd:bg-surface-container-lowest hover:bg-surface-container transition-colors">
                                         <td className="py-4 px-4 whitespace-nowrap">
                                             <div className="font-bold text-sm text-primary">{batang.pohon?.kelompok?.nama_kelompok || '-'}</div>
-                                            <div className="text-xs text-on-surface-variant font-data-mono mt-1 flex items-center gap-1">
+                                            <div className="text-xs text-on-surface-variant mt-1 mb-1">
+                                                No. Pohon: <span className="font-bold text-on-surface">{batang.pohon?.no_pohon || '-'}</span>
+                                            </div>
+                                            <div className="text-xs text-on-surface-variant font-data-mono flex items-center gap-1">
                                                 {batang.pohon?.tipe === 'barcode' ? (
                                                     <>
                                                         <QrCode className="w-[14px] h-[14px]" />
-                                                        <span className="truncate max-w-[120px]" title={batang.pohon?.no_barcode}>{batang.pohon?.no_barcode}</span>
+                                                        <span>{batang.pohon?.no_barcode}</span>
                                                     </>
                                                 ) : (
                                                     <span className="italic">- Manual -</span>
