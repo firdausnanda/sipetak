@@ -177,4 +177,33 @@ class PohonController extends Controller
             return redirect()->back()->withErrors(['error' => 'Gagal: ' . $e->getMessage()]);
         }
     }
+
+    public function calculateVolumeApi(Request $request)
+    {
+        $diameter_pangkal = floatval(str_replace(',', '.', $request->query('diameter_pangkal', 0)));
+        $diameter_ujung = floatval(str_replace(',', '.', $request->query('diameter_ujung', 0)));
+        $panjang = floatval(str_replace(',', '.', $request->query('panjang', 0)));
+        $jenis_pohon_id = $request->query('jenis_pohon_id');
+        $kelompok_id = $request->user()->kelompok_id;
+
+        $avgDiameter = floor(($diameter_pangkal + $diameter_ujung) / 2);
+        
+        $tabelVolume = \App\Models\TabelVolume::where('kelompok_id', $kelompok_id)
+            ->where('jenis_pohon_id', $jenis_pohon_id)
+            ->where('diameter', '<=', $avgDiameter)
+            ->where('panjang', '<=', $panjang)
+            ->orderBy('diameter', 'desc')
+            ->orderBy('panjang', 'desc')
+            ->first();
+
+        if ($tabelVolume) {
+            return response()->json([
+                'volume' => $tabelVolume->volume
+            ]);
+        }
+
+        return response()->json([
+            'volume' => 0
+        ]);
+    }
 }

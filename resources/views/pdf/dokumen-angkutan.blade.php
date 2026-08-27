@@ -350,6 +350,24 @@
         @endif
     @endforeach
 
+    <table style="width: 100%; margin-top: 30px; page-break-inside: avoid;">
+        <tr>
+            <td style="width: 70%; border: none;"></td>
+        </tr>
+        <tr>
+            <td style="border: none; padding: 2px; width: 100px;">Jenis Kayu</td>
+            <td style="border: none; padding: 2px;">: {{ $jenisKayu ?: '....' }}</td>
+        </tr>
+        <tr>
+            <td style="border: none; padding: 2px;">Jumlah Batang</td>
+            <td style="border: none; padding: 2px;">: {{ $jumlahBatang }}</td>
+        </tr>
+        <tr>
+            <td style="border: none; padding: 2px;">Total Volume</td>
+            <td style="border: none; padding: 2px;">: -</td>
+        </tr>
+    </table>
+
     <table style="width: 100%; border: none; margin-top: 30px; page-break-inside: avoid;">
         <tr>
             <td style="width: 70%; border: none;"></td>

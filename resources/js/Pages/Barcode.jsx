@@ -143,7 +143,21 @@ export default function Barcode() {
             console.error("Gagal memeriksa status pohon:", error);
         }
 
-        setData('batangs', [...data.batangs, tempBatang]);
+        let calculatedVolume = 0;
+        try {
+            const j = parseInt(localStorage.getItem('sesi_jenis_pohon'));
+            const volResp = await window.axios.get(route('api.volume.calculate', {
+                jenis_pohon_id: j,
+                panjang: tempBatang.panjang,
+                diameter_pangkal: tempBatang.diameter_pangkal,
+                diameter_ujung: tempBatang.diameter_ujung
+            }));
+            calculatedVolume = volResp.data.volume;
+        } catch (error) {
+            console.error("Gagal menghitung volume:", error);
+        }
+
+        setData('batangs', [...data.batangs, { ...tempBatang, volume: calculatedVolume }]);
         setTempBatang({
             no_batang: '',
             panjang: '',
@@ -370,7 +384,7 @@ export default function Barcode() {
                                     <div key={idx} className="border border-outline-variant rounded bg-surface p-3 flex justify-between items-center shadow-sm">
                                         <div className="flex flex-col">
                                             <span className="font-data-mono text-data-mono text-[#1B4332] font-bold">Batang {b.no_batang} <span className="text-surface-tint">| Mutu {b.mutu}</span></span>
-                                            <span className="font-label-caps text-label-caps text-[#6D4C41]">P: {b.panjang}cm | DP: {b.diameter_pangkal}cm | DU: {b.diameter_ujung}cm</span>
+                                            <span className="font-label-caps text-label-caps text-[#6D4C41]">P: {b.panjang}cm | DP: {b.diameter_pangkal}cm | DU: {b.diameter_ujung}cm | Vol: {b.volume} m³</span>
                                         </div>
                                         <button 
                                             type="button"
