@@ -31,8 +31,9 @@ export default function AdminLayout({ children }) {
         <div className="bg-background text-on-background font-body-md h-screen flex overflow-hidden w-full print:h-auto print:overflow-visible">
             {/* SideNavBar */}
             <aside className="w-64 flex-shrink-0 h-full flex flex-col p-base gap-base z-40 bg-surface-container border-r border-outline-variant hidden md:flex print:hidden">
-                <div className="px-base py-4 flex items-center justify-center border-b border-outline-variant pb-6 mb-2">
-                    <img src="/img/logo.webp" alt="SIPETAK" className="h-8 w-auto object-contain" />
+                <div className="px-base py-4 flex flex-col items-center justify-center border-b border-outline-variant pb-6 mb-2">
+                    <img src="/img/logo.webp" alt="SIPETAK" className="h-10 w-auto object-contain" />
+                    <p className="text-[10px] leading-tight text-on-surface-variant font-semibold text-center mt-2 uppercase tracking-wider">Sistem Informasi Penebangan<br/>dan Taksasi Kayu</p>
                 </div>
                 <nav className="flex-1 flex flex-col gap-2 overflow-y-auto">
                     <Link
@@ -201,8 +202,9 @@ export default function AdminLayout({ children }) {
             
             {/* Mobile Sidebar Content */}
             <aside className={`md:hidden fixed left-0 top-0 h-full flex flex-col p-base gap-base z-50 bg-surface-container border-r border-outline-variant w-64 transform transition-transform duration-300 ease-in-out ${showingNavigationDropdown ? 'translate-x-0' : '-translate-x-full'}`}>
-                <div className="px-base py-4 flex items-center justify-center border-b border-outline-variant pb-6 mb-2">
+                <div className="px-base py-4 flex flex-col items-center justify-center border-b border-outline-variant pb-6 mb-2">
                     <img src="/img/logo.webp" alt="SIPETAK" className="h-8 w-auto object-contain" />
+                    <p className="text-[10px] leading-tight text-on-surface-variant font-semibold text-center mt-2 uppercase tracking-wider">Sistem Informasi Penebangan<br/>dan Taksasi Kayu</p>
                 </div>
                 <nav className="flex-1 flex flex-col gap-2 overflow-y-auto">
                     <Link
