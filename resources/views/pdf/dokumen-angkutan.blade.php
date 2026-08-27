@@ -192,7 +192,7 @@
                         </tr>
                         <tr>
                             <td style="border: none; padding: 2px;">Total Volume</td>
-                            <td style="border: none; padding: 2px;">: -</td>
+                            <td style="border: none; padding: 2px;">: {{ number_format($totalVolume, 2) }} m³</td>
                         </tr>
                     </table>
                 </div>
