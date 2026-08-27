@@ -15,7 +15,7 @@ class TabelVolumeController extends Controller
 {
     public function index(Request $request)
     {
-        $query = TabelVolume::with(['jenisPohon']);
+        $query = TabelVolume::with(['jenisPohon.kelompok']);
         $currentUser = Auth::user();
 
         if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis'])) {
@@ -26,21 +26,29 @@ class TabelVolumeController extends Controller
             $query->where('jenis_pohon_id', $request->jenis_pohon_id);
         }
 
+        if ($request->filled('kelompok_id')) {
+            $query->where('kelompok_id', $request->kelompok_id);
+        }
+
         $tabelVolumes = $query->orderBy('jenis_pohon_id')
             ->orderBy('diameter')
             ->orderBy('panjang')
             ->paginate(15)
             ->withQueryString();
 
-        $jenisPohonsQuery = JenisPohon::orderBy('nama_jenis');
+        $jenisPohonsQuery = JenisPohon::with('kelompok')->orderBy('nama_jenis');
+        $kelompoksQuery = \App\Models\Kelompok::orderBy('nama_kelompok');
+        
         if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis'])) {
             $jenisPohonsQuery->where('kelompok_id', $currentUser->kelompok_id);
+            $kelompoksQuery->where('id', $currentUser->kelompok_id);
         }
 
         return Inertia::render('Admin/TabelVolume/Index', [
             'tabelVolumes' => $tabelVolumes,
             'jenisPohons' => $jenisPohonsQuery->get(),
-            'filters' => $request->only(['jenis_pohon_id'])
+            'kelompoks' => $kelompoksQuery->get(),
+            'filters' => $request->only(['jenis_pohon_id', 'kelompok_id'])
         ]);
     }
 

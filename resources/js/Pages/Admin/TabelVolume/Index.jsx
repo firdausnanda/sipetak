@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import { Search, Upload, Trash2, Download, FileText, ClipboardList, TreePine } from 'lucide-react';
+import { Search, Upload, Trash2, Download, FileText, ClipboardList, TreePine, Users } from 'lucide-react';
 import Modal from '@/Components/Modal';
 import InputLabel from '@/Components/InputLabel';
 import InputError from '@/Components/InputError';
@@ -38,14 +38,20 @@ const customSelectStyles = {
     indicatorSeparator: () => ({ display: 'none' })
 };
 
-export default function Index({ auth, tabelVolumes, jenisPohons = [], filters = {} }) {
+export default function Index({ auth, tabelVolumes, jenisPohons = [], kelompoks = [], filters = {} }) {
     const safeFilters = Array.isArray(filters) ? {} : filters;
     const [perPage, setPerPage] = useState(safeFilters.per_page || '15');
     const [jenisPohonFilter, setJenisPohonFilter] = useState(safeFilters.jenis_pohon_id || '');
+    const [kelompokFilter, setKelompokFilter] = useState(safeFilters.kelompok_id || '');
     
     const jenisPohonOptions = [
         { value: '', label: 'Semua Jenis' },
-        ...jenisPohons.map(j => ({ value: j.id, label: j.nama_jenis }))
+        ...jenisPohons.map(j => ({ value: j.id, label: j.kelompok ? `${j.nama_jenis} (${j.kelompok.nama_kelompok})` : j.nama_jenis }))
+    ];
+
+    const kelompokOptions = [
+        { value: '', label: 'Semua Kelompok' },
+        ...kelompoks.map(k => ({ value: k.id, label: k.nama_kelompok }))
     ];
 
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -61,6 +67,7 @@ export default function Index({ auth, tabelVolumes, jenisPohons = [], filters = 
         const payload = { 
             per_page: perPage,
             jenis_pohon_id: jenisPohonFilter,
+            kelompok_id: kelompokFilter,
             ...overrides 
         };
         router.get(route('admin.tabel_volumes.index'), payload, { preserveState: true, preserveScroll: true });
@@ -69,6 +76,7 @@ export default function Index({ auth, tabelVolumes, jenisPohons = [], filters = 
     const handleFilterChange = (field, value) => {
         if (field === 'per_page') setPerPage(value);
         if (field === 'jenis_pohon_id') setJenisPohonFilter(value);
+        if (field === 'kelompok_id') setKelompokFilter(value);
         
         applyFilters({ [field]: value });
     };
@@ -123,6 +131,20 @@ export default function Index({ auth, tabelVolumes, jenisPohons = [], filters = 
 
             {/* Filters Bar */}
             <div className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm mb-6 flex flex-col lg:flex-row gap-4 items-end relative z-20">
+                <div className="w-full lg:flex-1">
+                    <label className="block font-label-caps text-label-caps text-[#6D4C41] mb-2">Kelompok</label>
+                    <div className="relative">
+                        <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant z-10 pointer-events-none w-[18px] h-[18px]" />
+                        <Select
+                            value={kelompokOptions.find(o => o.value == kelompokFilter) || kelompokOptions[0]}
+                            onChange={(option) => handleFilterChange('kelompok_id', option ? option.value : '')}
+                            options={kelompokOptions}
+                            styles={customSelectStyles}
+                            placeholder="Semua Kelompok"
+                            isSearchable
+                        />
+                    </div>
+                </div>
                 <div className="w-full lg:flex-1">
                     <label className="block font-label-caps text-label-caps text-[#6D4C41] mb-2">Jenis Pohon</label>
                     <div className="relative">
@@ -185,7 +207,9 @@ export default function Index({ auth, tabelVolumes, jenisPohons = [], filters = 
                                 tabelVolumes.data.map((item, index) => (
                                     <tr key={item.id} className="even:bg-surface/30 odd:bg-surface-container-lowest hover:bg-surface-container transition-colors">
                                         <td className="py-4 px-4 text-sm text-on-surface-variant">{tabelVolumes.from + index}</td>
-                                        <td className="py-4 px-4 text-sm text-on-surface-variant">{item.jenis_pohon?.nama_jenis || '-'}</td>
+                                        <td className="py-4 px-4 text-sm text-on-surface-variant">
+                                            {item.jenis_pohon?.nama_jenis ? `${item.jenis_pohon.nama_jenis} ${item.jenis_pohon.kelompok?.nama_kelompok ? `(${item.jenis_pohon.kelompok.nama_kelompok})` : ''}` : '-'}
+                                        </td>
                                         <td className="py-4 px-4 font-bold text-sm text-primary">{item.diameter}</td>
                                         <td className="py-4 px-4 font-bold text-sm text-primary">{item.panjang}</td>
                                         <td className="py-4 px-4 text-sm font-mono text-on-surface-variant">{item.volume}</td>
