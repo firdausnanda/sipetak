@@ -82,13 +82,15 @@ export default function AdminLayout({ children }) {
                         <div className="h-[1px] w-full bg-outline-variant rounded-full"></div>
                     </div>
 
-                    <Link
-                        href={route('admin.users.index')}
-                        className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.users.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                    >
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
-                        Manajemen Pengguna
-                    </Link>
+                    {user.roles?.includes('admin_cdk') && (
+                        <Link
+                            href={route('admin.users.index')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.users.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
+                            Manajemen Pengguna
+                        </Link>
+                    )}
                     {user.roles?.includes('admin_cdk') && (
                         <div className="flex flex-col">
                             <button
@@ -253,13 +255,15 @@ export default function AdminLayout({ children }) {
                         <div className="h-[1px] w-full bg-outline-variant rounded-full"></div>
                     </div>
 
-                    <Link
-                        href={route('admin.users.index')}
-                        className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.users.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                    >
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
-                        Manajemen Pengguna
-                    </Link>
+                    {user.roles?.includes('admin_cdk') && (
+                        <Link
+                            href={route('admin.users.index')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.users.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
+                            Manajemen Pengguna
+                        </Link>
+                    )}
                     {user.roles?.includes('admin_cdk') && (
                         <div className="flex flex-col">
                             <button
