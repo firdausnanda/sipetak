@@ -51,16 +51,11 @@ export default function Login({ status, canResetPassword }) {
             {/* Right/Bottom Section: Login Form */}
             <div className="flex-1 flex flex-col justify-center items-center px-margin-mobile md:px-margin-desktop py-12 md:py-0 bg-surface md:min-h-screen">
                 {/* Mobile Header (Visible only on small screens) */}
-                <div className="w-full max-w-md mb-8 flex flex-col items-center md:hidden text-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-9 h-9 text-primary mb-2">
-                        <path d="M16 12L22 21H18V24H14V21H10L16 12Z" />
-                        <path d="M8 12L14 21H11V24H7V21H3L8 12Z" />
-                        <path d="M12 2L19 13H15V24H9V13H5L12 2Z" />
-                    </svg>
-                    <h1 className="font-display text-display text-primary font-bold">SIPETAK</h1>
-                    <p className="font-body-md text-body-md text-on-surface-variant mt-2">Sistem Informasi Penebangan dan Taksasi Kayu</p>
-                    <img src="/img/logo.webp" alt="SIPETAK" className="h-10 w-auto object-contain" />
-                    <p className="text-[10px] leading-tight text-on-surface-variant font-semibold text-center mt-2 uppercase tracking-wider">Sistem Informasi Penebangan<br/>dan Taksasi Kayu</p>
+                <div className="w-full max-w-md mb-8 flex flex-col items-center md:hidden text-center gap-3">
+                    <img src="/img/logo.webp" alt="SIPETAK" className="h-16 w-auto object-contain" />
+                    <p className="text-xs leading-relaxed text-on-surface-variant font-bold uppercase tracking-wider">
+                        Sistem Informasi Penebangan<br/>dan Taksasi Kayu
+                    </p>
                 </div>
                 
                 <div className="w-full max-w-md bg-surface-container-lowest p-8 rounded-xl border border-outline-variant shadow-sm">
