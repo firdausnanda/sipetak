@@ -179,12 +179,16 @@
                 <div class="form-data">
                     <table style="width: 100%; border: none;">
                         <tr>
-                            <td style="border: none; padding: 2px; width: 100px;">Jenis kayu</td>
+                            <td style="border: none; padding: 2px; width: 100px;">Jenis Kayu</td>
                             <td style="border: none; padding: 2px;">: {{ $jenisKayu ?: '....' }}</td>
                         </tr>
                         <tr>
-                            <td style="border: none; padding: 2px;">Jumlah batang</td>
+                            <td style="border: none; padding: 2px;">Jumlah Batang</td>
                             <td style="border: none; padding: 2px;">: {{ $jumlahBatang }}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: none; padding: 2px;">Total Volume</td>
+                            <td style="border: none; padding: 2px;">: -</td>
                         </tr>
                     </table>
                 </div>
