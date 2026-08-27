@@ -31,9 +31,25 @@ class DokumenAngkutanController extends Controller
             $query->where('kelompok_id', $user->kelompok_id);
         }
 
+        $summaryQuery = DokumenAngkutan::query();
+        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
+            $summaryQuery->where('kelompok_id', $user->kelompok_id);
+        }
+        $dokumenIds = $summaryQuery->pluck('id');
+        $pohonIds = Pohon::whereIn('dokumen_angkutan_id', $dokumenIds)->pluck('id');
+        
+        $totalPohon = $pohonIds->count();
+        $totalBatang = \App\Models\Batang::whereIn('pohon_id', $pohonIds)->count();
+        $totalVolume = \App\Models\Batang::whereIn('pohon_id', $pohonIds)->sum('volume');
+
         $dokumens = $query->paginate(10);
         return Inertia::render('Admin/DokumenAngkutan/Index', [
-            'dokumens' => $dokumens
+            'dokumens' => $dokumens,
+            'summary' => [
+                'total_pohon' => $totalPohon,
+                'total_batang' => $totalBatang,
+                'total_volume' => (float) $totalVolume,
+            ]
         ]);
     }
 
