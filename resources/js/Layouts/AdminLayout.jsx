@@ -88,63 +88,65 @@ export default function AdminLayout({ children }) {
                         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
                         Manajemen Pengguna
                     </Link>
-                    <div className="flex flex-col">
-                        <button
-                            onClick={() => setIsMasterOpen(!isMasterOpen)}
-                            className="flex items-center justify-between px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps w-full"
-                        >
-                            <div className="flex items-center gap-3">
-                                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dataset</span>
-                                Master
+                    {user.roles?.includes('admin_cdk') && (
+                        <div className="flex flex-col">
+                            <button
+                                onClick={() => setIsMasterOpen(!isMasterOpen)}
+                                className="flex items-center justify-between px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps w-full"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dataset</span>
+                                    Master
+                                </div>
+                                <span className={`material-symbols-outlined transition-transform duration-200 ${isMasterOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                            </button>
+                            
+                            <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ease-in-out ${isMasterOpen ? 'max-h-[32rem] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                                <Link
+                                    href={route('admin.pohons.index')}
+                                    className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.pohons.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                                >
+                                    <span className="material-symbols-outlined text-sm">park</span>
+                                    Pohon
+                                </Link>
+                                <Link
+                                    href={route('admin.petaks.index')}
+                                    className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.petaks.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                                >
+                                    <span className="material-symbols-outlined text-sm">map</span>
+                                    Petak
+                                </Link>
+                                <Link
+                                    href={route('admin.penerbits.index')}
+                                    className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.penerbits.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                                >
+                                    <span className="material-symbols-outlined text-sm">business</span>
+                                    Tenaga Teknis
+                                </Link>
+                                <Link
+                                    href={route('admin.tujuan_bongkars.index')}
+                                    className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.tujuan_bongkars.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                                >
+                                    <span className="material-symbols-outlined text-sm">location_on</span>
+                                    Tujuan Bongkar
+                                </Link>
+                                <Link
+                                    href={route('admin.rencana_tebangs.index')}
+                                    className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.rencana_tebangs.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                                >
+                                    <span className="material-symbols-outlined text-sm">list_alt</span>
+                                    Rencana Tebang
+                                </Link>
+                                <Link
+                                    href={route('admin.tabel_volumes.index')}
+                                    className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.tabel_volumes.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                                >
+                                    <span className="material-symbols-outlined text-sm">grid_on</span>
+                                    Tabel Volume
+                                </Link>
                             </div>
-                            <span className={`material-symbols-outlined transition-transform duration-200 ${isMasterOpen ? 'rotate-180' : ''}`}>expand_more</span>
-                        </button>
-                        
-                        <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ease-in-out ${isMasterOpen ? 'max-h-[32rem] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
-                            <Link
-                                href={route('admin.pohons.index')}
-                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.pohons.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                            >
-                                <span className="material-symbols-outlined text-sm">park</span>
-                                Pohon
-                            </Link>
-                            <Link
-                                href={route('admin.petaks.index')}
-                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.petaks.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                            >
-                                <span className="material-symbols-outlined text-sm">map</span>
-                                Petak
-                            </Link>
-                            <Link
-                                href={route('admin.penerbits.index')}
-                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.penerbits.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                            >
-                                <span className="material-symbols-outlined text-sm">business</span>
-                                Tenaga Teknis
-                            </Link>
-                            <Link
-                                href={route('admin.tujuan_bongkars.index')}
-                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.tujuan_bongkars.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                            >
-                                <span className="material-symbols-outlined text-sm">location_on</span>
-                                Tujuan Bongkar
-                            </Link>
-                            <Link
-                                href={route('admin.rencana_tebangs.index')}
-                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.rencana_tebangs.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                            >
-                                <span className="material-symbols-outlined text-sm">list_alt</span>
-                                Rencana Tebang
-                            </Link>
-                            <Link
-                                href={route('admin.tabel_volumes.index')}
-                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.tabel_volumes.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                            >
-                                <span className="material-symbols-outlined text-sm">grid_on</span>
-                                Tabel Volume
-                            </Link>
                         </div>
-                    </div>
+                    )}
                     {user.roles?.includes('admin_cdk') && (
                         <div className="flex flex-col">
                             <button
@@ -256,63 +258,65 @@ export default function AdminLayout({ children }) {
                         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
                         Manajemen Pengguna
                     </Link>
-                    <div className="flex flex-col">
-                        <button
-                            onClick={() => setIsMasterOpen(!isMasterOpen)}
-                            className="flex items-center justify-between px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps w-full"
-                        >
-                            <div className="flex items-center gap-3">
-                                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dataset</span>
-                                Master
+                    {user.roles?.includes('admin_cdk') && (
+                        <div className="flex flex-col">
+                            <button
+                                onClick={() => setIsMasterOpen(!isMasterOpen)}
+                                className="flex items-center justify-between px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps w-full"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dataset</span>
+                                    Master
+                                </div>
+                                <span className={`material-symbols-outlined transition-transform duration-200 ${isMasterOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                            </button>
+                            
+                            <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ease-in-out ${isMasterOpen ? 'max-h-[32rem] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                                <Link
+                                    href={route('admin.pohons.index')}
+                                    className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.pohons.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                                >
+                                    <span className="material-symbols-outlined text-sm">park</span>
+                                    Pohon
+                                </Link>
+                                <Link
+                                    href={route('admin.petaks.index')}
+                                    className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.petaks.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                                >
+                                    <span className="material-symbols-outlined text-sm">map</span>
+                                    Petak
+                                </Link>
+                                <Link
+                                    href={route('admin.penerbits.index')}
+                                    className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.penerbits.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                                >
+                                    <span className="material-symbols-outlined text-sm">business</span>
+                                    Tenaga Teknis
+                                </Link>
+                                <Link
+                                    href={route('admin.tujuan_bongkars.index')}
+                                    className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.tujuan_bongkars.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                                >
+                                    <span className="material-symbols-outlined text-sm">location_on</span>
+                                    Tujuan Bongkar
+                                </Link>
+                                <Link
+                                    href={route('admin.rencana_tebangs.index')}
+                                    className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.rencana_tebangs.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                                >
+                                    <span className="material-symbols-outlined text-sm">list_alt</span>
+                                    Rencana Tebang
+                                </Link>
+                                <Link
+                                    href={route('admin.tabel_volumes.index')}
+                                    className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.tabel_volumes.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                                >
+                                    <span className="material-symbols-outlined text-sm">grid_on</span>
+                                    Tabel Volume
+                                </Link>
                             </div>
-                            <span className={`material-symbols-outlined transition-transform duration-200 ${isMasterOpen ? 'rotate-180' : ''}`}>expand_more</span>
-                        </button>
-                        
-                        <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ease-in-out ${isMasterOpen ? 'max-h-[32rem] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
-                            <Link
-                                href={route('admin.pohons.index')}
-                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.pohons.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                            >
-                                <span className="material-symbols-outlined text-sm">park</span>
-                                Pohon
-                            </Link>
-                            <Link
-                                href={route('admin.petaks.index')}
-                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.petaks.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                            >
-                                <span className="material-symbols-outlined text-sm">map</span>
-                                Petak
-                            </Link>
-                            <Link
-                                href={route('admin.penerbits.index')}
-                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.penerbits.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                            >
-                                <span className="material-symbols-outlined text-sm">business</span>
-                                Tenaga Teknis
-                            </Link>
-                            <Link
-                                href={route('admin.tujuan_bongkars.index')}
-                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.tujuan_bongkars.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                            >
-                                <span className="material-symbols-outlined text-sm">location_on</span>
-                                Tujuan Bongkar
-                            </Link>
-                            <Link
-                                href={route('admin.rencana_tebangs.index')}
-                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.rencana_tebangs.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                            >
-                                <span className="material-symbols-outlined text-sm">list_alt</span>
-                                Rencana Tebang
-                            </Link>
-                            <Link
-                                href={route('admin.tabel_volumes.index')}
-                                className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.tabel_volumes.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                            >
-                                <span className="material-symbols-outlined text-sm">grid_on</span>
-                                Tabel Volume
-                            </Link>
                         </div>
-                    </div>
+                    )}
                     {user.roles?.includes('admin_cdk') && (
                         <div className="flex flex-col">
                             <button
