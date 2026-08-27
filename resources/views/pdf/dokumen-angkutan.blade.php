@@ -228,7 +228,7 @@
                                         <tr>
                                             <td style="border: none; padding: 0; text-align: left;">
                                                 <img src="data:image/svg+xml;base64,{!! base64_encode(
-                                                    QrCode::format('svg')->size(70)->margin(0)->generate('Dokumen No: ' . $dokumen->no_dokumen . ' | Penerbit: ' . ($dokumen->penerbit->nama ?? 'Ganis PKB')),
+                                                    QrCode::format('svg')->size(70)->margin(0)->generate(route('verifikasi.show', $dokumen->verification_token)),
                                                 ) !!}"
                                                     alt="QR Tanda Tangan">
                                             </td>
@@ -382,7 +382,7 @@
                 <div style="margin: 10px 0; min-height: 70px;">
                     @if (!empty($dokumen->penerbit->nama))
                         <img src="data:image/svg+xml;base64,{!! base64_encode(
-                            QrCode::format('svg')->size(70)->margin(0)->generate('Dokumen No: ' . $dokumen->no_dokumen . ' | Penerbit: ' . ($dokumen->penerbit->nama ?? 'Ganis PKB')),
+                            QrCode::format('svg')->size(70)->margin(0)->generate(route('verifikasi.show', $dokumen->verification_token)),
                         ) !!}" alt="QR Tanda Tangan">
                     @endif
                 </div>

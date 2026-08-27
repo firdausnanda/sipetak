@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Mattiverse\Userstamps\Traits\Userstamps;
+use Illuminate\Support\Str;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -12,6 +13,17 @@ class DokumenAngkutan extends Model
     use Userstamps, LogsActivity;
 
     protected $guarded = [];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->verification_token)) {
+                $model->verification_token = (string) Str::uuid();
+            }
+        });
+    }
 
     public function getActivitylogOptions(): LogOptions
     {

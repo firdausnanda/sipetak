@@ -273,7 +273,7 @@
                     <div style="margin: 10px 0; min-height: 70px;">
                         @if ($dokumen && !empty($dokumen->penerbit->nama))
                             <img src="data:image/svg+xml;base64,{!! base64_encode(
-                                \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(70)->margin(0)->generate('Dokumen No: ' . $skshhk->no_skshhk . ' | Penerbit: ' . ($dokumen->penerbit->nama ?? 'Ganis PKB')),
+                                \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(70)->margin(0)->generate(route('verifikasi.show', $skshhk->verification_token)),
                             ) !!}" alt="QR Tanda Tangan">
                         @endif
                     </div>
