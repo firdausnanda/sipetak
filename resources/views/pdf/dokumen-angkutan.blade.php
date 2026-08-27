@@ -350,19 +350,19 @@
         @endif
     @endforeach
 
-    <table style="width: 100%; margin-top: 30px; page-break-inside: avoid;">
+    <table style="width: 100%; margin-top: 15px; page-break-inside: avoid;">
         <tr>
-            <td style="width: 70%; border: none;"></td>
+            <td style="width: 70%; border: none; font-weight: bold">Jumlah Kayu</td>
         </tr>
-        <tr>
+        <tr style="font-size: 12px">
             <td style="border: none; padding: 2px; width: 100px;">Jenis Kayu</td>
             <td style="border: none; padding: 2px;">: {{ $jenisKayu ?: '....' }}</td>
         </tr>
-        <tr>
+        <tr style="font-size: 12px">
             <td style="border: none; padding: 2px;">Jumlah Batang</td>
             <td style="border: none; padding: 2px;">: {{ $jumlahBatang }}</td>
         </tr>
-        <tr>
+        <tr style="font-size: 12px">
             <td style="border: none; padding: 2px;">Total Volume</td>
             <td style="border: none; padding: 2px;">: -</td>
         </tr>
