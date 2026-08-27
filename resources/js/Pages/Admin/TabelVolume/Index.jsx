@@ -234,12 +234,12 @@ export default function Index({ auth, tabelVolumes, jenisPohons = [], kelompoks 
                         <span className="text-sm text-on-surface-variant font-body-md">
                             Menampilkan {tabelVolumes.from || 0}-{tabelVolumes.to || 0} dari {tabelVolumes.total} data
                         </span>
-                        <div className="flex gap-2 flex-wrap">
+                        <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                             {tabelVolumes.links.map((link, k) => (
                                 <Link
                                     key={k}
                                     href={link.url || '#'}
-                                    className={`p-2 border border-outline-variant rounded-lg min-h-[40px] min-w-[40px] flex items-center justify-center ${link.active ? 'bg-primary text-on-primary font-bold' : 'hover:bg-surface-container-low text-on-surface'} ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`px-3 py-2 border border-outline-variant rounded-lg min-h-[40px] min-w-[40px] flex items-center justify-center whitespace-nowrap flex-shrink-0 text-sm ${link.active ? 'bg-primary text-on-primary font-bold' : 'bg-surface-container-lowest hover:bg-surface-container-low text-on-surface'} ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                     preserveScroll
                                     preserveState

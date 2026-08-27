@@ -2,12 +2,13 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, router, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import Select from 'react-select';
-import { Table as TableIcon, Users, Map, Search, ChevronsUpDown, ArrowUp, ArrowDown, PackageOpen, QrCode, TreePine, User, Calendar } from 'lucide-react';
+import { Table as TableIcon, Users, Map, Search, ChevronsUpDown, ArrowUp, ArrowDown, PackageOpen, QrCode, TreePine, User, Calendar, SlidersHorizontal, X } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { format, parseISO } from 'date-fns';
 
 export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
+    const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
     const [filterData, setFilterData] = useState({
         kelompok_id: filters.kelompok_id || '',
         petak_id: filters.petak_id || '',
@@ -16,7 +17,11 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
         sort: filters.sort || 'created_at',
         direction: filters.direction || 'desc',
         search: filters.search || '',
-        per_page: filters.per_page || '10'
+        per_page: filters.per_page || '10',
+        no_barcode: filters.no_barcode || '',
+        no_pohon: filters.no_pohon || '',
+        no_batang: filters.no_batang || '',
+        mutu: filters.mutu || ''
     });
 
     const kelompokOptions = [
@@ -236,19 +241,111 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
                     </select>
                     <span className="text-sm font-body-md text-on-surface-variant">entri</span>
                 </div>
-                <div className="relative w-full sm:w-72 flex items-center">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-[18px] h-[18px]" />
-                    <input 
-                        type="text" 
-                        name="search"
-                        value={filterData.search}
-                        onChange={handleFilterChange}
-                        onKeyDown={(e) => { if (e.key === 'Enter') applyFilters(); }}
-                        placeholder="Cari jenis pohon, no petak, kelompok..."
-                        className="w-full pl-9 pr-4 py-2 border border-outline-variant rounded-lg focus:outline-none focus:border-primary text-sm bg-surface-container-lowest min-h-[40px]"
-                    />
+                <div className="flex w-full sm:w-auto items-center gap-2">
+                    <div className="relative w-full sm:w-72 flex items-center">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-[18px] h-[18px]" />
+                        <input 
+                            type="text" 
+                            name="search"
+                            value={filterData.search}
+                            onChange={handleFilterChange}
+                            onKeyDown={(e) => { if (e.key === 'Enter') applyFilters(); }}
+                            placeholder="Cari jenis pohon, no petak, kelompok..."
+                            className="w-full pl-9 pr-4 py-2 border border-outline-variant rounded-lg focus:outline-none focus:border-primary text-sm bg-surface-container-lowest min-h-[40px]"
+                        />
+                    </div>
+                    <button
+                        onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
+                        className={`p-2 rounded-lg border transition-colors min-h-[40px] flex items-center justify-center ${showAdvancedSearch ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-lowest border-outline-variant text-on-surface-variant hover:bg-surface-container'}`}
+                        title="Filter Lanjutan"
+                    >
+                        <SlidersHorizontal className="w-5 h-5" />
+                    </button>
                 </div>
             </div>
+
+            {/* Advanced Search Panel */}
+            {showAdvancedSearch && (
+                <div className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm mb-4 relative z-10">
+                    <div className="flex justify-between items-center mb-3">
+                        <h3 className="font-bold text-sm text-on-surface">Filter Lanjutan</h3>
+                        <button onClick={() => setShowAdvancedSearch(false)} className="text-on-surface-variant hover:text-on-surface">
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label className="block text-xs font-bold text-on-surface-variant mb-1">No. Barcode</label>
+                            <input 
+                                type="text" 
+                                name="no_barcode"
+                                value={filterData.no_barcode}
+                                onChange={handleFilterChange}
+                                onKeyDown={(e) => { if (e.key === 'Enter') applyFilters(); }}
+                                placeholder="Cari barcode..."
+                                className="w-full px-3 py-2 border border-outline-variant rounded-lg focus:outline-none focus:border-primary text-sm bg-surface-container-lowest"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-on-surface-variant mb-1">No. Pohon</label>
+                            <input 
+                                type="text" 
+                                name="no_pohon"
+                                value={filterData.no_pohon}
+                                onChange={handleFilterChange}
+                                onKeyDown={(e) => { if (e.key === 'Enter') applyFilters(); }}
+                                placeholder="Cari no. pohon..."
+                                className="w-full px-3 py-2 border border-outline-variant rounded-lg focus:outline-none focus:border-primary text-sm bg-surface-container-lowest"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-on-surface-variant mb-1">No. Batang</label>
+                            <input 
+                                type="text" 
+                                name="no_batang"
+                                value={filterData.no_batang}
+                                onChange={handleFilterChange}
+                                onKeyDown={(e) => { if (e.key === 'Enter') applyFilters(); }}
+                                placeholder="Cari no. batang..."
+                                className="w-full px-3 py-2 border border-outline-variant rounded-lg focus:outline-none focus:border-primary text-sm bg-surface-container-lowest"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-on-surface-variant mb-1">Mutu</label>
+                            <select
+                                name="mutu"
+                                value={filterData.mutu}
+                                onChange={handleFilterChange}
+                                className="w-full px-3 py-2 border border-outline-variant rounded-lg focus:outline-none focus:border-primary text-sm bg-surface-container-lowest"
+                            >
+                                <option value="">Semua Mutu</option>
+                                <option value="P">P</option>
+                                <option value="D">D</option>
+                                <option value="T">T</option>
+                                <option value="M">M</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="mt-4 flex justify-end gap-2">
+                        <button 
+                            onClick={() => {
+                                const resetFilters = { ...filterData, no_barcode: '', no_pohon: '', no_batang: '', mutu: '' };
+                                setFilterData(resetFilters);
+                                router.get(route('admin.dashboard'), resetFilters, { preserveState: true, preserveScroll: true });
+                            }}
+                            className="px-4 py-2 text-sm font-bold text-on-surface-variant bg-surface hover:bg-surface-container-high rounded-lg transition-colors border border-outline-variant"
+                        >
+                            Reset
+                        </button>
+                        <button 
+                            onClick={applyFilters}
+                            className="px-4 py-2 text-sm font-bold text-on-primary bg-primary hover:bg-opacity-90 rounded-lg transition-colors"
+                        >
+                            Terapkan Filter
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Data Table Card */}
             <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden">
@@ -359,12 +456,12 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
                         <span className="text-sm text-on-surface-variant font-body-md">
                             Menampilkan {batangs.from || 0}-{batangs.to || 0} dari {batangs.total} data
                         </span>
-                        <div className="flex gap-2 flex-wrap">
+                        <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                             {batangs.links.map((link, k) => (
                                 <Link
                                     key={k}
                                     href={link.url || '#'}
-                                    className={`p-2 border border-outline-variant rounded-lg min-h-[40px] min-w-[40px] flex items-center justify-center ${link.active ? 'bg-primary text-on-primary font-bold' : 'hover:bg-surface-container-low text-on-surface'} ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`px-3 py-2 border border-outline-variant rounded-lg min-h-[40px] min-w-[40px] flex items-center justify-center whitespace-nowrap flex-shrink-0 text-sm ${link.active ? 'bg-primary text-on-primary font-bold' : 'bg-surface-container-lowest hover:bg-surface-container-low text-on-surface'} ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                     preserveScroll
                                     preserveState

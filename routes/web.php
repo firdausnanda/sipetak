@@ -124,10 +124,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Daily Operations
     Route::get('/operations', [App\Http\Controllers\DailyOperationController::class, 'index'])->name('operations.index');
-    Route::get('/operations/create', [App\Http\Controllers\DailyOperationController::class, 'create'])->name('operations.create');
-    Route::get('/operations/fetch-results', [App\Http\Controllers\DailyOperationController::class, 'fetchResults'])->name('operations.fetch_results');
-    Route::post('/operations', [App\Http\Controllers\DailyOperationController::class, 'store'])->name('operations.store');
-    Route::put('/operations/{id}/mark-paid', [App\Http\Controllers\DailyOperationController::class, 'markAsPaid'])->name('operations.mark_paid');
+    Route::put('/operations/{date}/{user_id}/mark-paid', [App\Http\Controllers\DailyOperationController::class, 'markAsPaid'])->name('operations.mark_paid');
 });
 
 Route::middleware('auth')->group(function () {

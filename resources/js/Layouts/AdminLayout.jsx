@@ -57,7 +57,7 @@ export default function AdminLayout({ children }) {
                         className={`flex items-center gap-3 px-4 py-3 ${route().current('operations.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                     >
                         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>request_quote</span>
-                        Prestasi Kerja
+                        Prestasi Kerja Regu Tebang
                     </Link>
                     {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
                         <Link
@@ -228,7 +228,7 @@ export default function AdminLayout({ children }) {
                         className={`flex items-center gap-3 px-4 py-3 ${route().current('operations.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                     >
                         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>request_quote</span>
-                        Prestasi Kerja
+                        Prestasi Kerja Regu Tebang
                     </Link>
                     {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
                         <Link

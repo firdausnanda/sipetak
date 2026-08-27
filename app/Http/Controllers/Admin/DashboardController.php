@@ -61,6 +61,27 @@ class DashboardController extends Controller
             });
         }
 
+        // Advanced Search Filters
+        if ($request->filled('no_barcode')) {
+            $query->whereHas('pohon', function ($q) use ($request) {
+                $q->where('no_barcode', 'like', "%{$request->no_barcode}%");
+            });
+        }
+
+        if ($request->filled('no_pohon')) {
+            $query->whereHas('pohon', function ($q) use ($request) {
+                $q->where('no_pohon', 'like', "%{$request->no_pohon}%");
+            });
+        }
+
+        if ($request->filled('no_batang')) {
+            $query->where('no_batang', 'like', "%{$request->no_batang}%");
+        }
+
+        if ($request->filled('mutu')) {
+            $query->where('mutu', $request->mutu);
+        }
+
         return $query;
     }
 
@@ -102,7 +123,7 @@ class DashboardController extends Controller
             'batangs' => $batangs,
             'kelompoks' => $kelompoks,
             'petaks' => $petaks,
-            'filters' => $request->only(['kelompok_id', 'petak_id', 'start_date', 'end_date', 'sort', 'direction', 'search', 'per_page'])
+            'filters' => $request->only(['kelompok_id', 'petak_id', 'start_date', 'end_date', 'sort', 'direction', 'search', 'per_page', 'no_barcode', 'no_pohon', 'no_batang', 'mutu'])
         ]);
     }
 

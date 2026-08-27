@@ -39,7 +39,7 @@ export default function Index({ dokumens, summary = {}, auth }) {
                         <div className="flex flex-col">
                             <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total Pohon</span>
                             <span className="font-display text-[2rem] font-bold text-on-surface">
-                                {new Intl.NumberFormat('id-ID').format(summary.total_pohon || 0)} <span className="text-sm font-medium text-on-surface-variant">Pcs</span>
+                                {new Intl.NumberFormat('id-ID').format(summary.total_pohon || 0)} <span className="text-sm font-medium text-on-surface-variant">Pohon</span>
                             </span>
                         </div>
                         <div className="w-12 h-12 rounded-xl bg-[#10b981]/10 flex items-center justify-center text-[#10b981]">
@@ -55,7 +55,7 @@ export default function Index({ dokumens, summary = {}, auth }) {
                         <div className="flex flex-col">
                             <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total Batang</span>
                             <span className="font-display text-[2rem] font-bold text-on-surface">
-                                {new Intl.NumberFormat('id-ID').format(summary.total_batang || 0)} <span className="text-sm font-medium text-on-surface-variant">Pcs</span>
+                                {new Intl.NumberFormat('id-ID').format(summary.total_batang || 0)} <span className="text-sm font-medium text-on-surface-variant">Batang</span>
                             </span>
                         </div>
                         <div className="w-12 h-12 rounded-xl bg-[#f59e0b]/10 flex items-center justify-center text-[#f59e0b]">
@@ -141,12 +141,12 @@ export default function Index({ dokumens, summary = {}, auth }) {
                         <span className="text-sm text-on-surface-variant font-body-md">
                             Menampilkan {dokumens.from || 0}-{dokumens.to || 0} dari {dokumens.total} data
                         </span>
-                        <div className="flex gap-2 flex-wrap">
+                        <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                             {dokumens.links.map((link, k) => (
                                 <Link
                                     key={k}
                                     href={link.url || '#'}
-                                    className={`p-2 border border-outline-variant rounded-lg min-h-[40px] min-w-[40px] flex items-center justify-center ${link.active ? 'bg-primary text-on-primary font-bold' : 'hover:bg-surface-container-low text-on-surface'} ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`px-3 py-2 border border-outline-variant rounded-lg min-h-[40px] min-w-[40px] flex items-center justify-center whitespace-nowrap flex-shrink-0 text-sm ${link.active ? 'bg-primary text-on-primary font-bold' : 'bg-surface-container-lowest hover:bg-surface-container-low text-on-surface'} ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                     preserveScroll
                                     preserveState
