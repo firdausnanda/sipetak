@@ -171,8 +171,12 @@
                         ->unique()
                         ->join(', ');
                     $jumlahBatang = 0;
+                    $totalVolume = 0;
                     foreach ($dokumen->pohons as $p) {
                         $jumlahBatang += count($p->batangs);
+                        foreach ($p->batangs as $b) {
+                            $totalVolume += (float) $b->volume;
+                        }
                     }
                 @endphp
                 <div class="form-label">2. Kayu yang diangkut</div>
@@ -329,6 +333,7 @@
                         <th>Panjang (m)</th>
                         <th>D. Pangkal (cm)</th>
                         <th>D. Ujung (cm)</th>
+                        <th>Volume (m³)</th>
                         <th>Mutu</th>
                     </tr>
                 </thead>
@@ -339,6 +344,7 @@
                             <td>{{ $batang->panjang }}</td>
                             <td>{{ $batang->diameter_pangkal }}</td>
                             <td>{{ $batang->diameter_ujung }}</td>
+                            <td>{{ number_format($batang->volume, 2) }}</td>
                             <td>{{ $batang->mutu }}</td>
                         </tr>
                     @endforeach
@@ -364,7 +370,7 @@
         </tr>
         <tr style="font-size: 12px">
             <td style="border: none; padding: 2px;">Total Volume</td>
-            <td style="border: none; padding: 2px;">: -</td>
+            <td style="border: none; padding: 2px;">: {{ number_format($totalVolume, 2) }} m³</td>
         </tr>
     </table>
 
