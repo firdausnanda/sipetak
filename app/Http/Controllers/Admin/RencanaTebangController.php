@@ -19,6 +19,8 @@ class RencanaTebangController extends Controller
 
         if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis'])) {
             $query->where('kelompok_id', $currentUser->kelompok_id);
+        } elseif ($request->filled('kelompok_id')) {
+            $query->where('kelompok_id', $request->kelompok_id);
         }
 
         if ($request->filled('search')) {
@@ -51,7 +53,7 @@ class RencanaTebangController extends Controller
             'petaks' => $petaksQuery->get(),
             'jenisPohons' => $jenisPohonsQuery->get(),
             'kelompoks' => \App\Models\Kelompok::orderBy('nama_kelompok')->get(),
-            'filters' => $request->only(['search', 'petak_id', 'jenis_pohon_id'])
+            'filters' => $request->only(['search', 'petak_id', 'jenis_pohon_id', 'kelompok_id'])
         ]);
     }
 

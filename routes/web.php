@@ -15,6 +15,9 @@ use App\Http\Controllers\Admin\PenerbitController as AdminPenerbitController;
 use App\Http\Controllers\Admin\TujuanBongkarController as AdminTujuanBongkarController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\DokumenAngkutanController;
+use App\Http\Controllers\Admin\LampiranSkshhkController;
+use App\Http\Controllers\Admin\RencanaTebangController;
+use App\Http\Controllers\Admin\TabelVolumeController;
 use App\Http\Controllers\DashboardMonitoringController;
 use App\Http\Controllers\DailyOperationController;
 
@@ -41,7 +44,7 @@ Route::post('/manual', [PohonController::class, 'storeManual'])
     ->middleware(['auth', 'verified', 'role:user'])
     ->name('manual.store');
 
-Route::get('/api/rencana-tebang/check-barcode', [App\Http\Controllers\Admin\RencanaTebangController::class, 'checkBarcode'])
+Route::get('/api/rencana-tebang/check-barcode', [RencanaTebangController::class, 'checkBarcode'])
     ->middleware(['auth', 'verified'])
     ->name('api.rencana_tebang.check_barcode');
 
@@ -86,17 +89,17 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok|ganis'])->
     Route::resource('tujuan_bongkars', AdminTujuanBongkarController::class)->except(['create', 'show', 'edit']);
     
     // Rencana Tebang
-    Route::get('rencana-tebangs', [App\Http\Controllers\Admin\RencanaTebangController::class, 'index'])->name('rencana_tebangs.index');
-    Route::get('rencana-tebangs/template', [App\Http\Controllers\Admin\RencanaTebangController::class, 'template'])->name('rencana_tebangs.template');
-    Route::post('rencana-tebangs/import', [App\Http\Controllers\Admin\RencanaTebangController::class, 'import'])->name('rencana_tebangs.import');
-    Route::delete('rencana-tebangs/{id}', [App\Http\Controllers\Admin\RencanaTebangController::class, 'destroy'])->name('rencana_tebangs.destroy');
+    Route::get('rencana-tebangs', [RencanaTebangController::class, 'index'])->name('rencana_tebangs.index');
+    Route::get('rencana-tebangs/template', [RencanaTebangController::class, 'template'])->name('rencana_tebangs.template');
+    Route::post('rencana-tebangs/import', [RencanaTebangController::class, 'import'])->name('rencana_tebangs.import');
+    Route::delete('rencana-tebangs/{id}', [RencanaTebangController::class, 'destroy'])->name('rencana_tebangs.destroy');
 
     // Tabel Volume
-    Route::get('tabel-volumes', [App\Http\Controllers\Admin\TabelVolumeController::class, 'index'])->name('tabel_volumes.index');
-    Route::get('tabel-volumes/template', [App\Http\Controllers\Admin\TabelVolumeController::class, 'template'])->name('tabel_volumes.template');
-    Route::post('tabel-volumes/import', [App\Http\Controllers\Admin\TabelVolumeController::class, 'import'])->name('tabel_volumes.import');
-    // Route::get('tabel-volumes/generate-volume', [App\Http\Controllers\Admin\TabelVolumeController::class, 'generateVolume'])->name('tabel_volumes.generate_volume');
-    Route::delete('tabel-volumes/{id}', [App\Http\Controllers\Admin\TabelVolumeController::class, 'destroy'])->name('tabel_volumes.destroy');
+    Route::get('tabel-volumes', [TabelVolumeController::class, 'index'])->name('tabel_volumes.index');
+    Route::get('tabel-volumes/template', [TabelVolumeController::class, 'template'])->name('tabel_volumes.template');
+    Route::post('tabel-volumes/import', [TabelVolumeController::class, 'import'])->name('tabel_volumes.import');
+    // Route::get('tabel-volumes/generate-volume', [TabelVolumeController::class, 'generateVolume'])->name('tabel_volumes.generate_volume');
+    Route::delete('tabel-volumes/{id}', [TabelVolumeController::class, 'destroy'])->name('tabel_volumes.destroy');
 });
 
 Route::middleware(['auth', 'verified', 'role:admin_cdk|ganis'])->prefix('admin')->name('admin.')->group(function () {
@@ -106,14 +109,14 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|ganis'])->prefix('admin')
 
 Route::middleware(['auth', 'verified', 'role:admin_cdk|ganis|admin_kelompok'])->prefix('admin')->name('admin.')->group(function () {
     // Lampiran SKSHHK
-    Route::get('/lampiran-skshhk', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'index'])->name('lampiran_skshhk.index');
-    Route::get('/lampiran-skshhk/create', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'create'])->name('lampiran_skshhk.create');
-    Route::post('/lampiran-skshhk', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'store'])->name('lampiran_skshhk.store');
-    Route::get('/lampiran-skshhk/{id}/edit', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'edit'])->name('lampiran_skshhk.edit');
-    Route::put('/lampiran-skshhk/{id}', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'update'])->name('lampiran_skshhk.update');
-    Route::delete('/lampiran-skshhk/{id}', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'destroy'])->name('lampiran_skshhk.destroy');
-    Route::get('/lampiran-skshhk/{id}/export-pdf', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'exportPdf'])->name('lampiran_skshhk.export_pdf');
-    Route::get('/api/lampiran-skshhk/available-trees', [App\Http\Controllers\Admin\LampiranSkshhkController::class, 'getAvailableTrees'])->name('lampiran_skshhk.available_trees');
+    Route::get('/lampiran-skshhk', [LampiranSkshhkController::class, 'index'])->name('lampiran_skshhk.index');
+    Route::get('/lampiran-skshhk/create', [LampiranSkshhkController::class, 'create'])->name('lampiran_skshhk.create');
+    Route::post('/lampiran-skshhk', [LampiranSkshhkController::class, 'store'])->name('lampiran_skshhk.store');
+    Route::get('/lampiran-skshhk/{id}/edit', [LampiranSkshhkController::class, 'edit'])->name('lampiran_skshhk.edit');
+    Route::put('/lampiran-skshhk/{id}', [LampiranSkshhkController::class, 'update'])->name('lampiran_skshhk.update');
+    Route::delete('/lampiran-skshhk/{id}', [LampiranSkshhkController::class, 'destroy'])->name('lampiran_skshhk.destroy');
+    Route::get('/lampiran-skshhk/{id}/export-pdf', [LampiranSkshhkController::class, 'exportPdf'])->name('lampiran_skshhk.export_pdf');
+    Route::get('/api/lampiran-skshhk/available-trees', [LampiranSkshhkController::class, 'getAvailableTrees'])->name('lampiran_skshhk.available_trees');
 });
 
 Route::middleware(['auth', 'verified', 'role:admin_cdk'])->prefix('admin')->name('admin.')->group(function () {
@@ -128,8 +131,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('can:view_felling_progress');
     
     // Daily Operations
-    Route::get('/operations', [App\Http\Controllers\DailyOperationController::class, 'index'])->name('operations.index');
-    Route::put('/operations/{date}/{user_id}/mark-paid', [App\Http\Controllers\DailyOperationController::class, 'markAsPaid'])->name('operations.mark_paid');
+    Route::get('/operations', [DailyOperationController::class, 'index'])->name('operations.index');
+    Route::put('/operations/{date}/{user_id}/mark-paid', [DailyOperationController::class, 'markAsPaid'])->name('operations.mark_paid');
 });
 
 Route::middleware('auth')->group(function () {

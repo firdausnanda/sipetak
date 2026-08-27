@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import { Search, Upload, Trash2, Download, FileText, ClipboardList, Map as MapIcon, TreePine } from 'lucide-react';
+import { Search, Upload, Trash2, Download, FileText, ClipboardList, Map as MapIcon, TreePine, Users } from 'lucide-react';
 import Modal from '@/Components/Modal';
 import InputLabel from '@/Components/InputLabel';
 import InputError from '@/Components/InputError';
@@ -44,6 +44,7 @@ export default function Index({ auth, rencanaTebangs, petaks = [], jenisPohons =
     const [perPage, setPerPage] = useState(safeFilters.per_page || '10');
     const [petakFilter, setPetakFilter] = useState(safeFilters.petak_id || '');
     const [jenisPohonFilter, setJenisPohonFilter] = useState(safeFilters.jenis_pohon_id || '');
+    const [kelompokFilter, setKelompokFilter] = useState(safeFilters.kelompok_id || '');
     
     const petakOptions = [
         { value: '', label: 'Semua Petak' },
@@ -56,6 +57,10 @@ export default function Index({ auth, rencanaTebangs, petaks = [], jenisPohons =
     ];
 
     const kelompokOptions = kelompoks.map(k => ({ value: k.id, label: k.nama_kelompok }));
+    const kelompokFilterOptions = [
+        { value: '', label: 'Semua Kelompok' },
+        ...kelompoks.map(k => ({ value: k.id, label: k.nama_kelompok }))
+    ];
 
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -72,6 +77,7 @@ export default function Index({ auth, rencanaTebangs, petaks = [], jenisPohons =
             per_page: perPage,
             petak_id: petakFilter,
             jenis_pohon_id: jenisPohonFilter,
+            kelompok_id: kelompokFilter,
             ...overrides 
         };
         router.get(route('admin.rencana_tebangs.index'), payload, { preserveState: true, preserveScroll: true });
@@ -87,6 +93,7 @@ export default function Index({ auth, rencanaTebangs, petaks = [], jenisPohons =
         if (field === 'per_page') setPerPage(value);
         if (field === 'petak_id') setPetakFilter(value);
         if (field === 'jenis_pohon_id') setJenisPohonFilter(value);
+        if (field === 'kelompok_id') setKelompokFilter(value);
         
         applyFilters({ [field]: value });
     };
@@ -142,6 +149,22 @@ export default function Index({ auth, rencanaTebangs, petaks = [], jenisPohons =
 
             {/* Filters Bar */}
             <div className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm mb-6 flex flex-col lg:flex-row gap-4 items-end relative z-20">
+                {auth.user.roles?.includes('admin_cdk') && (
+                    <div className="w-full lg:flex-1">
+                        <label className="block font-label-caps text-label-caps text-[#6D4C41] mb-2">Kelompok</label>
+                        <div className="relative">
+                            <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant z-10 pointer-events-none w-[18px] h-[18px]" />
+                            <Select
+                                value={kelompokFilterOptions.find(o => o.value == kelompokFilter) || kelompokFilterOptions[0]}
+                                onChange={(option) => handleFilterChange('kelompok_id', option ? option.value : '')}
+                                options={kelompokFilterOptions}
+                                styles={customSelectStyles}
+                                placeholder="Semua Kelompok"
+                                isSearchable
+                            />
+                        </div>
+                    </div>
+                )}
                 <div className="w-full lg:flex-1">
                     <label className="block font-label-caps text-label-caps text-[#6D4C41] mb-2">Petak</label>
                     <div className="relative">
@@ -208,6 +231,7 @@ export default function Index({ auth, rencanaTebangs, petaks = [], jenisPohons =
                         <thead className="bg-surface-container-low border-b border-outline-variant sticky top-0 z-10">
                             <tr>
                                 <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">No</th>
+                                <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Kelompok</th>
                                 <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Petak</th>
                                 <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Jenis Pohon</th>
                                 <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">No Pohon</th>
@@ -218,7 +242,7 @@ export default function Index({ auth, rencanaTebangs, petaks = [], jenisPohons =
                         <tbody className="font-body-md text-body-md text-[#1B4332] divide-y divide-outline-variant">
                             {rencanaTebangs.data.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="py-12 text-center">
+                                    <td colSpan="7" className="py-12 text-center">
                                         <div className="flex flex-col items-center justify-center text-on-surface-variant">
                                             <FileText className="w-12 h-12 mb-3 opacity-50" />
                                             <p className="font-bold text-lg mb-1">Tidak ada data ditemukan</p>
@@ -229,6 +253,7 @@ export default function Index({ auth, rencanaTebangs, petaks = [], jenisPohons =
                                 rencanaTebangs.data.map((item, index) => (
                                     <tr key={item.id} className="even:bg-surface/30 odd:bg-surface-container-lowest hover:bg-surface-container transition-colors">
                                         <td className="py-4 px-4 text-sm text-on-surface-variant">{rencanaTebangs.from + index}</td>
+                                        <td className="py-4 px-4 text-sm text-on-surface-variant font-bold">{item.kelompok?.nama_kelompok || '-'}</td>
                                         <td className="py-4 px-4 text-sm text-on-surface-variant">{item.petak?.no_petak || '-'}</td>
                                         <td className="py-4 px-4 text-sm text-on-surface-variant">{item.jenis_pohon?.nama_jenis || '-'}</td>
                                         <td className="py-4 px-4 font-bold text-sm text-primary">{item.no_pohon}</td>
