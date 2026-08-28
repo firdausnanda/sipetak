@@ -3,8 +3,9 @@ import { Head, useForm, usePage, Link } from '@inertiajs/react';
 import Select from 'react-select';
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
+import { TrendingUp, TreePine, Activity } from 'lucide-react';
 
-export default function Dashboard({ petaks = [], jenisPohons = [], namaKelompok = 'User Dashboard' }) {
+export default function Dashboard({ petaks = [], jenisPohons = [], namaKelompok = 'User Dashboard', prestasiHariIni, prestasiBulanIni }) {
     const user = usePage().props.auth.user;
     const [signalStrength, setSignalStrength] = useState('good'); // 'good', 'fair', 'poor', 'offline'
     const [clickedAction, setClickedAction] = useState(null);
@@ -111,6 +112,68 @@ export default function Dashboard({ petaks = [], jenisPohons = [], namaKelompok 
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
                     </svg>
                     <span className="font-data-mono text-data-mono text-[#1B4332]">Sistem Online</span>
+                </div>
+            </div>
+
+            {/* Performance Stats Card */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
+                {/* Kinerja Hari Ini */}
+                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-sm p-4 md:p-6 text-white flex flex-col justify-between">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="font-headline-md text-lg font-bold flex items-center">
+                            <Activity className="w-5 h-5 mr-2" />
+                            Kinerja Hari Ini
+                        </h3>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                        <div className="bg-white/20 rounded-lg p-2">
+                            <div className="text-2xl font-bold">{prestasiHariIni?.jumlah_pohon || 0}</div>
+                            <div className="text-xs font-medium uppercase tracking-wider opacity-90 mt-1">Pohon</div>
+                        </div>
+                        <div className="bg-white/20 rounded-lg p-2">
+                            <div className="text-2xl font-bold">{prestasiHariIni?.jumlah_batang || 0}</div>
+                            <div className="text-xs font-medium uppercase tracking-wider opacity-90 mt-1">Batang</div>
+                        </div>
+                        <div className="bg-white/20 rounded-lg p-2">
+                            <div className="text-2xl font-bold">{Number(prestasiHariIni?.total_volume || 0).toFixed(2)}</div>
+                            <div className="text-xs font-medium uppercase tracking-wider opacity-90 mt-1">Vol (m³)</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Kinerja Bulan Ini */}
+                <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-sm p-4 md:p-6 text-white flex flex-col justify-between">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="font-headline-md text-lg font-bold flex items-center">
+                            <TrendingUp className="w-5 h-5 mr-2" />
+                            Kinerja Bulan Ini
+                        </h3>
+                        <Link 
+                            href={route('prestasi_kerja')} 
+                            className="text-xs font-medium bg-white/20 hover:bg-white/30 rounded px-2 py-1 transition-colors"
+                        >
+                            Lihat Detail &rarr;
+                        </Link>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                        <div className="bg-white/20 rounded-lg p-2">
+                            <div className="text-2xl font-bold">{prestasiBulanIni?.jumlah_pohon || 0}</div>
+                            <div className="text-xs font-medium uppercase tracking-wider opacity-90 mt-1">Pohon</div>
+                        </div>
+                        <div className="bg-white/20 rounded-lg p-2">
+                            <div className="text-2xl font-bold">{prestasiBulanIni?.jumlah_batang || 0}</div>
+                            <div className="text-xs font-medium uppercase tracking-wider opacity-90 mt-1">Batang</div>
+                        </div>
+                        <div className="bg-white/20 rounded-lg p-2">
+                            <div className="text-2xl font-bold">{Number(prestasiBulanIni?.total_volume || 0).toFixed(2)}</div>
+                            <div className="text-xs font-medium uppercase tracking-wider opacity-90 mt-1">Vol (m³)</div>
+                        </div>
+                    </div>
+                    {/* Status Upah */}
+                    <div className="mt-4 pt-3 border-t border-white/20 flex justify-between items-center text-sm">
+                        <span>Upah Lunas: <strong>{prestasiBulanIni?.pohon_lunas || 0} Phn</strong></span>
+                        <span>Pending: <strong>{prestasiBulanIni?.pohon_pending || 0} Phn</strong></span>
+                    </div>
                 </div>
             </div>
 

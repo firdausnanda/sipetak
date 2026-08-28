@@ -30,6 +30,10 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified', 'role:user'])
     ->name('dashboard');
 
+Route::get('/prestasi-kerja', [DashboardController::class, 'prestasiKerja'])
+    ->middleware(['auth', 'verified', 'role:user'])
+    ->name('prestasi_kerja');
+
 Route::get('/barcode', [PohonController::class, 'createBarcode'])
     ->middleware(['auth', 'verified', 'role:user'])
     ->name('barcode');
