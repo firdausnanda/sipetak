@@ -134,7 +134,7 @@
                     <table style="width: 100%; border: none; font-size: 12px;">
                         <tr><td style="border: none; padding: 2px; width: 100px;">Pemegang Izin</td><td style="border: none; padding: 2px;">: {{ $dokumen && $dokumen->kelompok ? $dokumen->kelompok->nama_kelompok : '' }}</td></tr>
                         <tr><td style="border: none; padding: 2px;">Alamat</td><td style="border: none; padding: 2px;">: {{ $dokumen && $dokumen->kelompok ? $dokumen->kelompok->alamat : '' }}</td></tr>
-                        <tr><td style="border: none; padding: 2px;">Nomor Telepon</td><td style="border: none; padding: 2px;">: {{ $dokumen && $dokumen->kelompok ? $dokumen->kelompok->no_hp : '' }}</td></tr>
+                        <tr><td style="border: none; padding: 2px;">Nomor Telepon</td><td style="border: none; padding: 2px;">: -</td></tr>
                     </table>
                 </td>
                 <td style="width: 10%; vertical-align: top; border: none;"></td>
@@ -209,7 +209,7 @@
                     <table style="width: 100%; border: none; font-size: 12px;">
                         <tr><td style="border: none; padding: 2px; width: 100px;">Pemegang Izin</td><td style="border: none; padding: 2px;">: {{ $dokumen && $dokumen->kelompok ? $dokumen->kelompok->nama_kelompok : '' }}</td></tr>
                         <tr><td style="border: none; padding: 2px;">Alamat</td><td style="border: none; padding: 2px;">: {{ $dokumen && $dokumen->kelompok ? $dokumen->kelompok->alamat : '' }}</td></tr>
-                        <tr><td style="border: none; padding: 2px;">Nomor Telepon</td><td style="border: none; padding: 2px;">: {{ $dokumen && $dokumen->kelompok ? $dokumen->kelompok->no_hp : '' }}</td></tr>
+                        <tr><td style="border: none; padding: 2px;">Nomor Telepon</td><td style="border: none; padding: 2px;">: -</td></tr>
                     </table>
                 </td>
                 <td style="width: 10%; vertical-align: top; border: none;"></td>
@@ -217,7 +217,7 @@
         </table>
 
         <div style="text-align: center; margin-bottom: 5px;">
-            <div style="font-weight: bold; font-size: 14px;">DAFTAR KAYU</div>
+            <div style="font-weight: bold; font-size: 14px;">DAFTAR KAYU BULAT</div>
             <div style="font-weight: bold; font-size: 12px;">Nomor : {{ $skshhk->no_skshhk }}</div>
         </div>
 
@@ -242,7 +242,7 @@
                     <th style="width: 15%;">Panjang(m)</th>
                     <th style="width: 10%;">Diameter(cm)</th>
                     <th style="width: 15%;">Volume(m3)</th>
-                    <th style="width: 10%;">Mutu</th>
+                    <th style="width: 10%;">Keterangan</th>
                 </tr>
             </thead>
             <tbody>
