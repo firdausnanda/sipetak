@@ -141,10 +141,18 @@
             </tr>
         </table>
 
-        <div style="text-align: center; margin-bottom: 20px;">
-            <div style="font-weight: bold; font-size: 14px;">REKAP MUTU DAN VOLUME TOTAL</div>
-            <div style="font-weight: bold; font-size: 12px;">Nomor : {{ $skshhk->no_skshhk }}</div>
-        </div>
+        <table style="width: 100%; border: none; margin-bottom: 20px;">
+            <tr>
+                <td colspan="5" style="text-align: center; font-weight: bold; font-size: 14px; border: none;">
+                    REKAP MUTU DAN VOLUME TOTAL
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5" style="text-align: center; font-weight: bold; font-size: 12px; border: none;">
+                    Nomor : {{ $skshhk->no_skshhk }}
+                </td>
+            </tr>
+        </table>
 
         <table style="width: 100%; border: none; margin-bottom: 10px;">
             <tr>
@@ -218,10 +226,18 @@
             </tr>
         </table>
 
-        <div style="text-align: center; margin-bottom: 5px;">
-            <div style="font-weight: bold; font-size: 14px;">DAFTAR KAYU BULAT</div>
-            <div style="font-weight: bold; font-size: 12px;">Nomor : {{ $skshhk->no_skshhk }}</div>
-        </div>
+        <table style="width: 100%; border: none; margin-bottom: 5px;">
+            <tr>
+                <td colspan="7" style="text-align: center; font-weight: bold; font-size: 14px; border: none;">
+                    DAFTAR KAYU BULAT
+                </td>
+            </tr>
+            <tr>
+                <td colspan="7" style="text-align: center; font-weight: bold; font-size: 12px; border: none;">
+                    Nomor : {{ $skshhk->no_skshhk }}
+                </td>
+            </tr>
+        </table>
 
         <table style="width: 100%; border: none; margin-bottom: 0px;">
             <tr>

@@ -5,9 +5,10 @@ namespace App\Exports;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use App\Models\DokumenAngkutan;
 
-class DokumenAngkutanExport implements FromView, WithColumnWidths
+class DokumenAngkutanExport implements FromView, WithColumnWidths, WithTitle
 {
     protected $dokumen;
 
@@ -35,5 +36,11 @@ class DokumenAngkutanExport implements FromView, WithColumnWidths
             'F' => 20,
             'G' => 20,
         ];
+    }
+
+    public function title(): string
+    {
+        $safeTitle = str_replace(['\\', '/', '?', '*', ':', '[', ']'], '_', $this->dokumen->no_dokumen);
+        return substr('Dok ' . $safeTitle, 0, 31);
     }
 }

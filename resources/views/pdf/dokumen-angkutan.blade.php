@@ -81,10 +81,9 @@
 
 <body>
 
-    <!-- Cover Page -->
-    <table class="header-table">
+    <table class="header-table" style="width: 100%; border: none;">
         <tr>
-            <td style="width: 120px; text-align: center;">
+            <td rowspan="3" style="width: 120px; text-align: center; vertical-align: middle; border: none;">
                 @php
                     $logoBase64 = null;
                     if ($dokumen->kelompok && $dokumen->kelompok->logo_url) {
@@ -116,14 +115,18 @@
                     </div>
                 @endif
             </td>
-            <td>
-                <div class="title">
-                    {{ strtoupper($dokumen->kelompok->nama_kelompok ?? '....................') }}<br>
-                    DOKUMEN ANGKUTAN KAYU
-                </div>
-                <div style="margin-top: 10px; text-align: center;">
-                    NOMOR DOKUMEN : {{ $dokumen->no_dokumen }}<br>
-                </div>
+            <td style="text-align: center; font-weight: bold; font-size: 16px; border: none;">
+                {{ strtoupper($dokumen->kelompok->nama_kelompok ?? '....................') }}
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: center; font-weight: bold; font-size: 16px; border: none;">
+                DOKUMEN ANGKUTAN KAYU
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: center; border: none;">
+                NOMOR DOKUMEN : {{ $dokumen->no_dokumen }}
             </td>
         </tr>
     </table>
@@ -315,19 +318,33 @@
     <div class="page-break"></div>
     @endif
 
-    <div style="text-align: center; margin-bottom: 20px;">
-        <h3>DAFTAR ANGKUTAN KAYU</h3>
-        <div style="margin-top: 10px; text-align: center;">
-            NOMOR DOKUMEN : {{ $dokumen->no_dokumen }}<br>
-            TANGGAL : {{ \Carbon\Carbon::parse($dokumen->tanggal)->locale('id')->translatedFormat('d F Y') }}
-        </div>
-    </div>
+    <table style="width: 100%; border: none; margin-bottom: 20px;">
+        <tr>
+            <td colspan="6" style="text-align: center; font-weight: bold; font-size: 16px; border: none;">
+                DAFTAR ANGKUTAN KAYU
+            </td>
+        </tr>
+        <tr>
+            <td colspan="6" style="text-align: center; border: none;">
+                NOMOR DOKUMEN : {{ $dokumen->no_dokumen }}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="6" style="text-align: center; border: none;">
+                TANGGAL : {{ \Carbon\Carbon::parse($dokumen->tanggal)->locale('id')->translatedFormat('d F Y') }}
+            </td>
+        </tr>
+    </table>
 
     @foreach ($dokumen->pohons as $index => $pohon)
-        <div style="margin-top: 20px; font-weight: bold;">
-            Pohon #{{ $index + 1 }} - Barcode: {{ $pohon->no_barcode ?? ($pohon->no_pohon ?? 'Tanpa Barcode') }}
-            (Jenis: {{ $pohon->jenisPohon->nama_jenis ?? '-' }}, Petak: {{ $pohon->petak->no_petak ?? '-' }})
-        </div>
+        <table style="width: 100%; border: none; margin-top: 20px;">
+            <tr>
+                <td colspan="6" style="font-weight: bold; border: none;">
+                    Pohon #{{ $index + 1 }} - Barcode: {{ $pohon->no_barcode ?? ($pohon->no_pohon ?? 'Tanpa Barcode') }}
+                    (Jenis: {{ $pohon->jenisPohon->nama_jenis ?? '-' }}, Petak: {{ $pohon->petak->no_petak ?? '-' }})
+                </td>
+            </tr>
+        </table>
 
         @if ($pohon->batangs->count() > 0)
             <table class="table-batang">
@@ -355,8 +372,11 @@
                 </tbody>
             </table>
         @else
-            <p style="text-align: center; font-style: italic; border: 1px solid #ccc; padding: 10px;">Belum ada data
-                ukuran batang.</p>
+            <table class="table-batang">
+                <tr>
+                    <td colspan="6" style="text-align: center; font-style: italic; border: 1px solid #ccc; padding: 10px;">Belum ada data ukuran batang.</td>
+                </tr>
+            </table>
         @endif
     @endforeach
 

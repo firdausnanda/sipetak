@@ -5,8 +5,9 @@ namespace App\Exports;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithTitle;
 
-class LampiranSkshhkExport implements FromView, WithColumnWidths
+class LampiranSkshhkExport implements FromView, WithColumnWidths, WithTitle
 {
     protected $dokumen;
     protected $skshhkData;
@@ -38,5 +39,15 @@ class LampiranSkshhkExport implements FromView, WithColumnWidths
             'G' => 25,
             'H' => 15,
         ];
+    }
+
+    public function title(): string
+    {
+        if (isset($this->skshhkData[0]['skshhk']->no_skshhk)) {
+            $no = $this->skshhkData[0]['skshhk']->no_skshhk;
+            $safeTitle = str_replace(['\\', '/', '?', '*', ':', '[', ']'], '_', $no);
+            return substr('Lampiran ' . $safeTitle, 0, 31);
+        }
+        return 'Lampiran SKSHHK';
     }
 }
