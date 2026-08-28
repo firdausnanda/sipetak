@@ -100,7 +100,7 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok|ganis'])->
     Route::get('tabel-volumes', [TabelVolumeController::class, 'index'])->name('tabel_volumes.index');
     Route::get('tabel-volumes/template', [TabelVolumeController::class, 'template'])->name('tabel_volumes.template');
     Route::post('tabel-volumes/import', [TabelVolumeController::class, 'import'])->name('tabel_volumes.import');
-    // Route::get('tabel-volumes/generate-volume', [TabelVolumeController::class, 'generateVolume'])->name('tabel_volumes.generate_volume');
+    Route::get('tabel-volumes/generate-volume', [TabelVolumeController::class, 'generateVolume'])->name('tabel_volumes.generate_volume');
     Route::delete('tabel-volumes/{id}', [TabelVolumeController::class, 'destroy'])->name('tabel_volumes.destroy');
 });
 
