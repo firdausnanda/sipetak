@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { CheckCircle, Clock } from 'lucide-react';
+import { CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -24,6 +24,15 @@ export default function PrestasiKerja({ operations, filters }) {
     return (
         <AuthenticatedLayout>
             <Head title="Detail Prestasi Kerja" />
+            <style>{`
+                @keyframes fastBlink {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0; }
+                }
+                .blinking-icon {
+                    animation: fastBlink 1s linear infinite;
+                }
+            `}</style>
 
             <div className="flex-grow pt-[calc(var(--spacing-touch-target)+var(--spacing-margin-mobile))] md:pt-0 px-margin-mobile md:px-0 flex flex-col max-w-[1200px] w-full mx-auto pb-8">
                 
@@ -78,8 +87,8 @@ export default function PrestasiKerja({ operations, filters }) {
                                                         </span>
                                                     )}
                                                     {op.pohon_pending > 0 && (
-                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-100 text-orange-700 rounded-full text-sm font-bold w-fit">
-                                                            <Clock className="w-4 h-4" /> Pending
+                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-100 text-red-700 rounded-full text-sm font-bold w-fit">
+                                                            <AlertTriangle className="w-4 h-4 text-red-600 blinking-icon" /> Belum Lunas
                                                         </span>
                                                     )}
                                                 </div>
@@ -131,8 +140,8 @@ export default function PrestasiKerja({ operations, filters }) {
                                             </span>
                                         )}
                                         {op.pohon_pending > 0 && (
-                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-100 text-orange-700 rounded-full text-sm font-bold shadow-sm">
-                                                <Clock className="w-4 h-4" /> Pending
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-100 text-red-700 rounded-full text-sm font-bold shadow-sm">
+                                                <AlertTriangle className="w-4 h-4 text-red-600 blinking-icon" /> Belum Lunas
                                             </span>
                                         )}
                                         {op.pohon_lunas == 0 && op.pohon_pending == 0 && (

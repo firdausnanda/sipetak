@@ -4,7 +4,7 @@ import { useState } from 'react';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import TextInput from '@/Components/TextInput';
-import { Plus, Search, CheckCircle, Clock, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { Plus, Search, CheckCircle, Clock, ChevronUp, ChevronDown, ChevronsUpDown, AlertTriangle } from 'lucide-react';
 import Swal from 'sweetalert2';
 import Select from 'react-select';
 import DatePicker, { registerLocale } from 'react-datepicker';
@@ -233,8 +233,17 @@ export default function Index({ auth, operations, filters, reguOptions }) {
                                                     <CheckCircle className="w-3 h-3" /> Lunas
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold">
-                                                    <Clock className="w-3 h-3" /> Pending
+                                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">
+                                                    <style>{`
+                                                        @keyframes fastBlink {
+                                                            0%, 100% { opacity: 1; }
+                                                            50% { opacity: 0; }
+                                                        }
+                                                        .blinking-icon {
+                                                            animation: fastBlink 1s linear infinite;
+                                                        }
+                                                    `}</style>
+                                                    <AlertTriangle className="w-3 h-3 text-red-600 blinking-icon" /> Belum Lunas
                                                 </span>
                                             )}
                                         </td>

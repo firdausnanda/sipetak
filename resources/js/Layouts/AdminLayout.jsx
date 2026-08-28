@@ -36,13 +36,15 @@ export default function AdminLayout({ children }) {
                     <p className="text-[10px] leading-tight text-on-surface-variant font-semibold text-center mt-2 uppercase tracking-wider">Sistem Informasi Penebangan<br/>dan Taksasi Kayu</p>
                 </div>
                 <nav className="flex-1 flex flex-col gap-2 overflow-y-auto">
-                    <Link
-                        href={route('admin.dashboard')}
-                        className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dashboard') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                    >
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
-                        Laporan
-                    </Link>
+                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('admin_kelompok')) && (
+                        <Link
+                            href={route('admin.dashboard')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dashboard') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
+                            Hasil Tebangan
+                        </Link>
+                    )}
                     {user.permissions?.includes('view_felling_progress') && (
                         <Link
                             href={route('mobile.dashboard')}
@@ -52,13 +54,15 @@ export default function AdminLayout({ children }) {
                             Monitoring Operasional
                         </Link>
                     )}
-                    <Link
-                        href={route('operations.index')}
-                        className={`flex items-center gap-3 px-4 py-3 ${route().current('operations.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
-                    >
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>request_quote</span>
-                        Prestasi Kerja Regu Tebang
-                    </Link>
+                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('admin_kelompok')) && (
+                        <Link
+                            href={route('operations.index')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('operations.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>request_quote</span>
+                            Prestasi Kerja Regu Tebang
+                        </Link>
+                    )}
                     {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
                         <Link
                             href={route('admin.dokumen_angkutans.index')}
@@ -68,7 +72,7 @@ export default function AdminLayout({ children }) {
                             Dokumen Angkutan
                         </Link>
                     )}
-                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis') || user.roles?.includes('admin_kelompok')) && (
+                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
                         <Link
                             href={route('admin.lampiran_skshhk.index')}
                             className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.lampiran_skshhk.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
@@ -214,7 +218,7 @@ export default function AdminLayout({ children }) {
                         className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dashboard') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                     >
                         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
-                        Laporan
+                        Hasil Tebangan
                     </Link>
                     {user.permissions?.includes('view_felling_progress') && (
                         <Link

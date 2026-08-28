@@ -48,12 +48,29 @@ class LampiranSkshhkController extends Controller
             $q->whereIn('skshhk_id', $allIds);
         })->sum('volume');
 
+        // Calculate Vorad (Sisa Pohon yang belum masuk SKSHHK)
+        $voradQuery = Pohon::whereNotNull('dokumen_angkutan_id')->whereNull('skshhk_id');
+        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
+            $voradQuery->whereHas('dokumenAngkutan', function($q) use ($user) {
+                $q->where('kelompok_id', $user->kelompok_id);
+            });
+        }
+        $voradPohonIds = $voradQuery->pluck('id');
+        $voradPohon = $voradPohonIds->count();
+        $voradBatang = \App\Models\Batang::whereIn('pohon_id', $voradPohonIds)->count();
+        $voradVolume = \App\Models\Batang::whereIn('pohon_id', $voradPohonIds)->sum('volume');
+
         return Inertia::render('Admin/LampiranSkshhk/Index', [
             'skshhks' => $skshhks,
             'summary' => [
                 'total_pohon' => $totalPohon,
                 'total_batang' => $totalBatang,
                 'total_volume' => $totalVolume
+            ],
+            'vorad' => [
+                'pohon' => $voradPohon,
+                'batang' => $voradBatang,
+                'volume' => (float) $voradVolume,
             ]
         ]);
     }

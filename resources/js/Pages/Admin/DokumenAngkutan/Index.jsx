@@ -2,7 +2,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link } from '@inertiajs/react';
 import { Plus, FileText, Calendar, Truck, Eye, TreePine, Database, Box } from 'lucide-react';
 
-export default function Index({ dokumens, summary = {}, auth }) {
+export default function Index({ dokumens, summary = {}, vorad = {}, auth }) {
     const formatDate = (dateString) => {
         if (!dateString) return '-';
         const date = new Date(dateString);
@@ -31,7 +31,7 @@ export default function Index({ dokumens, summary = {}, auth }) {
             </div>
 
             {/* Stats/Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
                 {/* Card Pohon */}
                 <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm relative overflow-hidden transition-all hover:shadow-md hover:border-[#10b981]/40 group">
                     <div className="absolute right-0 top-0 w-24 h-24 bg-[#10b981]/5 rounded-bl-[100px] -z-10 transition-transform group-hover:scale-110"></div>
@@ -77,6 +77,27 @@ export default function Index({ dokumens, summary = {}, auth }) {
                         <div className="w-12 h-12 rounded-xl bg-[#3b82f6]/10 flex items-center justify-center text-[#3b82f6]">
                             <Box className="w-6 h-6" />
                         </div>
+                    </div>
+                </div>
+
+                {/* Card Vorad */}
+                <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm relative overflow-hidden transition-all hover:shadow-md hover:border-[#ef4444]/40 group">
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#ef4444]/5 rounded-bl-[100px] -z-10 transition-transform group-hover:scale-110"></div>
+                    <div className="flex items-center justify-between relative z-10 mb-3">
+                        <div className="flex flex-col">
+                            <span className="font-label-lg text-label-lg text-[#ef4444] mb-1 font-bold">Vorad (Sisa Pohon)</span>
+                            <span className="font-display text-[2rem] font-bold text-on-surface">
+                                {new Intl.NumberFormat('id-ID').format(vorad.pohon || 0)} <span className="text-sm font-medium text-on-surface-variant">Pohon</span>
+                            </span>
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-[#ef4444]/10 flex items-center justify-center text-[#ef4444]">
+                            <TreePine className="w-6 h-6" />
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs font-bold text-on-surface-variant pt-2 border-t border-outline-variant/50">
+                        <span>{new Intl.NumberFormat('id-ID').format(vorad.batang || 0)} Btg</span>
+                        <span className="w-1 h-1 rounded-full bg-outline-variant"></span>
+                        <span>{new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(vorad.volume || 0)} m³</span>
                     </div>
                 </div>
             </div>

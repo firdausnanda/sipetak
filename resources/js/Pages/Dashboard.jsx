@@ -172,14 +172,14 @@ export default function Dashboard({ petaks = [], jenisPohons = [], namaKelompok 
                     {/* Status Upah */}
                     <div className="mt-4 pt-3 border-t border-white/20 flex justify-between items-center text-sm">
                         <span>Upah Lunas: <strong>{prestasiBulanIni?.pohon_lunas || 0} Phn</strong></span>
-                        <span>Pending: <strong>{prestasiBulanIni?.pohon_pending || 0} Phn</strong></span>
+                        <span>Belum Lunas: <strong>{prestasiBulanIni?.pohon_pending || 0} Phn</strong></span>
                     </div>
                 </div>
             </div>
 
             {/* Input Section Card */}
             <div className="bg-surface rounded-xl border border-outline-variant shadow-sm p-4 md:p-6 mb-6">
-                <h2 className="font-headline-md text-headline-md text-secondary mb-4 border-b border-outline-variant pb-2">Parameter Sesi</h2>
+                <h2 className="font-headline-md text-headline-md text-secondary mb-4 border-b border-outline-variant pb-2">Start</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     {/* Nomor Petak Input */}
                     <div className="flex flex-col space-y-2">
@@ -235,12 +235,12 @@ export default function Dashboard({ petaks = [], jenisPohons = [], namaKelompok 
             </div>
 
             {/* Action Buttons Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mt-8">
+            <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6 mt-8 w-full">
                 {/* Barcode Logging Action */}
                 <Link 
                     href={route('barcode')} 
                     onClick={(e) => handleActionClick(e, 'barcode')}
-                    className={`h-32 flex flex-col items-center justify-center text-white rounded-xl shadow-md transition-transform focus:outline-none focus:ring-2 focus:ring-[#FB8500] focus:ring-offset-2 ${clickedAction === 'barcode' ? 'bg-[#E07700] opacity-75 pointer-events-none' : 'bg-[#FB8500] hover:bg-[#E07700] active:scale-95'}`}
+                    className={`flex-1 w-full h-32 flex flex-col items-center justify-center text-white rounded-xl shadow-md transition-transform focus:outline-none focus:ring-2 focus:ring-[#FB8500] focus:ring-offset-2 ${clickedAction === 'barcode' ? 'bg-[#E07700] opacity-75 pointer-events-none' : 'bg-[#FB8500] hover:bg-[#E07700] active:scale-95'}`}
                 >
                     {clickedAction === 'barcode' ? (
                         <svg className="animate-spin w-10 h-10 mb-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -257,11 +257,18 @@ export default function Dashboard({ petaks = [], jenisPohons = [], namaKelompok 
                         {clickedAction === 'barcode' ? 'Memproses...' : 'Pohon Berbarcode'}
                     </span>
                 </Link>
+
+                <div className="flex items-center justify-center w-full sm:w-auto py-2 sm:py-0">
+                    <div className="h-[1px] w-full sm:w-[1px] sm:h-12 bg-outline-variant"></div>
+                    <span className="px-4 text-on-surface-variant font-label-caps text-xs tracking-widest text-center whitespace-nowrap">ATAU</span>
+                    <div className="h-[1px] w-full sm:w-[1px] sm:h-12 bg-outline-variant"></div>
+                </div>
+
                 {/* Manual Logging Action */}
                 <Link 
                     href={route('manual')} 
                     onClick={(e) => handleActionClick(e, 'manual')}
-                    className={`h-32 flex flex-col items-center justify-center bg-surface border-2 text-[#FB8500] rounded-xl shadow-sm transition-transform focus:outline-none focus:ring-2 focus:ring-[#FB8500] focus:ring-offset-2 ${clickedAction === 'manual' ? 'border-[#E07700] text-[#E07700] opacity-75 pointer-events-none' : 'border-[#FB8500] hover:bg-surface-container-low active:scale-95'}`}
+                    className={`flex-1 w-full h-32 flex flex-col items-center justify-center bg-surface border-2 text-[#FB8500] rounded-xl shadow-sm transition-transform focus:outline-none focus:ring-2 focus:ring-[#FB8500] focus:ring-offset-2 ${clickedAction === 'manual' ? 'border-[#E07700] text-[#E07700] opacity-75 pointer-events-none' : 'border-[#FB8500] hover:bg-surface-container-low active:scale-95'}`}
                 >
                     {clickedAction === 'manual' ? (
                         <svg className="animate-spin w-10 h-10 mb-2 text-[#E07700]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

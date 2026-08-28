@@ -42,6 +42,16 @@ class DokumenAngkutanController extends Controller
         $totalBatang = \App\Models\Batang::whereIn('pohon_id', $pohonIds)->count();
         $totalVolume = \App\Models\Batang::whereIn('pohon_id', $pohonIds)->sum('volume');
 
+        // Calculate Vorad (Sisa Pohon yang belum masuk dokumen angkutan)
+        $voradQuery = Pohon::whereNull('dokumen_angkutan_id');
+        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
+            $voradQuery->where('kelompok_id', $user->kelompok_id);
+        }
+        $voradPohonIds = $voradQuery->pluck('id');
+        $voradPohon = $voradPohonIds->count();
+        $voradBatang = \App\Models\Batang::whereIn('pohon_id', $voradPohonIds)->count();
+        $voradVolume = \App\Models\Batang::whereIn('pohon_id', $voradPohonIds)->sum('volume');
+
         $dokumens = $query->paginate(10);
         return Inertia::render('Admin/DokumenAngkutan/Index', [
             'dokumens' => $dokumens,
@@ -49,6 +59,11 @@ class DokumenAngkutanController extends Controller
                 'total_pohon' => $totalPohon,
                 'total_batang' => $totalBatang,
                 'total_volume' => (float) $totalVolume,
+            ],
+            'vorad' => [
+                'pohon' => $voradPohon,
+                'batang' => $voradBatang,
+                'volume' => (float) $voradVolume,
             ]
         ]);
     }
