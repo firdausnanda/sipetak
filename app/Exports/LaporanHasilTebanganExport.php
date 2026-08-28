@@ -50,7 +50,7 @@ class LaporanHasilTebanganExport implements FromCollection, WithHeadings, WithMa
             $batang->pohon->tipe === 'barcode' ? 'Barcode' : 'Manual',
             $batang->pohon->no_pohon ?? '-',
             $batang->pohon->no_barcode ?? '-',
-            $batang->created_at ? \Carbon\Carbon::parse($batang->created_at)->translatedFormat('d F Y H:i:s') : '-',
+            $batang->pohon && $batang->pohon->tanggal ? \Carbon\Carbon::parse($batang->pohon->tanggal)->translatedFormat('d F Y') : '-',
             $batang->pohon->petak->no_petak ?? '-',
             $batang->pohon->jenisPohon->nama_jenis ?? '-',
             $batang->no_batang,
