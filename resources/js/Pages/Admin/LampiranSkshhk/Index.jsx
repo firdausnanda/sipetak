@@ -1,6 +1,6 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Download, Edit, Trash2, TreePine, Database, Box } from 'lucide-react';
+import { Plus, Download, Edit, Trash2, TreePine, Database, Box, FileSpreadsheet } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 export default function Index({ skshhks, summary = {} }) {
@@ -129,10 +129,18 @@ export default function Index({ skshhks, summary = {} }) {
                                         <td className="py-4 px-4 text-right">
                                             <div className="flex justify-end gap-2">
                                                 <a 
-                                                    href={route('admin.lampiran_skshhk.export_pdf', skshhk.id)} 
+                                                    href={route('admin.lampiran_skshhk.export_excel', skshhk.id)} 
                                                     target="_blank"
                                                     rel="noreferrer"
                                                     className="inline-flex items-center gap-1 bg-[#10b981] text-white hover:bg-opacity-90 px-3 py-1.5 rounded-lg transition-colors font-bold text-xs"
+                                                >
+                                                    <FileSpreadsheet className="w-4 h-4" /> Export Excel
+                                                </a>
+                                                <a 
+                                                    href={route('admin.lampiran_skshhk.export_pdf', skshhk.id)} 
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="inline-flex items-center gap-1 bg-primary text-on-primary hover:bg-opacity-90 px-3 py-1.5 rounded-lg transition-colors font-bold text-xs"
                                                 >
                                                     <Download className="w-4 h-4" /> Export PDF
                                                 </a>

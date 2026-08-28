@@ -107,7 +107,7 @@
                     }
                 @endphp
 
-                @if ($logoBase64)
+                @if (!empty($logoBase64) && (!isset($isExcel) || !$isExcel))
                     <img src="{{ $logoBase64 }}" style="max-width: 100px; max-height: 100px; width: auto; height: auto;"
                         alt="Logo KTH">
                 @else
@@ -227,10 +227,12 @@
                                     <table style="border: none; width: 100%;">
                                         <tr>
                                             <td style="border: none; padding: 0; text-align: left;">
+                                                @if((!isset($isExcel) || !$isExcel) && $dokumen->verification_token)
                                                 <img src="data:image/svg+xml;base64,{!! base64_encode(
                                                     QrCode::format('svg')->size(70)->margin(0)->generate(route('verifikasi.show', $dokumen->verification_token)),
                                                 ) !!}"
                                                     alt="QR Tanda Tangan">
+                                                @endif
                                             </td>
                                         </tr>
                                     </table>
@@ -309,7 +311,9 @@
     </table>
 
     <!-- Halaman Lampiran (Page Break) -->
+    @if(!isset($isExcel) || !$isExcel)
     <div class="page-break"></div>
+    @endif
 
     <div style="text-align: center; margin-bottom: 20px;">
         <h3>DAFTAR ANGKUTAN KAYU</h3>
@@ -381,9 +385,11 @@
                 <p style="margin: 0; padding: 0;">Penerbit,</p>
                 <div style="margin: 10px 0; min-height: 70px;">
                     @if (!empty($dokumen->penerbit->nama))
+                        @if((!isset($isExcel) || !$isExcel) && $dokumen->verification_token)
                         <img src="data:image/svg+xml;base64,{!! base64_encode(
                             QrCode::format('svg')->size(70)->margin(0)->generate(route('verifikasi.show', $dokumen->verification_token)),
                         ) !!}" alt="QR Tanda Tangan">
+                        @endif
                     @endif
                 </div>
                 <p style="margin: 0; padding: 0; font-weight: bold; text-decoration: underline;">

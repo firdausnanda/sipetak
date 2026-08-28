@@ -106,6 +106,7 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok|ganis'])->
 
 Route::middleware(['auth', 'verified', 'role:admin_cdk|ganis'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dokumen-angkutans/{id}/pdf', [DokumenAngkutanController::class, 'exportPdf'])->name('dokumen_angkutans.pdf');
+    Route::get('/dokumen-angkutans/{id}/excel', [DokumenAngkutanController::class, 'exportExcel'])->name('dokumen_angkutans.excel');
     Route::resource('dokumen_angkutans', DokumenAngkutanController::class)->except(['destroy']);
 });
 
@@ -118,6 +119,7 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|ganis|admin_kelompok'])->
     Route::put('/lampiran-skshhk/{id}', [LampiranSkshhkController::class, 'update'])->name('lampiran_skshhk.update');
     Route::delete('/lampiran-skshhk/{id}', [LampiranSkshhkController::class, 'destroy'])->name('lampiran_skshhk.destroy');
     Route::get('/lampiran-skshhk/{id}/export-pdf', [LampiranSkshhkController::class, 'exportPdf'])->name('lampiran_skshhk.export_pdf');
+    Route::get('/lampiran-skshhk/{id}/export-excel', [LampiranSkshhkController::class, 'exportExcel'])->name('lampiran_skshhk.export_excel');
     Route::get('/api/lampiran-skshhk/available-trees', [LampiranSkshhkController::class, 'getAvailableTrees'])->name('lampiran_skshhk.available_trees');
 });
 

@@ -318,4 +318,79 @@ class LampiranSkshhkController extends Controller
         $safeNoSkshhk = str_replace(['/', '\\'], '_', $skshhk->no_skshhk);
         return $pdf->stream('Lampiran_SKSHHK_' . $safeNoSkshhk . '.pdf');
     }
+
+    public function exportExcel($id)
+    {
+        $user = Auth::user();
+        $skshhk = Skshhk::with([
+            'pohons.jenisPohon', 
+            'pohons.batangs',
+            'pohons.dokumenAngkutan.kelompok'
+        ])->findOrFail($id);
+
+        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
+            $hasUnauthorized = Pohon::where('skshhk_id', $skshhk->id)
+                ->whereHas('dokumenAngkutan', function($q) use ($user) {
+                    $q->where('kelompok_id', '!=', $user->kelompok_id);
+                })->exists();
+            if ($hasUnauthorized) {
+                abort(403, 'Unauthorized access to this document.');
+            }
+        }
+
+        $firstTree = $skshhk->pohons->first();
+        $dokumen = $firstTree ? $firstTree->dokumenAngkutan : null;
+        
+        $skshhkData = [];
+        
+        $rekap = [];
+        foreach(['P', 'D', 'T', 'M'] as $kat) {
+            $rekap[$kat] = [
+                'AI' => ['jumlah' => 0, 'volume' => 0],
+                'AII' => ['jumlah' => 0, 'volume' => 0],
+                'AIII' => ['jumlah' => 0, 'volume' => 0],
+            ];
+        }
+
+        $details = [];
+        $no = 1;
+
+        foreach ($skshhk->pohons as $pohon) {
+            foreach ($pohon->batangs as $batang) {
+                $avgDiameter = floor(($batang->diameter_pangkal + $batang->diameter_ujung) / 2);
+                $subKat = \App\Helpers\MutuHelper::getSubKategori($avgDiameter);
+
+                if (isset($rekap[$batang->mutu])) {
+                    $rekap[$batang->mutu][$subKat]['jumlah']++;
+                    $rekap[$batang->mutu][$subKat]['volume'] += $batang->volume;
+                }
+
+                $idBarcode = '';
+                if ($pohon->tipe === 'barcode' && $pohon->no_barcode) {
+                    $idBarcode = $pohon->no_barcode . '.' . str_pad($batang->no_batang, 2, '0', STR_PAD_LEFT);
+                } else {
+                    $idBarcode = ($pohon->no_pohon ?? 'NON-BARCODE') . '.' . str_pad($batang->no_batang, 2, '0', STR_PAD_LEFT);
+                }
+
+                $details[] = [
+                    'no' => $no++,
+                    'id_barcode' => $idBarcode,
+                    'jenis' => $pohon->jenisPohon ? $pohon->jenisPohon->nama_jenis : '-',
+                    'panjang' => $batang->panjang,
+                    'diameter' => $avgDiameter,
+                    'volume' => $batang->volume,
+                    'mutu' => $batang->mutu . ' (' . $subKat . ')',
+                ];
+            }
+        }
+        
+        $skshhkData[] = [
+            'skshhk' => $skshhk,
+            'rekap' => $rekap,
+            'details' => $details,
+        ];
+
+        $safeNoSkshhk = str_replace(['/', '\\'], '_', $skshhk->no_skshhk);
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\LampiranSkshhkExport($dokumen, $skshhkData), 'Lampiran_SKSHHK_' . $safeNoSkshhk . '.xlsx');
+    }
 }

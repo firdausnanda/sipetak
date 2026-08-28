@@ -69,7 +69,7 @@ class DokumenAngkutanController extends Controller
         if (!empty($selectedPetakIds)) {
             $query = Pohon::whereIn('petak_id', $selectedPetakIds)
                           ->whereNull('dokumen_angkutan_id')
-                          ->with(['jenisPohon', 'petak']);
+                          ->with(['jenisPohon', 'petak', 'batangs']);
             if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
                 $query->where('kelompok_id', $user->kelompok_id);
             }
@@ -245,5 +245,26 @@ class DokumenAngkutanController extends Controller
 
         $safeNoDokumen = str_replace(['/', '\\'], '_', $dokumen->no_dokumen);
         return $pdf->stream('Dokumen_Angkutan_' . $safeNoDokumen . '.pdf');
+    }
+
+    public function exportExcel($id)
+    {
+        $user = Auth::user();
+        $dokumen = DokumenAngkutan::with([
+            'kelompok',
+            'penerbit',
+            'tujuanBongkar',
+            'petaks',
+            'pohons.jenisPohon',
+            'pohons.petak',
+            'pohons.batangs'
+        ])->findOrFail($id);
+
+        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id && $dokumen->kelompok_id !== $user->kelompok_id) {
+            abort(403, 'Unauthorized access to this document.');
+        }
+
+        $safeNoDokumen = str_replace(['/', '\\'], '_', $dokumen->no_dokumen);
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\DokumenAngkutanExport($dokumen), 'Dokumen_Angkutan_' . $safeNoDokumen . '.xlsx');
     }
 }

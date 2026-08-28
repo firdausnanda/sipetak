@@ -1,7 +1,7 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
-import { ArrowLeft, FileText, Calendar, Users, Map, Info, TreePine, Printer, Box, Edit } from 'lucide-react';
+import { ArrowLeft, FileText, Calendar, Users, Map, Info, TreePine, Printer, Box, Edit, FileSpreadsheet } from 'lucide-react';
 import Modal from '@/Components/Modal';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
@@ -49,7 +49,7 @@ export default function Show({ dokumen }) {
                     </Link>
                     <button onClick={() => setIsExportModalOpen(true)} className="flex items-center gap-2 bg-surface-container-high text-primary px-4 py-2 rounded-lg hover:bg-surface-container-highest transition-colors font-bold shadow-sm">
                         <Printer className="w-4 h-4" />
-                        Export PDF
+                        Export Data
                     </button>
                 </div>
             </div>
@@ -282,6 +282,16 @@ export default function Show({ dokumen }) {
                         <SecondaryButton onClick={() => setIsExportModalOpen(false)}>
                             Batal
                         </SecondaryButton>
+                        <a 
+                            href={route('admin.dokumen_angkutans.excel', dokumen.id)} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            onClick={() => setIsExportModalOpen(false)}
+                            className="inline-flex items-center px-4 py-2 bg-[#10b981] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-[#10b981] focus:ring-offset-2 transition ease-in-out duration-150"
+                        >
+                            <FileSpreadsheet className="w-4 h-4 mr-2" />
+                            Ya, Export Excel
+                        </a>
                         <a 
                             href={route('admin.dokumen_angkutans.pdf', dokumen.id)} 
                             target="_blank" 

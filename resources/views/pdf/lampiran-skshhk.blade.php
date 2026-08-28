@@ -200,7 +200,9 @@
             </table>
         </div>
 
-        <div class="page-break"></div>
+        @if(!isset($isExcel) || !$isExcel)
+    <div class="page-break"></div>
+    @endif
 
         <!-- Page 2+: Detail -->
         <table style="width: 100%; border: none; margin-bottom: 5px;">
@@ -272,9 +274,11 @@
                     <p style="margin: 0; padding: 0;">Penerbit,</p>
                     <div style="margin: 10px 0; min-height: 70px;">
                         @if ($dokumen && !empty($dokumen->penerbit->nama))
+                            @if((!isset($isExcel) || !$isExcel) && $skshhk->verification_token)
                             <img src="data:image/svg+xml;base64,{!! base64_encode(
                                 \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(70)->margin(0)->generate(route('verifikasi.show', $skshhk->verification_token)),
                             ) !!}" alt="QR Tanda Tangan">
+                            @endif
                         @endif
                     </div>
                     <p style="margin: 0; padding: 0; font-weight: bold; text-decoration: underline;">
@@ -285,7 +289,9 @@
         </table>
 
         @if(!$loop->last)
-            <div class="page-break"></div>
+            @if(!isset($isExcel) || !$isExcel)
+    <div class="page-break"></div>
+    @endif
         @endif
     @endforeach
 </body>

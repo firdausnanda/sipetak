@@ -131,7 +131,7 @@ export default function Form({ skshhk, dokumenAngkutans, selectedPohons }) {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden p-6">
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-6">
                     <h3 className="font-bold text-lg mb-4 text-primary">Informasi SKSHHK</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -172,7 +172,7 @@ export default function Form({ skshhk, dokumenAngkutans, selectedPohons }) {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Left Panel: Available Trees */}
-                    <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden p-6">
+                    <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-6">
                         <h3 className="font-bold text-lg mb-4 text-primary">Cari & Pilih Kayu</h3>
                         
                         <div className="mb-4">
@@ -217,7 +217,7 @@ export default function Form({ skshhk, dokumenAngkutans, selectedPohons }) {
                         {loadingTrees ? (
                             <div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
                         ) : selectedDokumenId ? (
-                            <div className="border border-outline-variant rounded-lg overflow-hidden max-h-96 overflow-y-auto">
+                            <div className="border border-outline-variant rounded-lg overflow-x-auto max-h-96 overflow-y-auto">
                                 <table className="w-full text-left text-sm">
                                     <thead className="bg-surface-container sticky top-0">
                                         <tr>
@@ -264,14 +264,14 @@ export default function Form({ skshhk, dokumenAngkutans, selectedPohons }) {
                     </div>
 
                     {/* Right Panel: Selected Trees */}
-                    <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden p-6">
+                    <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-6">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="font-bold text-lg text-primary">Kayu Terpilih</h3>
                             <span className="bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">{data.pohon_ids.length} Kayu</span>
                         </div>
                         {errors.pohon_ids && <p className="text-error text-xs mb-2">{errors.pohon_ids}</p>}
 
-                        <div className="border border-outline-variant rounded-lg overflow-hidden max-h-[460px] overflow-y-auto">
+                        <div className="border border-outline-variant rounded-lg overflow-x-auto max-h-[460px] overflow-y-auto">
                             <table className="w-full text-left text-sm">
                                 <thead className="bg-surface-container sticky top-0">
                                     <tr>
@@ -302,6 +302,22 @@ export default function Form({ skshhk, dokumenAngkutans, selectedPohons }) {
                                         ))
                                     )}
                                 </tbody>
+                                {selectedTreesData.length > 0 && (
+                                    <tfoot className="bg-surface-container font-bold sticky bottom-0">
+                                        <tr>
+                                            <td colSpan="2" className="p-3 text-right">Total Volume:</td>
+                                            <td className="p-3 text-right">
+                                                {selectedTreesData.reduce((total, pohon) => {
+                                                    const treeVol = pohon.batangs && Array.isArray(pohon.batangs) 
+                                                        ? pohon.batangs.reduce((sum, batang) => sum + Number(batang.volume), 0) 
+                                                        : 0;
+                                                    return total + treeVol;
+                                                }, 0).toFixed(2)}
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                )}
                             </table>
                         </div>
                     </div>
