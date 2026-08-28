@@ -85,7 +85,7 @@ export default function Index({ dokumens, summary = {}, vorad = {}, auth }) {
                     <div className="absolute right-0 top-0 w-24 h-24 bg-[#ef4444]/5 rounded-bl-[100px] -z-10 transition-transform group-hover:scale-110"></div>
                     <div className="flex items-center justify-between relative z-10 mb-3">
                         <div className="flex flex-col">
-                            <span className="font-label-lg text-label-lg text-[#ef4444] mb-1 font-bold">Vorad (Sisa Pohon)</span>
+                            <span className="font-label-lg text-label-lg text-[#ef4444] mb-1 font-bold">Vorad (Sisa di TPn)</span>
                             <span className="font-display text-[2rem] font-bold text-on-surface">
                                 {new Intl.NumberFormat('id-ID').format(vorad.pohon || 0)} <span className="text-sm font-medium text-on-surface-variant">Pohon</span>
                             </span>
