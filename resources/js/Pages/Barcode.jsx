@@ -316,7 +316,7 @@ export default function Barcode() {
                             />
                         </div>
                         <div className="flex flex-col">
-                            <label className="font-label-caps text-label-caps text-[#6D4C41] mb-1">D. Pangkal</label>
+                            <label className="font-label-caps text-label-caps text-[#6D4C41] mb-1">D. Pangkal (cm)</label>
                             <input 
                                 className="h-touch-target border border-outline-variant rounded bg-surface-bright px-2 text-center text-[#1B4332] font-data-mono text-data-mono focus:ring-2 focus:ring-[#FB8500] focus:border-[#FB8500] focus:outline-none" 
                                 placeholder="0" 
@@ -327,7 +327,7 @@ export default function Barcode() {
                             />
                         </div>
                         <div className="flex flex-col">
-                            <label className="font-label-caps text-label-caps text-[#6D4C41] mb-1">D. Ujung</label>
+                            <label className="font-label-caps text-label-caps text-[#6D4C41] mb-1">D. Ujung (cm)</label>
                             <input 
                                 className="h-touch-target border border-outline-variant rounded bg-surface-bright px-2 text-center text-[#1B4332] font-data-mono text-data-mono focus:ring-2 focus:ring-[#FB8500] focus:border-[#FB8500] focus:outline-none" 
                                 placeholder="0" 
