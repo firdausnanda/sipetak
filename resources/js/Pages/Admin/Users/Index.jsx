@@ -2,7 +2,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, router, Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import Select from 'react-select';
-import { Search, Plus, Edit, Trash2, Shield, Users as UsersIcon, X, Check } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Shield, Users as UsersIcon, X, Check, Eye, EyeOff } from 'lucide-react';
 
 const customSelectStyles = {
     control: (base, state) => ({
@@ -50,6 +50,7 @@ export default function Index({ users, roles, kelompoks, filters = {}, auth }) {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [userToEdit, setUserToEdit] = useState(null);
     const [userToDelete, setUserToDelete] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     // Form
     const { data, setData, post, put, delete: destroy, processing, errors, reset, clearErrors } = useForm({
@@ -371,14 +372,23 @@ export default function Index({ users, roles, kelompoks, filters = {}, auth }) {
 
                             <div>
                                 <InputLabel htmlFor="password" value="Password" />
-                                <TextInput
-                                    id="password"
-                                    type="password"
-                                    name="password"
-                                    value={data.password}
-                                    className="mt-1 block w-full"
-                                    onChange={(e) => setData('password', e.target.value)}
-                                />
+                                <div className="relative">
+                                    <TextInput
+                                        id="password"
+                                        type={showPassword ? "text" : "password"}
+                                        name="password"
+                                        value={data.password}
+                                        className="mt-1 block w-full pr-10"
+                                        onChange={(e) => setData('password', e.target.value)}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none mt-1"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
+                                </div>
                                 <InputError message={errors.password} className="mt-2" />
                             </div>
 
@@ -462,14 +472,23 @@ export default function Index({ users, roles, kelompoks, filters = {}, auth }) {
 
                             <div>
                                 <InputLabel htmlFor="edit_password" value="Password Baru (Kosongkan jika tidak diubah)" />
-                                <TextInput
-                                    id="edit_password"
-                                    type="password"
-                                    name="password"
-                                    value={data.password}
-                                    className="mt-1 block w-full"
-                                    onChange={(e) => setData('password', e.target.value)}
-                                />
+                                <div className="relative">
+                                    <TextInput
+                                        id="edit_password"
+                                        type={showPassword ? "text" : "password"}
+                                        name="password"
+                                        value={data.password}
+                                        className="mt-1 block w-full pr-10"
+                                        onChange={(e) => setData('password', e.target.value)}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none mt-1"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
+                                </div>
                                 <InputError message={errors.password} className="mt-2" />
                             </div>
 
