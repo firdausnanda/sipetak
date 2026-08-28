@@ -18,7 +18,7 @@ class DashboardController extends Controller
 
         $currentUser = auth()->user();
 
-        if ($currentUser->hasRole('admin_kelompok')) {
+        if ($currentUser->hasRole('admin_kelompok') || $currentUser->hasRole('ganis')) {
             $query->whereHas('pohon', function ($q) use ($currentUser) {
                 $q->where('kelompok_id', $currentUser->kelompok_id);
             });
@@ -111,7 +111,7 @@ class DashboardController extends Controller
         $kelompoksQuery = Kelompok::orderBy('nama_kelompok');
         $petaksQuery = Petak::orderBy('no_petak');
 
-        if ($currentUser->hasRole('admin_kelompok')) {
+        if ($currentUser->hasRole('admin_kelompok') || $currentUser->hasRole('ganis')) {
             $kelompoksQuery->where('id', $currentUser->kelompok_id);
             $petaksQuery->where('kelompok_id', $currentUser->kelompok_id);
         }
@@ -154,7 +154,7 @@ class DashboardController extends Controller
         $batang = Batang::findOrFail($id);
 
         $currentUser = auth()->user();
-        if ($currentUser->hasRole('admin_kelompok')) {
+        if ($currentUser->hasRole('admin_kelompok') || $currentUser->hasRole('ganis')) {
             $batang->load('pohon');
             if ($batang->pohon->kelompok_id != $currentUser->kelompok_id) {
                 abort(403, 'Unauthorized action.');
