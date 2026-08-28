@@ -193,7 +193,7 @@ export default function Manual() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Panjang */}
                                 <div>
-                                    <label className="block mb-2 text-[#6D4C41] font-label-caps text-[12px] font-bold tracking-[0.05em] uppercase" htmlFor="panjang">PANJANG (CM)</label>
+                                    <label className="block mb-2 text-[#6D4C41] font-label-caps text-[12px] font-bold tracking-[0.05em] uppercase" htmlFor="panjang">PANJANG (M)</label>
                                     <div className="relative focus-within:ring-2 focus-within:ring-[#FB8500] focus-within:ring-offset-2 rounded-DEFAULT">
                                         <input 
                                             className="w-full h-touch-target border border-outline-variant rounded-DEFAULT bg-surface-container-lowest px-4 text-on-surface font-data-mono text-data-mono focus:outline-none focus:border-transparent transition-all" 
@@ -314,7 +314,7 @@ export default function Manual() {
                                         <div key={idx} className="border border-outline-variant rounded bg-surface p-3 flex justify-between items-center shadow-sm">
                                             <div className="flex flex-col">
                                                 <span className="font-data-mono text-data-mono text-[#1B4332] font-bold">Batang {b.no_batang} <span className="text-surface-tint">| Mutu {b.mutu}</span></span>
-                                                <span className="font-label-caps text-label-caps text-[#6D4C41]">P: {b.panjang}cm | DP: {b.diameter_pangkal}cm | DU: {b.diameter_ujung}cm | Vol: {b.volume} m³</span>
+                                                <span className="font-label-caps text-label-caps text-[#6D4C41]">P: {b.panjang}m | DP: {b.diameter_pangkal}cm | DU: {b.diameter_ujung}cm | Vol: {b.volume} m³</span>
                                             </div>
                                             <button 
                                                 type="button"

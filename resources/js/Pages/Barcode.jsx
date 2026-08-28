@@ -305,7 +305,7 @@ export default function Barcode() {
                     {/* Dimensions */}
                     <div className="grid grid-cols-3 gap-2">
                         <div className="flex flex-col">
-                            <label className="font-label-caps text-label-caps text-[#6D4C41] mb-1">Panjang (cm)</label>
+                            <label className="font-label-caps text-label-caps text-[#6D4C41] mb-1">Panjang (m)</label>
                             <input 
                                 className="h-touch-target border border-outline-variant rounded bg-surface-bright px-2 text-center text-[#1B4332] font-data-mono text-data-mono focus:ring-2 focus:ring-[#FB8500] focus:border-[#FB8500] focus:outline-none" 
                                 placeholder="0" 
@@ -387,7 +387,7 @@ export default function Barcode() {
                                     <div key={idx} className="border border-outline-variant rounded bg-surface p-3 flex justify-between items-center shadow-sm">
                                         <div className="flex flex-col">
                                             <span className="font-data-mono text-data-mono text-[#1B4332] font-bold">Batang {b.no_batang} <span className="text-surface-tint">| Mutu {b.mutu}</span></span>
-                                            <span className="font-label-caps text-label-caps text-[#6D4C41]">P: {b.panjang}cm | DP: {b.diameter_pangkal}cm | DU: {b.diameter_ujung}cm | Vol: {b.volume} m³</span>
+                                            <span className="font-label-caps text-label-caps text-[#6D4C41]">P: {b.panjang}m | DP: {b.diameter_pangkal}cm | DU: {b.diameter_ujung}cm | Vol: {b.volume} m³</span>
                                         </div>
                                         <button 
                                             type="button"
