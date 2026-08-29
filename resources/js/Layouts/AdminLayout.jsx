@@ -389,7 +389,10 @@ export default function AdminLayout({ children }) {
                         <div className="font-headline-md text-headline-md font-bold text-primary md:hidden">SIPETAK Admin</div>
                     </div>
                     <div className="flex items-center gap-2 lg:gap-4">
-                        <button className="w-10 h-10 flex items-center justify-center text-primary hover:bg-surface-container-high transition-colors cursor-pointer active:opacity-80 rounded-full hidden lg:flex">
+                        <button 
+                            onClick={() => window.location.reload()}
+                            className="w-10 h-10 flex items-center justify-center text-primary hover:bg-surface-container-high transition-colors cursor-pointer active:opacity-80 rounded-full hidden lg:flex"
+                        >
                             <span className="material-symbols-outlined">sync</span>
                         </button>
                         <button className="w-10 h-10 flex items-center justify-center text-primary hover:bg-surface-container-high transition-colors cursor-pointer active:opacity-80 rounded-full relative">

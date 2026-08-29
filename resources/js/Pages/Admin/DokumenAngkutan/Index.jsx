@@ -1,8 +1,56 @@
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Head, Link } from '@inertiajs/react';
-import { Plus, FileText, Calendar, Truck, Eye, TreePine, Database, Box } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { Plus, FileText, Calendar, Truck, Eye, TreePine, Database, Box, Filter, X } from 'lucide-react';
+import { useState } from 'react';
+import Select from 'react-select';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
-export default function Index({ dokumens, summary = {}, vorad = {}, auth }) {
+export default function Index({ dokumens, summary = {}, vorad = {}, auth, filters = {}, kelompoks = [] }) {
+    const [filterKelompok, setFilterKelompok] = useState(filters?.kelompok_id || '');
+    const [filterTanggal, setFilterTanggal] = useState(filters?.tanggal || '');
+
+    const applyFilter = (key, value) => {
+        const queryParams = {
+            kelompok_id: filterKelompok,
+            tanggal: filterTanggal,
+            [key]: value
+        };
+        
+        Object.keys(queryParams).forEach(k => {
+            if (!queryParams[k]) {
+                delete queryParams[k];
+            }
+        });
+
+        router.get(route('admin.dokumen_angkutans.index'), queryParams, {
+            preserveState: true,
+            preserveScroll: true
+        });
+    };
+
+    const handleKelompokChange = (selectedOption) => {
+        const val = selectedOption ? selectedOption.value : '';
+        setFilterKelompok(val);
+        applyFilter('kelompok_id', val);
+    };
+
+    const handleTanggalChange = (date) => {
+        let val = '';
+        if (date) {
+            const offset = date.getTimezoneOffset();
+            const localDate = new Date(date.getTime() - (offset*60*1000));
+            val = localDate.toISOString().split('T')[0];
+        }
+        setFilterTanggal(val);
+        applyFilter('tanggal', val);
+    };
+
+    const kelompokOptions = kelompoks.map(k => ({
+        value: k.id,
+        label: k.nama_kelompok
+    }));
+
     const formatDate = (dateString) => {
         if (!dateString) return '-';
         const date = new Date(dateString);
@@ -99,6 +147,36 @@ export default function Index({ dokumens, summary = {}, vorad = {}, auth }) {
                         <span className="w-1 h-1 rounded-full bg-outline-variant"></span>
                         <span>{new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(vorad.volume || 0)} m³</span>
                     </div>
+                </div>
+            </div>
+
+            {/* Filter Section */}
+            <div className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm mb-6 flex flex-col sm:flex-row gap-4 items-end z-20 relative">
+                {kelompoks.length > 0 && (
+                    <div className="flex-1 w-full relative z-20">
+                        <label className="block text-sm font-bold text-on-surface-variant mb-1">Kelompok</label>
+                        <Select
+                            isClearable
+                            options={kelompokOptions}
+                            value={kelompokOptions.find(opt => opt.value == filterKelompok) || null}
+                            onChange={handleKelompokChange}
+                            placeholder="Semua Kelompok"
+                            className="react-select-container text-sm"
+                            classNamePrefix="react-select"
+                        />
+                    </div>
+                )}
+                <div className="flex-1 w-full relative z-10">
+                    <label className="block text-sm font-bold text-on-surface-variant mb-1">Tanggal</label>
+                    <DatePicker
+                        isClearable
+                        selected={filterTanggal ? new Date(filterTanggal) : null}
+                        onChange={handleTanggalChange}
+                        dateFormat="dd MMMM yyyy"
+                        placeholderText="Semua Tanggal"
+                        className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:outline-none focus:border-primary min-h-[38px]"
+                        wrapperClassName="w-full"
+                    />
                 </div>
             </div>
 

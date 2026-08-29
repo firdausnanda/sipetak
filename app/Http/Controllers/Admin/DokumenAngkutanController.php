@@ -18,7 +18,7 @@ use App\Models\Kelompok;
 
 class DokumenAngkutanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         $query = DokumenAngkutan::with(['kelompok', 'petaks'])
@@ -27,14 +27,27 @@ class DokumenAngkutanController extends Controller
             ->withSum('batangs', 'volume')
             ->latest();
         
+        $summaryQuery = DokumenAngkutan::query();
+
         if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
             $query->where('kelompok_id', $user->kelompok_id);
-        }
-
-        $summaryQuery = DokumenAngkutan::query();
-        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
             $summaryQuery->where('kelompok_id', $user->kelompok_id);
         }
+
+        // Filters
+        $filterKelompok = $request->input('kelompok_id');
+        $filterTanggal = $request->input('tanggal');
+
+        if ($filterKelompok) {
+            $query->where('kelompok_id', $filterKelompok);
+            $summaryQuery->where('kelompok_id', $filterKelompok);
+        }
+
+        if ($filterTanggal) {
+            $query->whereDate('tanggal', $filterTanggal);
+            $summaryQuery->whereDate('tanggal', $filterTanggal);
+        }
+
         $dokumenIds = $summaryQuery->pluck('id');
         $pohonIds = Pohon::whereIn('dokumen_angkutan_id', $dokumenIds)->pluck('id');
         
@@ -47,12 +60,21 @@ class DokumenAngkutanController extends Controller
         if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
             $voradQuery->where('kelompok_id', $user->kelompok_id);
         }
+        if ($filterKelompok) {
+            $voradQuery->where('kelompok_id', $filterKelompok);
+        }
         $voradPohonIds = $voradQuery->pluck('id');
         $voradPohon = $voradPohonIds->count();
         $voradBatang = \App\Models\Batang::whereIn('pohon_id', $voradPohonIds)->count();
         $voradVolume = \App\Models\Batang::whereIn('pohon_id', $voradPohonIds)->sum('volume');
 
-        $dokumens = $query->paginate(10);
+        $dokumens = $query->paginate(10)->withQueryString();
+
+        $kelompoks = [];
+        if (!$user->hasAnyRole(['admin_kelompok', 'ganis'])) {
+            $kelompoks = Kelompok::all();
+        }
+
         return Inertia::render('Admin/DokumenAngkutan/Index', [
             'dokumens' => $dokumens,
             'summary' => [
@@ -64,7 +86,9 @@ class DokumenAngkutanController extends Controller
                 'pohon' => $voradPohon,
                 'batang' => $voradBatang,
                 'volume' => (float) $voradVolume,
-            ]
+            ],
+            'filters' => $request->only(['kelompok_id', 'tanggal']),
+            'kelompoks' => $kelompoks,
         ]);
     }
 
