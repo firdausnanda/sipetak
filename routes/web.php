@@ -153,10 +153,7 @@ require __DIR__.'/auth.php';
 
 // Maintenance Mode Routes
 Route::get('/maintenance/down', function () {
-    \Illuminate\Support\Facades\Artisan::call('down', [
-        '--status' => 200,
-        '--render' => 'errors.503'
-    ]);
+    \Illuminate\Support\Facades\Artisan::call('down');
     return "Aplikasi sekarang dalam mode maintenance (down).";
 });
 
