@@ -130,6 +130,12 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|ganis|admin_kelompok'])->
 Route::middleware(['auth', 'verified', 'role:admin_cdk'])->prefix('admin')->name('admin.')->group(function () {
     // Log
     Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
+    
+    // Backup Database
+    Route::get('/backup', [\App\Http\Controllers\Admin\BackupController::class, 'index'])->name('backup.index');
+    Route::post('/backup', [\App\Http\Controllers\Admin\BackupController::class, 'store'])->name('backup.store');
+    Route::get('/backup/download', [\App\Http\Controllers\Admin\BackupController::class, 'download'])->name('backup.download');
+    Route::delete('/backup', [\App\Http\Controllers\Admin\BackupController::class, 'destroy'])->name('backup.destroy');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -152,12 +158,12 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';
 
 // Maintenance Mode Routes
-Route::get('/maintenance/down', function () {
-    \Illuminate\Support\Facades\Artisan::call('down');
-    return "Aplikasi sekarang dalam mode maintenance (down).";
-});
+// Route::get('/maintenance/down', function () {
+//     \Illuminate\Support\Facades\Artisan::call('down');
+//     return "Aplikasi sekarang dalam mode maintenance (down).";
+// });
 
-Route::get('/maintenance/up', function () {
-    \Illuminate\Support\Facades\Artisan::call('up');
-    return "Aplikasi sekarang sudah live kembali (up).";
-});
+// Route::get('/maintenance/up', function () {
+//     \Illuminate\Support\Facades\Artisan::call('up');
+//     return "Aplikasi sekarang sudah live kembali (up).";
+// });

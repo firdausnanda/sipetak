@@ -24,7 +24,7 @@ export default function AdminLayout({ children }) {
         route().current('admin.pohons.*') || route().current('admin.petaks.*') || route().current('admin.penerbits.*') || route().current('admin.tujuan_bongkars.*') || route().current('admin.rencana_tebangs.*') || route().current('admin.tabel_volumes.*')
     );
     const [isPengaturanOpen, setIsPengaturanOpen] = useState(
-        route().current('admin.activity-log.*')
+        route().current('admin.activity-log.*') || route().current('admin.backup.*')
     );
 
     return (
@@ -174,6 +174,13 @@ export default function AdminLayout({ children }) {
                                 >
                                     <span className="material-symbols-outlined text-sm">history</span>
                                     Log Aktivitas
+                                </Link>
+                                <Link
+                                    href={route('admin.backup.index')}
+                                    className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.backup.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                                >
+                                    <span className="material-symbols-outlined text-sm">cloud_download</span>
+                                    Backup Database
                                 </Link>
                                 <a
                                     href="/admin/error-log"
