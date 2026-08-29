@@ -23,6 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
 
+        $middleware->preventRequestsDuringMaintenance(except: [
+            '/maintenance/up',
+        ]);
+
         $middleware->redirectUsersTo(function (Request $request) {
             if ($request->user() && $request->user()->hasRole(['admin_cdk', 'admin_kelompok'])) {
                 return route('admin.dashboard');

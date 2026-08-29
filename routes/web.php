@@ -150,3 +150,14 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// Maintenance Mode Routes
+Route::get('/maintenance/down', function () {
+    \Illuminate\Support\Facades\Artisan::call('down');
+    return "Aplikasi sekarang dalam mode maintenance (down).";
+});
+
+Route::get('/maintenance/up', function () {
+    \Illuminate\Support\Facades\Artisan::call('up');
+    return "Aplikasi sekarang sudah live kembali (up).";
+});
