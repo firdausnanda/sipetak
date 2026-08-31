@@ -32,7 +32,7 @@ const customSelectStyles = {
     })
 };
 
-export default function Index({ auth, operations, filters, reguOptions }) {
+export default function Index({ auth, operations, summary = {}, filters, reguOptions }) {
     const { flash } = usePage().props;
     const [search, setSearch] = useState(filters?.search || '');
     const [tanggalMulai, setTanggalMulai] = useState(filters?.tanggal_mulai ? new Date(filters.tanggal_mulai) : null);
@@ -126,23 +126,47 @@ export default function Index({ auth, operations, filters, reguOptions }) {
 
             {/* Stats/Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm flex flex-col justify-center">
-                    <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total Pohon</span>
-                    <span className="font-display text-[2rem] font-bold text-primary">
-                        {new Intl.NumberFormat('id-ID').format(operations.data.reduce((acc, curr) => acc + curr.jumlah_pohon, 0))} Pohon
-                    </span>
+                <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm relative overflow-hidden transition-all hover:shadow-md hover:border-[#10b981]/40 group">
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#10b981]/5 rounded-bl-[100px] -z-10 transition-transform group-hover:scale-110"></div>
+                    <div className="flex items-center justify-between relative z-10">
+                        <div className="flex flex-col">
+                            <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total Pohon</span>
+                            <span className="font-display text-[2rem] font-bold text-on-surface">
+                                {new Intl.NumberFormat('id-ID').format(summary.total_pohon || 0)} <span className="text-sm font-medium text-on-surface-variant">Pohon</span>
+                            </span>
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-[#10b981]/10 flex items-center justify-center text-[#10b981]">
+                            <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m8 14 4-4 4 4"/><path d="m8 10 4-4 4 4"/><path d="M12 22v-8"/></svg>
+                        </div>
+                    </div>
                 </div>
-                <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm flex flex-col justify-center">
-                    <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total Batang</span>
-                    <span className="font-display text-[2rem] font-bold text-[#219EBC]">
-                        {new Intl.NumberFormat('id-ID').format(operations.data.reduce((acc, curr) => acc + curr.jumlah_batang, 0))} Batang
-                    </span>
+                <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm relative overflow-hidden transition-all hover:shadow-md hover:border-[#f59e0b]/40 group">
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#f59e0b]/5 rounded-bl-[100px] -z-10 transition-transform group-hover:scale-110"></div>
+                    <div className="flex items-center justify-between relative z-10">
+                        <div className="flex flex-col">
+                            <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total Batang</span>
+                            <span className="font-display text-[2rem] font-bold text-on-surface">
+                                {new Intl.NumberFormat('id-ID').format(summary.total_batang || 0)} <span className="text-sm font-medium text-on-surface-variant">Batang</span>
+                            </span>
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-[#f59e0b]/10 flex items-center justify-center text-[#f59e0b]">
+                            <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+                        </div>
+                    </div>
                 </div>
-                <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm flex flex-col justify-center">
-                    <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total Volume</span>
-                    <span className="font-display text-[2rem] font-bold text-[#8ECAE6]">
-                        {new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(operations.data.reduce((acc, curr) => acc + parseFloat(curr.total_volume), 0))} m³
-                    </span>
+                <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm relative overflow-hidden transition-all hover:shadow-md hover:border-[#3b82f6]/40 group">
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#3b82f6]/5 rounded-bl-[100px] -z-10 transition-transform group-hover:scale-110"></div>
+                    <div className="flex items-center justify-between relative z-10">
+                        <div className="flex flex-col">
+                            <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total Volume</span>
+                            <span className="font-display text-[2rem] font-bold text-on-surface">
+                                {new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(summary.total_volume || 0)} <span className="text-sm font-medium text-on-surface-variant">m³</span>
+                            </span>
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-[#3b82f6]/10 flex items-center justify-center text-[#3b82f6]">
+                            <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                        </div>
+                    </div>
                 </div>
             </div>
 

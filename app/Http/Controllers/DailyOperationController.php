@@ -73,10 +73,31 @@ class DailyOperationController extends Controller
             ];
         });
 
+        $summaryQuery = Pohon::query();
+        if (!$authUser->hasRole('admin_cdk')) {
+            $summaryQuery->where('kelompok_id', $authUser->kelompok_id);
+        }
+        if ($request->filled('search')) {
+            $summaryQuery->where('created_by', $request->search);
+        }
+        if ($request->filled('tanggal_mulai') && $request->filled('tanggal_akhir')) {
+            $summaryQuery->whereBetween(DB::raw('DATE(created_at)'), [$request->tanggal_mulai, $request->tanggal_akhir]);
+        }
+
+        $totalPohon = $summaryQuery->count();
+        $pohonIds = $summaryQuery->pluck('id');
+        $totalBatang = \App\Models\Batang::whereIn('pohon_id', $pohonIds)->count();
+        $totalVolume = \App\Models\Batang::whereIn('pohon_id', $pohonIds)->sum('volume');
+
         return \Inertia\Inertia::render('Operations/Index', [
             'operations' => [
                 'data' => $operationsData,
                 'links' => $operationsRaw->toArray()['links'] ?? []
+            ],
+            'summary' => [
+                'total_pohon' => $totalPohon,
+                'total_batang' => $totalBatang,
+                'total_volume' => (float) $totalVolume,
             ],
             'filters' => array_merge(
                 $request->only(['search', 'tanggal_mulai', 'tanggal_akhir']),
