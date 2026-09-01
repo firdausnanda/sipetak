@@ -63,11 +63,31 @@ export default function Create({ petaks, pohons, selectedPetakIds, penerbits, tu
     }, [searchInput]);
 
     const filteredPohons = (pohons || []).filter(p => {
+        if (!data.tanggal || !p.tanggal || p.tanggal > data.tanggal) {
+            return false;
+        }
+        
         const query = searchQuery.toLowerCase();
         return (p.no_pohon && p.no_pohon.toString().toLowerCase().includes(query)) || 
                (p.no_barcode && p.no_barcode.toLowerCase().includes(query)) ||
                (p.jenis_pohon?.nama_jenis && p.jenis_pohon.nama_jenis.toLowerCase().includes(query));
     });
+
+    // Uncheck trees that become invalid when document date changes
+    useEffect(() => {
+        if (!data.tanggal && data.pohon_ids.length > 0) {
+            setData('pohon_ids', []);
+        } else if (data.tanggal && data.pohon_ids.length > 0) {
+            const validSelectedTreeIds = data.pohon_ids.filter(id => {
+                const pohon = (pohons || []).find(p => p.id === id);
+                return pohon && pohon.tanggal && pohon.tanggal <= data.tanggal;
+            });
+
+            if (validSelectedTreeIds.length !== data.pohon_ids.length) {
+                setData('pohon_ids', validSelectedTreeIds);
+            }
+        }
+    }, [data.tanggal, pohons, data.pohon_ids]);
 
     const handleSelectAll = (e) => {
         if (e.target.checked) {
@@ -275,7 +295,11 @@ export default function Create({ petaks, pohons, selectedPetakIds, penerbits, tu
                             <h3 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
                                 <CheckSquare className="w-5 h-5" /> Pilih Pohon
                             </h3>
-                            {pohons && pohons.length > 0 ? (
+                            {!data.tanggal ? (
+                                <div className="text-center py-8 text-on-surface-variant text-sm border border-dashed border-outline-variant rounded-lg text-amber-600 font-medium">
+                                    Silakan isi tanggal dokumen terlebih dahulu untuk memilih pohon.
+                                </div>
+                            ) : pohons && pohons.length > 0 ? (
                                 <div>
                                     <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant pb-4">
                                         <div className="flex items-center gap-2">
@@ -325,6 +349,7 @@ export default function Create({ petaks, pohons, selectedPetakIds, penerbits, tu
                                                     <div className="text-xs text-on-surface-variant font-bold text-red-700 mt-0.5">No. Pohon: {pohon.no_pohon || '-'}</div>
                                                     <div className="text-xs text-on-surface-variant mt-1 truncate">Jenis: {pohon.jenis_pohon?.nama_jenis || '-'}</div>
                                                     <div className="text-xs text-on-surface-variant truncate">Petak: {pohon.petak?.no_petak || '-'}</div>
+                                                    <div className="text-xs font-bold text-primary truncate mt-1">Tanggal: {pohon.tanggal ? new Date(pohon.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : '-'}</div>
                                                 </div>
                                             </div>
                                         ))}
@@ -355,6 +380,7 @@ export default function Create({ petaks, pohons, selectedPetakIds, penerbits, tu
                                         <tr>
                                             <th className="p-3">Barcode / No</th>
                                             <th className="p-3">Jenis</th>
+                                            <th className="p-3">Tanggal</th>
                                             <th className="p-3">Petak</th>
                                             <th className="p-3 text-right">Volume (m³)</th>
                                             <th className="p-3 text-center">Batal</th>
@@ -362,7 +388,7 @@ export default function Create({ petaks, pohons, selectedPetakIds, penerbits, tu
                                     </thead>
                                     <tbody className="divide-y divide-outline-variant">
                                         {selectedTreesData.length === 0 ? (
-                                            <tr><td colSpan="5" className="p-4 text-center text-on-surface-variant">Belum ada pohon yang dipilih.</td></tr>
+                                            <tr><td colSpan="6" className="p-4 text-center text-on-surface-variant">Belum ada pohon yang dipilih.</td></tr>
                                         ) : (
                                             selectedTreesData.map(pohon => (
                                                 <tr key={pohon.id} className="hover:bg-surface-container-lowest">
@@ -371,6 +397,7 @@ export default function Create({ petaks, pohons, selectedPetakIds, penerbits, tu
                                                         <div className="text-xs text-on-surface-variant font-bold text-red-700">{pohon.no_pohon || '-'}</div>
                                                     </td>
                                                     <td className="p-3">{pohon.jenis_pohon?.nama_jenis || '-'}</td>
+                                                    <td className="p-3 whitespace-nowrap text-xs">{pohon.tanggal ? new Date(pohon.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) : '-'}</td>
                                                     <td className="p-3">{pohon.petak?.no_petak || '-'}</td>
                                                     <td className="p-3 text-right">{calculateVolume(pohon.batangs)}</td>
                                                     <td className="p-3 text-center">
@@ -385,7 +412,7 @@ export default function Create({ petaks, pohons, selectedPetakIds, penerbits, tu
                                     {selectedTreesData.length > 0 && (
                                         <tfoot className="bg-surface-container font-bold sticky bottom-0">
                                             <tr>
-                                                <td colSpan="3" className="p-3 text-right">Total Volume:</td>
+                                                <td colSpan="4" className="p-3 text-right">Total Volume:</td>
                                                 <td className="p-3 text-right">{totalVolume}</td>
                                                 <td></td>
                                             </tr>
