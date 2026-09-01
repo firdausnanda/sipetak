@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\PetakController as AdminPetakController;
 use App\Http\Controllers\Admin\PenerbitController as AdminPenerbitController;
 use App\Http\Controllers\Admin\TujuanBongkarController as AdminTujuanBongkarController;
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\DokumenAngkutanController;
 use App\Http\Controllers\Admin\LampiranSkshhkController;
 use App\Http\Controllers\Admin\RencanaTebangController;
@@ -132,10 +133,10 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk'])->prefix('admin')->name
     Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
     
     // Backup Database
-    Route::get('/backup', [\App\Http\Controllers\Admin\BackupController::class, 'index'])->name('backup.index');
-    Route::post('/backup', [\App\Http\Controllers\Admin\BackupController::class, 'store'])->name('backup.store');
-    Route::get('/backup/download', [\App\Http\Controllers\Admin\BackupController::class, 'download'])->name('backup.download');
-    Route::delete('/backup', [\App\Http\Controllers\Admin\BackupController::class, 'destroy'])->name('backup.destroy');
+    Route::get('/backup', [BackupController::class, 'index'])->name('backup.index');
+    Route::post('/backup', [BackupController::class, 'store'])->name('backup.store');
+    Route::get('/backup/download', [BackupController::class, 'download'])->name('backup.download');
+    Route::delete('/backup', [BackupController::class, 'destroy'])->name('backup.destroy');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

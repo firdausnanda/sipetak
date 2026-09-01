@@ -527,7 +527,18 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
                                                 {batang.pohon?.jenis_pohon?.nama_jenis || '-'}
                                             </div>
                                         </td>
-                                        <td className="py-4 px-4 text-right text-sm">{batang.no_batang}</td>
+                                        <td className="py-4 px-4 text-right">
+                                            <div className="text-sm">{batang.no_batang}</div>
+                                            {batang.pohon?.skshhk ? (
+                                                <div className="mt-1">
+                                                    <span className="inline-block px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed rounded text-[10px] font-bold" title={`SKSHHK: ${batang.pohon.skshhk.no_skshhk}`}>SKSHHK</span>
+                                                </div>
+                                            ) : batang.pohon?.dokumen_angkutan ? (
+                                                <div className="mt-1">
+                                                    <span className="inline-block px-2 py-0.5 bg-primary-fixed text-on-primary-fixed rounded text-[10px] font-bold" title={`Dokumen: ${batang.pohon.dokumen_angkutan.no_dokumen}`}>DOKUMEN</span>
+                                                </div>
+                                            ) : null}
+                                        </td>
                                         <td className="py-4 px-4 text-right font-data-mono text-data-mono text-sm whitespace-nowrap">{batang.panjang}</td>
                                         <td className="py-4 px-4 text-right font-data-mono text-data-mono text-sm whitespace-nowrap">{batang.diameter_ujung} / {batang.diameter_pangkal}</td>
                                         <td className="py-4 px-4 text-right font-data-mono text-data-mono text-sm whitespace-nowrap">{batang.volume || '-'}</td>
