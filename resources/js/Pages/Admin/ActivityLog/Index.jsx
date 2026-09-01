@@ -302,7 +302,7 @@ export default function Index({ logs, filters = {}, options = {} }) {
                                             {log.subject_id ? ` (#${log.subject_id})` : ''}
                                         </td>
                                         <td className="py-4 px-4 align-top">
-                                            {formatProperties(log.properties)}
+                                            {formatProperties(log.attribute_changes && Object.keys(log.attribute_changes).length > 0 ? log.attribute_changes : log.properties)}
                                         </td>
                                     </tr>
                                 ))
