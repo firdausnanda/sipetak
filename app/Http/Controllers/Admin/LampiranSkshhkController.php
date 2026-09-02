@@ -106,17 +106,8 @@ class LampiranSkshhkController extends Controller
 
     public function create()
     {
-        $user = Auth::user();
-        $dokumenQuery = DokumenAngkutan::select('id', 'no_dokumen', 'tanggal')->orderBy('tanggal', 'desc');
-        
-        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
-            $dokumenQuery->where('kelompok_id', $user->kelompok_id);
-        }
-        
-        $dokumenAngkutans = $dokumenQuery->get();
-
         return Inertia::render('Admin/LampiranSkshhk/Form', [
-            'dokumenAngkutans' => $dokumenAngkutans,
+            'dokumenAngkutans' => [],
             'skshhk' => null,
             'selectedPohons' => []
         ]);
@@ -125,22 +116,26 @@ class LampiranSkshhkController extends Controller
     public function getAvailableTrees(Request $request)
     {
         $user = Auth::user();
-        $dokumenId = $request->query('dokumen_id');
+        $search = $request->query('search');
+        
+        $query = Pohon::with(['jenisPohon', 'batangs'])
+            ->whereNotNull('dokumen_angkutan_id')
+            ->whereNull('skshhk_id');
 
-        if (!$dokumenId) {
-            return response()->json([]);
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('no_barcode', 'like', "%{$search}%")
+                  ->orWhere('no_pohon', 'like', "%{$search}%");
+            });
         }
 
-        $dokumen = DokumenAngkutan::findOrFail($dokumenId);
-
-        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id && $dokumen->kelompok_id !== $user->kelompok_id) {
-            abort(403);
+        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
+            $query->whereHas('dokumenAngkutan', function($q) use ($user) {
+                $q->where('kelompok_id', $user->kelompok_id);
+            });
         }
 
-        $pohons = Pohon::with(['jenisPohon', 'batangs'])
-            ->where('dokumen_angkutan_id', $dokumenId)
-            ->whereNull('skshhk_id')
-            ->get();
+        $pohons = $query->limit(50)->get();
 
         return response()->json($pohons);
     }
@@ -179,11 +174,7 @@ class LampiranSkshhkController extends Controller
         $user = Auth::user();
         $skshhk = Skshhk::findOrFail($id);
 
-        $dokumenQuery = DokumenAngkutan::select('id', 'no_dokumen', 'tanggal')->orderBy('tanggal', 'desc');
-        
         if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
-            $dokumenQuery->where('kelompok_id', $user->kelompok_id);
-            // Additionally check if this skshhk belongs to them
             $hasUnauthorized = Pohon::where('skshhk_id', $skshhk->id)
                 ->whereHas('dokumenAngkutan', function($q) use ($user) {
                     $q->where('kelompok_id', '!=', $user->kelompok_id);
@@ -192,15 +183,13 @@ class LampiranSkshhkController extends Controller
                 abort(403);
             }
         }
-        
-        $dokumenAngkutans = $dokumenQuery->get();
 
         $selectedPohons = Pohon::with(['jenisPohon', 'dokumenAngkutan', 'batangs'])
             ->where('skshhk_id', $skshhk->id)
             ->get();
 
         return Inertia::render('Admin/LampiranSkshhk/Form', [
-            'dokumenAngkutans' => $dokumenAngkutans,
+            'dokumenAngkutans' => [],
             'skshhk' => $skshhk,
             'selectedPohons' => $selectedPohons
         ]);
