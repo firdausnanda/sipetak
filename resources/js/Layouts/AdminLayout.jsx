@@ -252,7 +252,7 @@ export default function AdminLayout({ children }) {
                             Dokumen Angkutan
                         </Link>
                     )}
-                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis') || user.roles?.includes('admin_kelompok')) && (
+                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
                         <Link
                             href={route('admin.lampiran_skshhk.index')}
                             className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.lampiran_skshhk.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
