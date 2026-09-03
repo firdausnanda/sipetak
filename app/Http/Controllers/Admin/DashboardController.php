@@ -89,7 +89,7 @@ class DashboardController extends Controller
     {
         $query = $this->buildQuery($request);
 
-        $sort = $request->input('sort', 'created_at');
+        $sort = $request->input('sort', 'tanggal');
         $direction = $request->input('direction', 'desc');
 
         $batangColumns = ['no_batang', 'panjang', 'diameter_ujung', 'diameter_pangkal', 'mutu', 'created_at'];

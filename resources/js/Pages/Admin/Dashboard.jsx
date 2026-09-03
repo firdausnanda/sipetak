@@ -65,7 +65,7 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
         petak_id: filters.petak_id || '',
         start_date: filters.start_date || '',
         end_date: filters.end_date || '',
-        sort: filters.sort || 'created_at',
+        sort: filters.sort || 'tanggal',
         direction: filters.direction || 'desc',
         search: filters.search || '',
         per_page: filters.per_page || '10',
