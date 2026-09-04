@@ -38,6 +38,7 @@ class LampiranSkshhkController extends Controller
 
         $filterKelompok = $request->input('kelompok_id');
         $filterTanggal = $request->input('tanggal');
+        $search = $request->input('search');
 
         if ($filterKelompok) {
             $query->whereHas('batangs.pohon.dokumenAngkutan', function($q) use ($filterKelompok) {
@@ -51,6 +52,21 @@ class LampiranSkshhkController extends Controller
         if ($filterTanggal) {
             $query->whereDate('tanggal', $filterTanggal);
             $summaryQuery->whereDate('tanggal', $filterTanggal);
+        }
+        
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('no_skshhk', 'like', "%{$search}%")
+                  ->orWhereHas('batangs.pohon.dokumenAngkutan', function($q2) use ($search) {
+                      $q2->where('no_dokumen', 'like', "%{$search}%");
+                  });
+            });
+            $summaryQuery->where(function($q) use ($search) {
+                $q->where('no_skshhk', 'like', "%{$search}%")
+                  ->orWhereHas('batangs.pohon.dokumenAngkutan', function($q2) use ($search) {
+                      $q2->where('no_dokumen', 'like', "%{$search}%");
+                  });
+            });
         }
 
         $skshhks = $query->paginate(10)->withQueryString();

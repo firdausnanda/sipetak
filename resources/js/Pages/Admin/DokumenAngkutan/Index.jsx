@@ -9,11 +9,13 @@ import 'react-datepicker/dist/react-datepicker.css';
 export default function Index({ dokumens, summary = {}, vorad = {}, auth, filters = {}, kelompoks = [] }) {
     const [filterKelompok, setFilterKelompok] = useState(filters?.kelompok_id || '');
     const [filterTanggal, setFilterTanggal] = useState(filters?.tanggal || '');
+    const [searchQuery, setSearchQuery] = useState(filters?.search || '');
 
     const applyFilter = (key, value) => {
         const queryParams = {
             kelompok_id: filterKelompok,
             tanggal: filterTanggal,
+            search: searchQuery,
             [key]: value
         };
         
@@ -152,6 +154,19 @@ export default function Index({ dokumens, summary = {}, vorad = {}, auth, filter
 
             {/* Filter Section */}
             <div className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm mb-6 flex flex-col sm:flex-row gap-4 items-end z-20 relative">
+                <div className="flex-1 w-full relative z-10">
+                    <label className="block text-sm font-bold text-on-surface-variant mb-1">Cari No. Dokumen</label>
+                    <input
+                        type="text"
+                        placeholder="Ketik lalu Enter..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') applyFilter('search', searchQuery);
+                        }}
+                        className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:outline-none focus:border-primary min-h-[38px]"
+                    />
+                </div>
                 {kelompoks.length > 0 && (
                     <div className="flex-1 w-full relative z-20">
                         <label className="block text-sm font-bold text-on-surface-variant mb-1">Kelompok</label>

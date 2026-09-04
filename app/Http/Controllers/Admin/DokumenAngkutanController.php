@@ -37,6 +37,7 @@ class DokumenAngkutanController extends Controller
         // Filters
         $filterKelompok = $request->input('kelompok_id');
         $filterTanggal = $request->input('tanggal');
+        $search = $request->input('search');
 
         if ($filterKelompok) {
             $query->where('kelompok_id', $filterKelompok);
@@ -47,6 +48,12 @@ class DokumenAngkutanController extends Controller
             $query->whereDate('tanggal', $filterTanggal);
             $summaryQuery->whereDate('tanggal', $filterTanggal);
         }
+        
+        if ($search) {
+            $query->where('no_dokumen', 'like', "%{$search}%");
+        }
+
+        $dokumens = $query->paginate(10)->withQueryString();
 
         $dokumenIds = $summaryQuery->pluck('id');
         $pohonIds = Pohon::whereIn('dokumen_angkutan_id', $dokumenIds)->pluck('id');
