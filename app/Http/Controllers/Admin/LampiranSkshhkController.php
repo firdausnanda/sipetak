@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DokumenAngkutan;
 use App\Models\Skshhk;
 use App\Models\Pohon;
+use App\Models\Batang;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -18,20 +19,19 @@ class LampiranSkshhkController extends Controller
     {
         $user = Auth::user();
         
-        $query = Skshhk::withCount('pohons')
-            ->withSum(['pohons as total_volume' => function ($q) {
-                $q->join('batangs', 'pohons.id', '=', 'batangs.pohon_id');
-            }], 'batangs.volume')
+        $query = Skshhk::withCount(['batangs as pohons_count' => function ($q) {
+                $q->select(DB::raw('count(distinct(pohon_id))'));
+            }])
+            ->withSum('batangs as total_volume', 'volume')
             ->latest();
 
         $summaryQuery = Skshhk::query();
 
         if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
-            // Filter SKSHHK by user's kelompok via trees' dokumen angkutan
-            $query->whereHas('pohons.dokumenAngkutan', function($q) use ($user) {
+            $query->whereHas('batangs.pohon.dokumenAngkutan', function($q) use ($user) {
                 $q->where('kelompok_id', $user->kelompok_id);
             });
-            $summaryQuery->whereHas('pohons.dokumenAngkutan', function($q) use ($user) {
+            $summaryQuery->whereHas('batangs.pohon.dokumenAngkutan', function($q) use ($user) {
                 $q->where('kelompok_id', $user->kelompok_id);
             });
         }
@@ -40,10 +40,10 @@ class LampiranSkshhkController extends Controller
         $filterTanggal = $request->input('tanggal');
 
         if ($filterKelompok) {
-            $query->whereHas('pohons.dokumenAngkutan', function($q) use ($filterKelompok) {
+            $query->whereHas('batangs.pohon.dokumenAngkutan', function($q) use ($filterKelompok) {
                 $q->where('kelompok_id', $filterKelompok);
             });
-            $summaryQuery->whereHas('pohons.dokumenAngkutan', function($q) use ($filterKelompok) {
+            $summaryQuery->whereHas('batangs.pohon.dokumenAngkutan', function($q) use ($filterKelompok) {
                 $q->where('kelompok_id', $filterKelompok);
             });
         }
@@ -55,32 +55,30 @@ class LampiranSkshhkController extends Controller
 
         $skshhks = $query->paginate(10)->withQueryString();
 
-        // Calculate Summary
         $allIds = $summaryQuery->pluck('id');
-        $totalPohon = Pohon::whereIn('skshhk_id', $allIds)->count();
-        $totalBatang = \App\Models\Batang::whereHas('pohon', function ($q) use ($allIds) {
-            $q->whereIn('skshhk_id', $allIds);
-        })->count();
-        $totalVolume = \App\Models\Batang::whereHas('pohon', function ($q) use ($allIds) {
-            $q->whereIn('skshhk_id', $allIds);
-        })->sum('volume');
+        $totalBatang = Batang::whereIn('skshhk_id', $allIds)->count();
+        $totalVolume = Batang::whereIn('skshhk_id', $allIds)->sum('volume');
+        $totalPohon = Batang::whereIn('skshhk_id', $allIds)->distinct('pohon_id')->count('pohon_id');
 
-        // Calculate Vorad (Sisa Pohon yang belum masuk SKSHHK)
-        $voradQuery = Pohon::whereNotNull('dokumen_angkutan_id')->whereNull('skshhk_id');
-        if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
-            $voradQuery->whereHas('dokumenAngkutan', function($q) use ($user) {
-                $q->where('kelompok_id', $user->kelompok_id);
+        // Calculate Vorad (Sisa Batang yang belum masuk SKSHHK dari pohon yang sudah ada dokumen angkutan)
+        $voradBatangQuery = Batang::whereNull('skshhk_id')
+            ->whereHas('pohon', function($q) use ($user, $filterKelompok) {
+                $q->whereNotNull('dokumen_angkutan_id');
+                if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
+                    $q->whereHas('dokumenAngkutan', function($q2) use ($user) {
+                        $q2->where('kelompok_id', $user->kelompok_id);
+                    });
+                }
+                if ($filterKelompok) {
+                    $q->whereHas('dokumenAngkutan', function($q2) use ($filterKelompok) {
+                        $q2->where('kelompok_id', $filterKelompok);
+                    });
+                }
             });
-        }
-        if ($filterKelompok) {
-            $voradQuery->whereHas('dokumenAngkutan', function($q) use ($filterKelompok) {
-                $q->where('kelompok_id', $filterKelompok);
-            });
-        }
-        $voradPohonIds = $voradQuery->pluck('id');
-        $voradPohon = $voradPohonIds->count();
-        $voradBatang = \App\Models\Batang::whereIn('pohon_id', $voradPohonIds)->count();
-        $voradVolume = \App\Models\Batang::whereIn('pohon_id', $voradPohonIds)->sum('volume');
+        
+        $voradBatang = $voradBatangQuery->count();
+        $voradVolume = $voradBatangQuery->sum('volume');
+        $voradPohon = $voradBatangQuery->distinct('pohon_id')->count('pohon_id');
 
         $kelompoks = [];
         if (!$user->hasAnyRole(['admin_kelompok', 'ganis'])) {
@@ -109,7 +107,8 @@ class LampiranSkshhkController extends Controller
         return Inertia::render('Admin/LampiranSkshhk/Form', [
             'dokumenAngkutans' => [],
             'skshhk' => null,
-            'selectedPohons' => []
+            'selectedBatangs' => [],
+            'selectedPohonsData' => []
         ]);
     }
 
@@ -118,9 +117,13 @@ class LampiranSkshhkController extends Controller
         $user = Auth::user();
         $search = $request->query('search');
         
-        $query = Pohon::with(['jenisPohon', 'batangs'])
-            ->whereNotNull('dokumen_angkutan_id')
-            ->whereNull('skshhk_id');
+        $query = Pohon::with(['jenisPohon', 'batangs' => function($q) {
+                $q->whereNull('skshhk_id');
+            }])
+            ->whereHas('batangs', function($q) {
+                $q->whereNull('skshhk_id');
+            })
+            ->whereNotNull('dokumen_angkutan_id');
 
         if ($search) {
             $query->where(function($q) use ($search) {
@@ -145,8 +148,8 @@ class LampiranSkshhkController extends Controller
         $request->validate([
             'no_skshhk' => 'required|string|max:255',
             'tanggal' => 'required|date',
-            'pohon_ids' => 'array',
-            'pohon_ids.*' => 'exists:pohons,id',
+            'batang_ids' => 'array',
+            'batang_ids.*' => 'exists:batangs,id',
         ]);
 
         DB::beginTransaction();
@@ -156,8 +159,8 @@ class LampiranSkshhkController extends Controller
                 'tanggal' => $request->tanggal,
             ]);
 
-            if (!empty($request->pohon_ids)) {
-                Pohon::whereIn('id', $request->pohon_ids)
+            if (!empty($request->batang_ids)) {
+                Batang::whereIn('id', $request->batang_ids)
                     ->update(['skshhk_id' => $skshhk->id]);
             }
 
@@ -175,8 +178,8 @@ class LampiranSkshhkController extends Controller
         $skshhk = Skshhk::findOrFail($id);
 
         if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
-            $hasUnauthorized = Pohon::where('skshhk_id', $skshhk->id)
-                ->whereHas('dokumenAngkutan', function($q) use ($user) {
+            $hasUnauthorized = Batang::where('skshhk_id', $skshhk->id)
+                ->whereHas('pohon.dokumenAngkutan', function($q) use ($user) {
                     $q->where('kelompok_id', '!=', $user->kelompok_id);
                 })->exists();
             if ($hasUnauthorized) {
@@ -184,14 +187,23 @@ class LampiranSkshhkController extends Controller
             }
         }
 
-        $selectedPohons = Pohon::with(['jenisPohon', 'dokumenAngkutan', 'batangs'])
-            ->where('skshhk_id', $skshhk->id)
+        $selectedPohonsData = Pohon::with(['jenisPohon', 'dokumenAngkutan', 'batangs' => function($q) use ($skshhk) {
+                // To display all batangs of the trees that have some batangs selected, 
+                // we might want to load batangs that are either unassigned or assigned to this SKSHHK.
+                $q->whereNull('skshhk_id')->orWhere('skshhk_id', $skshhk->id);
+            }])
+            ->whereHas('batangs', function($q) use ($skshhk) {
+                $q->where('skshhk_id', $skshhk->id);
+            })
             ->get();
+
+        $selectedBatangs = Batang::where('skshhk_id', $skshhk->id)->pluck('id')->toArray();
 
         return Inertia::render('Admin/LampiranSkshhk/Form', [
             'dokumenAngkutans' => [],
             'skshhk' => $skshhk,
-            'selectedPohons' => $selectedPohons
+            'selectedBatangs' => $selectedBatangs,
+            'selectedPohonsData' => $selectedPohonsData
         ]);
     }
 
@@ -200,8 +212,8 @@ class LampiranSkshhkController extends Controller
         $request->validate([
             'no_skshhk' => 'required|string|max:255',
             'tanggal' => 'required|date',
-            'pohon_ids' => 'array',
-            'pohon_ids.*' => 'exists:pohons,id',
+            'batang_ids' => 'array',
+            'batang_ids.*' => 'exists:batangs,id',
         ]);
 
         $user = Auth::user();
@@ -211,8 +223,8 @@ class LampiranSkshhkController extends Controller
             $skshhk = Skshhk::findOrFail($id);
             
             if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
-                $hasUnauthorized = Pohon::where('skshhk_id', $skshhk->id)
-                    ->whereHas('dokumenAngkutan', function($q) use ($user) {
+                $hasUnauthorized = Batang::where('skshhk_id', $skshhk->id)
+                    ->whereHas('pohon.dokumenAngkutan', function($q) use ($user) {
                         $q->where('kelompok_id', '!=', $user->kelompok_id);
                     })->exists();
                 if ($hasUnauthorized) {
@@ -225,12 +237,10 @@ class LampiranSkshhkController extends Controller
                 'tanggal' => $request->tanggal,
             ]);
 
-            // Detach all trees first
-            Pohon::where('skshhk_id', $skshhk->id)->update(['skshhk_id' => null]);
+            Batang::where('skshhk_id', $skshhk->id)->update(['skshhk_id' => null]);
 
-            // Attach new trees
-            if (!empty($request->pohon_ids)) {
-                Pohon::whereIn('id', $request->pohon_ids)
+            if (!empty($request->batang_ids)) {
+                Batang::whereIn('id', $request->batang_ids)
                     ->update(['skshhk_id' => $skshhk->id]);
             }
 
@@ -251,8 +261,8 @@ class LampiranSkshhkController extends Controller
             $skshhk = Skshhk::findOrFail($id);
 
             if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
-                $hasUnauthorized = Pohon::where('skshhk_id', $skshhk->id)
-                    ->whereHas('dokumenAngkutan', function($q) use ($user) {
+                $hasUnauthorized = Batang::where('skshhk_id', $skshhk->id)
+                    ->whereHas('pohon.dokumenAngkutan', function($q) use ($user) {
                         $q->where('kelompok_id', '!=', $user->kelompok_id);
                     })->exists();
                 if ($hasUnauthorized) {
@@ -260,7 +270,7 @@ class LampiranSkshhkController extends Controller
                 }
             }
 
-            Pohon::where('skshhk_id', $skshhk->id)->update(['skshhk_id' => null]);
+            Batang::where('skshhk_id', $skshhk->id)->update(['skshhk_id' => null]);
             $skshhk->delete();
 
             DB::commit();
@@ -275,14 +285,13 @@ class LampiranSkshhkController extends Controller
     {
         $user = Auth::user();
         $skshhk = Skshhk::with([
-            'pohons.jenisPohon', 
-            'pohons.batangs',
-            'pohons.dokumenAngkutan.kelompok'
+            'batangs.pohon.jenisPohon',
+            'batangs.pohon.dokumenAngkutan.kelompok'
         ])->findOrFail($id);
 
         if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
-            $hasUnauthorized = Pohon::where('skshhk_id', $skshhk->id)
-                ->whereHas('dokumenAngkutan', function($q) use ($user) {
+            $hasUnauthorized = Batang::where('skshhk_id', $skshhk->id)
+                ->whereHas('pohon.dokumenAngkutan', function($q) use ($user) {
                     $q->where('kelompok_id', '!=', $user->kelompok_id);
                 })->exists();
             if ($hasUnauthorized) {
@@ -290,13 +299,11 @@ class LampiranSkshhkController extends Controller
             }
         }
 
-        // Determine Logo and Kelompok from the first tree's dokumen angkutan
-        $firstTree = $skshhk->pohons->first();
-        $dokumen = $firstTree ? $firstTree->dokumenAngkutan : null;
+        $firstBatang = $skshhk->batangs->first();
+        $dokumen = ($firstBatang && $firstBatang->pohon) ? $firstBatang->pohon->dokumenAngkutan : null;
         
         $skshhkData = [];
         
-        // Prepare Rekap
         $rekap = [];
         foreach(['P', 'D', 'T', 'M'] as $kat) {
             $rekap[$kat] = [
@@ -306,22 +313,23 @@ class LampiranSkshhkController extends Controller
             ];
         }
 
-        // Prepare Details
         $details = [];
         $no = 1;
 
-        foreach ($skshhk->pohons as $pohon) {
-            foreach ($pohon->batangs as $batang) {
+        // Group batangs by pohon for display logic if needed, or just iterate batangs
+        $groupedBatangs = $skshhk->batangs->groupBy('pohon_id');
+
+        foreach ($groupedBatangs as $pohonId => $batangs) {
+            $pohon = $batangs->first()->pohon;
+            foreach ($batangs as $batang) {
                 $avgDiameter = floor(($batang->diameter_pangkal + $batang->diameter_ujung) / 2);
                 $subKat = \App\Helpers\MutuHelper::getSubKategori($avgDiameter);
 
-                // Rekap
                 if (isset($rekap[$batang->mutu])) {
                     $rekap[$batang->mutu][$subKat]['jumlah']++;
                     $rekap[$batang->mutu][$subKat]['volume'] += $batang->volume;
                 }
 
-                // Details
                 $idBarcode = '';
                 if ($pohon->tipe === 'barcode' && $pohon->no_barcode) {
                     $idBarcode = $pohon->no_barcode . '.' . str_pad($batang->no_batang, 2, '0', STR_PAD_LEFT);
@@ -358,14 +366,13 @@ class LampiranSkshhkController extends Controller
     {
         $user = Auth::user();
         $skshhk = Skshhk::with([
-            'pohons.jenisPohon', 
-            'pohons.batangs',
-            'pohons.dokumenAngkutan.kelompok'
+            'batangs.pohon.jenisPohon',
+            'batangs.pohon.dokumenAngkutan.kelompok'
         ])->findOrFail($id);
 
         if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
-            $hasUnauthorized = Pohon::where('skshhk_id', $skshhk->id)
-                ->whereHas('dokumenAngkutan', function($q) use ($user) {
+            $hasUnauthorized = Batang::where('skshhk_id', $skshhk->id)
+                ->whereHas('pohon.dokumenAngkutan', function($q) use ($user) {
                     $q->where('kelompok_id', '!=', $user->kelompok_id);
                 })->exists();
             if ($hasUnauthorized) {
@@ -373,8 +380,8 @@ class LampiranSkshhkController extends Controller
             }
         }
 
-        $firstTree = $skshhk->pohons->first();
-        $dokumen = $firstTree ? $firstTree->dokumenAngkutan : null;
+        $firstBatang = $skshhk->batangs->first();
+        $dokumen = ($firstBatang && $firstBatang->pohon) ? $firstBatang->pohon->dokumenAngkutan : null;
         
         $skshhkData = [];
         
@@ -390,8 +397,11 @@ class LampiranSkshhkController extends Controller
         $details = [];
         $no = 1;
 
-        foreach ($skshhk->pohons as $pohon) {
-            foreach ($pohon->batangs as $batang) {
+        $groupedBatangs = $skshhk->batangs->groupBy('pohon_id');
+
+        foreach ($groupedBatangs as $pohonId => $batangs) {
+            $pohon = $batangs->first()->pohon;
+            foreach ($batangs as $batang) {
                 $avgDiameter = floor(($batang->diameter_pangkal + $batang->diameter_ujung) / 2);
                 $subKat = \App\Helpers\MutuHelper::getSubKategori($avgDiameter);
 
@@ -427,5 +437,24 @@ class LampiranSkshhkController extends Controller
 
         $safeNoSkshhk = str_replace(['/', '\\'], '_', $skshhk->no_skshhk);
         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\LampiranSkshhkExport($dokumen, $skshhkData), 'Lampiran_SKSHHK_' . $safeNoSkshhk . '.xlsx');
+    }
+
+    public function migrateOldData(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user->hasRole('admin_cdk')) {
+            abort(403, 'Unauthorized.');
+        }
+
+        try {
+            if (!\Illuminate\Support\Facades\Schema::hasColumn('pohons', 'skshhk_id')) {
+                return response()->json(['success' => false, 'message' => 'Kolom skshhk_id di tabel pohons sudah tidak ada, data mungkin sudah dimigrasi.']);
+            }
+            
+            DB::statement('UPDATE batangs b JOIN pohons p ON b.pohon_id = p.id SET b.skshhk_id = p.skshhk_id WHERE p.skshhk_id IS NOT NULL');
+            return response()->json(['success' => true, 'message' => 'Data SKSHHK lama berhasil dimigrasi ke tabel batangs.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal memigrasi data: ' . $e->getMessage()]);
+        }
     }
 }

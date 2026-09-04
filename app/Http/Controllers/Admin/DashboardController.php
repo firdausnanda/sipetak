@@ -13,7 +13,7 @@ class DashboardController extends Controller
 {
     private function buildQuery(Request $request)
     {
-        $query = Batang::with(['pohon.kelompok', 'pohon.petak', 'pohon.jenisPohon', 'pohon.dokumenAngkutan', 'pohon.skshhk', 'creator'])
+        $query = Batang::with(['pohon.kelompok', 'pohon.petak', 'pohon.jenisPohon', 'pohon.dokumenAngkutan', 'skshhk', 'creator'])
             ->select('batangs.*');
 
         $currentUser = auth()->user();

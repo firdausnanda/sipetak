@@ -1,30 +1,31 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import { ArrowLeft, Save, Square, CheckSquare, Loader2, X, Search, Info } from 'lucide-react';
+import { ArrowLeft, Save, Square, CheckSquare, Loader2, Search, ChevronDown, ChevronRight, X } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { useState, useEffect } from 'react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { id as idLocale } from 'date-fns/locale/id';
-import Modal from '@/Components/Modal';
 
 registerLocale('id', idLocale);
 
-export default function Form({ skshhk, selectedPohons }) {
+export default function Form({ skshhk, selectedBatangs, selectedPohonsData }) {
     const isEdit = !!skshhk;
 
     const { data, setData, post, put, processing, errors } = useForm({
         no_skshhk: skshhk?.no_skshhk || '',
         tanggal: skshhk?.tanggal || '',
-        pohon_ids: selectedPohons ? selectedPohons.map(p => p.id) : [],
+        batang_ids: selectedBatangs || [],
     });
 
     const [availableTrees, setAvailableTrees] = useState([]);
     const [loadingTrees, setLoadingTrees] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedDetailPohon, setSelectedDetailPohon] = useState(null);
 
-    const [selectedTreesData, setSelectedTreesData] = useState(selectedPohons || []);
+    const [expandedAvailableTrees, setExpandedAvailableTrees] = useState([]);
+    const [expandedSelectedTrees, setExpandedSelectedTrees] = useState([]);
+
+    const [selectedTreesData, setSelectedTreesData] = useState(selectedPohonsData || []);
 
     const calculateVolume = (batangs) => {
         if (!batangs || !Array.isArray(batangs)) return '0.00';
@@ -56,42 +57,96 @@ export default function Form({ skshhk, selectedPohons }) {
         }
     };
 
-    const toggleTree = (tree) => {
-        let newIds = [...data.pohon_ids];
-        let newTreesData = [...selectedTreesData];
-
-        if (newIds.includes(tree.id)) {
-            newIds = newIds.filter(id => id !== tree.id);
-            newTreesData = newTreesData.filter(t => t.id !== tree.id);
+    const toggleAvailableTreeExpanded = (treeId) => {
+        if (expandedAvailableTrees.includes(treeId)) {
+            setExpandedAvailableTrees(expandedAvailableTrees.filter(id => id !== treeId));
         } else {
-            newIds.push(tree.id);
-            newTreesData.push(tree);
+            setExpandedAvailableTrees([...expandedAvailableTrees, treeId]);
+        }
+    };
+
+    const toggleSelectedTreeExpanded = (treeId) => {
+        if (expandedSelectedTrees.includes(treeId)) {
+            setExpandedSelectedTrees(expandedSelectedTrees.filter(id => id !== treeId));
+        } else {
+            setExpandedSelectedTrees([...expandedSelectedTrees, treeId]);
+        }
+    };
+
+    const toggleBatang = (batang, tree) => {
+        let newIds = [...data.batang_ids];
+        let newTreesData = [...selectedTreesData];
+        
+        let treeIndex = newTreesData.findIndex(t => t.id === tree.id);
+        
+        if (newIds.includes(batang.id)) {
+            // Remove batang
+            newIds = newIds.filter(id => id !== batang.id);
+            if (treeIndex !== -1) {
+                let currentTree = { ...newTreesData[treeIndex] };
+                currentTree.batangs = currentTree.batangs.filter(b => b.id !== batang.id);
+                if (currentTree.batangs.length === 0) {
+                    newTreesData = newTreesData.filter(t => t.id !== tree.id);
+                } else {
+                    newTreesData[treeIndex] = currentTree;
+                }
+            }
+        } else {
+            // Add batang
+            newIds.push(batang.id);
+            if (treeIndex === -1) {
+                // Clone tree and only add this batang
+                let newTree = { ...tree, batangs: [batang] };
+                newTreesData.push(newTree);
+            } else {
+                let currentTree = { ...newTreesData[treeIndex] };
+                // Ensure batang isn't already there
+                if (!currentTree.batangs.find(b => b.id === batang.id)) {
+                    currentTree.batangs = [...currentTree.batangs, batang];
+                }
+                newTreesData[treeIndex] = currentTree;
+            }
         }
 
-        setData('pohon_ids', newIds);
+        setData('batang_ids', newIds);
         setSelectedTreesData(newTreesData);
     };
 
-    const toggleAllTrees = () => {
-        const isAllSelected = availableTrees.length > 0 && availableTrees.every(tree => data.pohon_ids.includes(tree.id));
+    const toggleAllBatangsInTree = (tree, batangsInTree) => {
+        const allSelected = batangsInTree.every(b => data.batang_ids.includes(b.id));
         
-        let newIds = [...data.pohon_ids];
+        let newIds = [...data.batang_ids];
         let newTreesData = [...selectedTreesData];
+        let treeIndex = newTreesData.findIndex(t => t.id === tree.id);
 
-        if (isAllSelected) {
-            availableTrees.forEach(tree => {
-                newIds = newIds.filter(id => id !== tree.id);
-                newTreesData = newTreesData.filter(t => t.id !== tree.id);
+        if (allSelected) {
+            // Deselect all
+            batangsInTree.forEach(batang => {
+                newIds = newIds.filter(id => id !== batang.id);
             });
+            // Remove tree entirely
+            newTreesData = newTreesData.filter(t => t.id !== tree.id);
         } else {
-            availableTrees.forEach(tree => {
-                if (!newIds.includes(tree.id)) {
-                    newIds.push(tree.id);
-                    newTreesData.push(tree);
+            // Select all
+            let currentTree = treeIndex !== -1 ? { ...newTreesData[treeIndex] } : { ...tree, batangs: [] };
+            
+            batangsInTree.forEach(batang => {
+                if (!newIds.includes(batang.id)) {
+                    newIds.push(batang.id);
+                    if (!currentTree.batangs.find(b => b.id === batang.id)) {
+                        currentTree.batangs.push(batang);
+                    }
                 }
             });
+
+            if (treeIndex === -1) {
+                newTreesData.push(currentTree);
+            } else {
+                newTreesData[treeIndex] = currentTree;
+            }
         }
-        setData('pohon_ids', newIds);
+
+        setData('batang_ids', newIds);
         setSelectedTreesData(newTreesData);
     };
 
@@ -122,7 +177,7 @@ export default function Form({ skshhk, selectedPohons }) {
                         {isEdit ? 'Edit SKSHHK' : 'Tambah SKSHHK'}
                     </h2>
                     <p className="font-body-md text-body-md text-on-surface-variant">
-                        Kelola data SKSHHK dan pilih kayu yang masuk ke dalamnya.
+                        Kelola data SKSHHK dan pilih batang kayu yang masuk ke dalamnya.
                     </p>
                 </div>
             </div>
@@ -168,11 +223,11 @@ export default function Form({ skshhk, selectedPohons }) {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Left Panel: Available Trees */}
-                    <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-6">
-                        <h3 className="font-bold text-lg mb-4 text-primary">Cari & Pilih Kayu</h3>
+                    {/* Left Panel: Available Trees & Batangs */}
+                    <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-6 flex flex-col max-h-[600px]">
+                        <h3 className="font-bold text-lg mb-4 text-primary shrink-0">Cari & Pilih Kayu</h3>
                         
-                        <div className="mb-4 relative">
+                        <div className="mb-4 relative shrink-0">
                             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-outline" />
                             <input
                                 type="text"
@@ -184,111 +239,181 @@ export default function Form({ skshhk, selectedPohons }) {
                         </div>
 
                         {loadingTrees ? (
-                            <div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+                            <div className="flex justify-center p-8 shrink-0"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
                         ) : (
-                            <div className="border border-outline-variant rounded-lg overflow-x-auto max-h-96 overflow-y-auto">
-                                <table className="w-full text-left text-sm">
-                                    <thead className="bg-surface-container sticky top-0">
-                                        <tr>
-                                            <th className="p-3 w-10">
-                                                <button type="button" onClick={toggleAllTrees} className="focus:outline-none">
-                                                    {availableTrees.length > 0 && availableTrees.every(tree => data.pohon_ids.includes(tree.id)) ? (
-                                                        <CheckSquare className="w-5 h-5 text-primary" />
-                                                    ) : (
-                                                        <Square className="w-5 h-5 text-outline" />
-                                                    )}
-                                                </button>
-                                            </th>
-                                            <th className="p-3">Barcode / No</th>
-                                            <th className="p-3">Jenis</th>
-                                            <th className="p-3 text-right">Volume (m³)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-outline-variant">
+                            <div className="border border-outline-variant rounded-lg overflow-y-auto flex-1">
+                                <div className="w-full text-left text-sm">
+                                    <div className="bg-surface-container sticky top-0 flex p-3 font-bold border-b border-outline-variant">
+                                        <div className="w-10"></div>
+                                        <div className="flex-1">Barcode / No</div>
+                                        <div className="flex-1">Jenis</div>
+                                        <div className="w-24 text-right">Volume (m³)</div>
+                                    </div>
+                                    <div className="divide-y divide-outline-variant">
                                         {availableTrees.length === 0 ? (
-                                            <tr><td colSpan="4" className="p-4 text-center text-on-surface-variant">Tidak ada kayu tersedia / ditemukan.</td></tr>
+                                            <div className="p-4 text-center text-on-surface-variant">Tidak ada kayu tersedia / ditemukan.</div>
                                         ) : (
-                                            availableTrees.map(pohon => (
-                                                <tr key={pohon.id} className="hover:bg-surface-container-lowest cursor-pointer" onClick={() => toggleTree(pohon)}>
-                                                    <td className="p-3">
-                                                        {data.pohon_ids.includes(pohon.id) ? <CheckSquare className="w-5 h-5 text-primary" /> : <Square className="w-5 h-5 text-outline" />}
-                                                    </td>
-                                                    <td className="p-3 font-mono">
-                                                        <div>{pohon.no_barcode || '-'}</div>
-                                                        <div className="text-xs text-on-surface-variant">No. Pohon : <span className='text-red-700 font-bold'>{pohon.no_pohon || '-'}</span></div>
-                                                    </td>
-                                                    <td className="p-3">{pohon.jenis_pohon?.nama_jenis || '-'}</td>
-                                                    <td className="p-3 text-right">{calculateVolume(pohon.batangs)}</td>
-                                                </tr>
-                                            ))
+                                            availableTrees.map(pohon => {
+                                                const isExpanded = expandedAvailableTrees.includes(pohon.id);
+                                                const allBatangsSelected = pohon.batangs && pohon.batangs.length > 0 && pohon.batangs.every(b => data.batang_ids.includes(b.id));
+                                                const someBatangsSelected = pohon.batangs && pohon.batangs.some(b => data.batang_ids.includes(b.id));
+                                                
+                                                return (
+                                                    <div key={pohon.id} className="flex flex-col">
+                                                        <div className="flex p-3 hover:bg-surface-container-lowest transition-colors items-center">
+                                                            <div className="w-10 flex items-center gap-2 cursor-pointer" onClick={() => toggleAvailableTreeExpanded(pohon.id)}>
+                                                                {isExpanded ? <ChevronDown className="w-5 h-5 text-on-surface-variant" /> : <ChevronRight className="w-5 h-5 text-on-surface-variant" />}
+                                                            </div>
+                                                            <div className="w-8 flex justify-center cursor-pointer" onClick={() => toggleAllBatangsInTree(pohon, pohon.batangs)}>
+                                                                {allBatangsSelected ? (
+                                                                    <CheckSquare className="w-5 h-5 text-primary" />
+                                                                ) : someBatangsSelected ? (
+                                                                    <div className="w-5 h-5 flex items-center justify-center border-2 border-primary rounded-sm bg-primary/20"><div className="w-2.5 h-2.5 bg-primary rounded-sm"></div></div>
+                                                                ) : (
+                                                                    <Square className="w-5 h-5 text-outline" />
+                                                                )}
+                                                            </div>
+                                                            <div className="flex-1 font-mono cursor-pointer" onClick={() => toggleAvailableTreeExpanded(pohon.id)}>
+                                                                <div>{pohon.no_barcode || '-'}</div>
+                                                                <div className="text-xs text-on-surface-variant">No. Pohon: <span className='text-red-700 font-bold'>{pohon.no_pohon || '-'}</span></div>
+                                                            </div>
+                                                            <div className="flex-1 cursor-pointer" onClick={() => toggleAvailableTreeExpanded(pohon.id)}>
+                                                                {pohon.jenis_pohon?.nama_jenis || '-'}
+                                                            </div>
+                                                            <div className="w-24 text-right cursor-pointer" onClick={() => toggleAvailableTreeExpanded(pohon.id)}>
+                                                                {calculateVolume(pohon.batangs)}
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {isExpanded && pohon.batangs && (
+                                                            <div className="bg-surface-container-lowest border-y border-outline-variant py-2 pl-12 pr-3 space-y-1">
+                                                                <div className="flex text-xs font-bold text-on-surface-variant px-2 py-1 border-b border-outline-variant mb-1">
+                                                                    <div className="w-8"></div>
+                                                                    <div className="w-16">No. Btg</div>
+                                                                    <div className="w-16">Pnjng</div>
+                                                                    <div className="flex-1 text-right">D.Pkl</div>
+                                                                    <div className="flex-1 text-right">D.Ujg</div>
+                                                                    <div className="flex-1 text-right text-primary">Vol</div>
+                                                                </div>
+                                                                {pohon.batangs.map(batang => (
+                                                                    <div key={batang.id} className="flex text-xs px-2 py-1 hover:bg-surface-container-high rounded items-center cursor-pointer" onClick={() => toggleBatang(batang, pohon)}>
+                                                                        <div className="w-8">
+                                                                            {data.batang_ids.includes(batang.id) ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4 text-outline" />}
+                                                                        </div>
+                                                                        <div className="w-16 font-mono">{batang.no_batang}</div>
+                                                                        <div className="w-16">{batang.panjang}</div>
+                                                                        <div className="flex-1 text-right">{batang.diameter_pangkal}</div>
+                                                                        <div className="flex-1 text-right">{batang.diameter_ujung}</div>
+                                                                        <div className="flex-1 text-right text-primary font-bold">{batang.volume}</div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )
+                                            })
                                         )}
-                                    </tbody>
-                                </table>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
 
-                    {/* Right Panel: Selected Trees */}
-                    <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-bold text-lg text-primary">Kayu Terpilih</h3>
-                            <span className="bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">{data.pohon_ids.length} Kayu</span>
+                    {/* Right Panel: Selected Batangs */}
+                    <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-6 flex flex-col max-h-[600px]">
+                        <div className="flex justify-between items-center mb-4 shrink-0">
+                            <h3 className="font-bold text-lg text-primary">Batang Terpilih</h3>
+                            <span className="bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">{data.batang_ids.length} Batang</span>
                         </div>
-                        {errors.pohon_ids && <p className="text-error text-xs mb-2">{errors.pohon_ids}</p>}
+                        {errors.batang_ids && <p className="text-error text-xs mb-2 shrink-0">{errors.batang_ids}</p>}
 
-                        <div className="border border-outline-variant rounded-lg overflow-x-auto max-h-[460px] overflow-y-auto">
-                            <table className="w-full text-left text-sm">
-                                <thead className="bg-surface-container sticky top-0">
-                                    <tr>
-                                        <th className="p-3">Barcode / No</th>
-                                        <th className="p-3">Jenis</th>
-                                        <th className="p-3 text-right">Volume (m³)</th>
-                                        <th className="p-3 text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-outline-variant">
+                        <div className="border border-outline-variant rounded-lg overflow-y-auto flex-1">
+                            <div className="w-full text-left text-sm">
+                                <div className="bg-surface-container sticky top-0 flex p-3 font-bold border-b border-outline-variant">
+                                    <div className="w-8"></div>
+                                    <div className="flex-1">Barcode / No</div>
+                                    <div className="flex-1">Jenis</div>
+                                    <div className="w-24 text-right">Volume (m³)</div>
+                                    <div className="w-10"></div>
+                                </div>
+                                <div className="divide-y divide-outline-variant">
                                     {selectedTreesData.length === 0 ? (
-                                        <tr><td colSpan="4" className="p-4 text-center text-on-surface-variant">Belum ada kayu yang dipilih.</td></tr>
+                                        <div className="p-4 text-center text-on-surface-variant">Belum ada batang yang dipilih.</div>
                                     ) : (
-                                        selectedTreesData.map(pohon => (
-                                            <tr key={pohon.id} className="hover:bg-surface-container-lowest">
-                                                <td className="p-3 font-mono">
-                                                    <div>{pohon.no_barcode || '-'}</div>
-                                                    <div className="text-xs text-on-surface-variant">{pohon.no_pohon || '-'}</div>
-                                                </td>
-                                                <td className="p-3">{pohon.jenis_pohon?.nama_jenis || pohon.jenisPohon?.nama_jenis || '-'}</td>
-                                                <td className="p-3 text-right">{calculateVolume(pohon.batangs)}</td>
-                                                <td className="p-3 text-center">
-                                                    <div className="flex items-center justify-center gap-2">
-                                                        <button type="button" onClick={() => setSelectedDetailPohon(pohon)} className="text-info hover:text-primary" title="Lihat detail batang">
-                                                            <Info className="w-5 h-5" />
-                                                        </button>
-                                                        <button type="button" onClick={() => toggleTree(pohon)} className="text-error hover:opacity-80" title="Batalkan pilihan">
-                                                            <X className="w-5 h-5" />
-                                                        </button>
+                                        selectedTreesData.map(pohon => {
+                                            const isExpanded = expandedSelectedTrees.includes(pohon.id);
+                                            // Only batangs that are selected
+                                            const selectedBatangsInTree = (pohon.batangs || []).filter(b => data.batang_ids.includes(b.id));
+
+                                            if (selectedBatangsInTree.length === 0) return null;
+
+                                            return (
+                                                <div key={pohon.id} className="flex flex-col">
+                                                    <div className="flex p-3 hover:bg-surface-container-lowest transition-colors items-center">
+                                                        <div className="w-8 flex items-center cursor-pointer" onClick={() => toggleSelectedTreeExpanded(pohon.id)}>
+                                                            {isExpanded ? <ChevronDown className="w-5 h-5 text-on-surface-variant" /> : <ChevronRight className="w-5 h-5 text-on-surface-variant" />}
+                                                        </div>
+                                                        <div className="flex-1 font-mono cursor-pointer" onClick={() => toggleSelectedTreeExpanded(pohon.id)}>
+                                                            <div>{pohon.no_barcode || '-'}</div>
+                                                            <div className="text-xs text-on-surface-variant">{pohon.no_pohon || '-'}</div>
+                                                        </div>
+                                                        <div className="flex-1 cursor-pointer" onClick={() => toggleSelectedTreeExpanded(pohon.id)}>
+                                                            {pohon.jenis_pohon?.nama_jenis || pohon.jenisPohon?.nama_jenis || '-'}
+                                                        </div>
+                                                        <div className="w-24 text-right font-bold cursor-pointer" onClick={() => toggleSelectedTreeExpanded(pohon.id)}>
+                                                            {calculateVolume(selectedBatangsInTree)}
+                                                        </div>
+                                                        <div className="w-10 flex justify-end">
+                                                            <button type="button" onClick={() => toggleAllBatangsInTree(pohon, pohon.batangs)} className="text-error hover:opacity-80" title="Hapus semua batang dari pohon ini">
+                                                                <X className="w-5 h-5" />
+                                                            </button>
+                                                        </div>
                                                     </div>
-                                                </td>
-                                            </tr>
-                                        ))
+
+                                                    {isExpanded && (
+                                                        <div className="bg-surface-container-lowest border-y border-outline-variant py-2 pl-10 pr-3 space-y-1">
+                                                            <div className="flex text-xs font-bold text-on-surface-variant px-2 py-1 border-b border-outline-variant mb-1">
+                                                                <div className="w-16">No. Btg</div>
+                                                                <div className="w-16">Pnjng</div>
+                                                                <div className="flex-1 text-right">D.Pkl</div>
+                                                                <div className="flex-1 text-right">D.Ujg</div>
+                                                                <div className="flex-1 text-right text-primary">Vol</div>
+                                                                <div className="w-8"></div>
+                                                            </div>
+                                                            {selectedBatangsInTree.map(batang => (
+                                                                <div key={batang.id} className="flex text-xs px-2 py-1 hover:bg-surface-container-high rounded items-center">
+                                                                    <div className="w-16 font-mono">{batang.no_batang}</div>
+                                                                    <div className="w-16">{batang.panjang}</div>
+                                                                    <div className="flex-1 text-right">{batang.diameter_pangkal}</div>
+                                                                    <div className="flex-1 text-right">{batang.diameter_ujung}</div>
+                                                                    <div className="flex-1 text-right text-primary font-bold">{batang.volume}</div>
+                                                                    <div className="w-8 flex justify-end">
+                                                                        <button type="button" onClick={() => toggleBatang(batang, pohon)} className="text-error hover:opacity-80" title="Hapus batang">
+                                                                            <X className="w-4 h-4" />
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })
                                     )}
-                                </tbody>
+                                </div>
                                 {selectedTreesData.length > 0 && (
-                                    <tfoot className="bg-surface-container font-bold sticky bottom-0">
-                                        <tr>
-                                            <td colSpan="2" className="p-3 text-right">Total Volume:</td>
-                                            <td className="p-3 text-right">
-                                                {selectedTreesData.reduce((total, pohon) => {
-                                                    const treeVol = pohon.batangs && Array.isArray(pohon.batangs) 
-                                                        ? pohon.batangs.reduce((sum, batang) => sum + Number(batang.volume), 0) 
-                                                        : 0;
-                                                    return total + treeVol;
-                                                }, 0).toFixed(2)}
-                                            </td>
-                                            <td></td>
-                                        </tr>
-                                    </tfoot>
+                                    <div className="bg-surface-container font-bold sticky bottom-0 flex p-3 border-t border-outline-variant">
+                                        <div className="flex-1 text-right pr-4">Total Volume:</div>
+                                        <div className="w-32 text-right">
+                                            {selectedTreesData.reduce((total, pohon) => {
+                                                const selectedBatangsInTree = (pohon.batangs || []).filter(b => data.batang_ids.includes(b.id));
+                                                const treeVol = selectedBatangsInTree.reduce((sum, batang) => sum + Number(batang.volume), 0);
+                                                return total + treeVol;
+                                            }, 0).toFixed(2)}
+                                        </div>
+                                    </div>
                                 )}
-                            </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -306,71 +431,6 @@ export default function Form({ skshhk, selectedPohons }) {
                     </button>
                 </div>
             </form>
-
-            {/* Modal Detail Batang */}
-            <Modal show={selectedDetailPohon !== null} onClose={() => setSelectedDetailPohon(null)} maxWidth="2xl">
-                {selectedDetailPohon && (
-                    <div className="p-6">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold text-primary">Detail Batang Pohon</h2>
-                            <button onClick={() => setSelectedDetailPohon(null)} className="text-on-surface-variant hover:text-error">
-                                <X className="w-6 h-6" />
-                            </button>
-                        </div>
-                        
-                        <div className="mb-4 text-sm">
-                            <div className="grid grid-cols-2 gap-2">
-                                <div><span className="font-bold">Barcode:</span> {selectedDetailPohon.no_barcode || '-'}</div>
-                                <div><span className="font-bold">No. Pohon:</span> {selectedDetailPohon.no_pohon || '-'}</div>
-                                <div><span className="font-bold">Jenis:</span> {selectedDetailPohon.jenis_pohon?.nama_jenis || selectedDetailPohon.jenisPohon?.nama_jenis || '-'}</div>
-                            </div>
-                        </div>
-
-                        <div className="overflow-x-auto max-h-96">
-                            <table className="w-full text-left text-sm border-collapse border border-outline-variant">
-                                <thead className="bg-surface-container sticky top-0">
-                                    <tr>
-                                        <th className="p-2 border border-outline-variant">No. Batang</th>
-                                        <th className="p-2 border border-outline-variant text-right">Panjang (m)</th>
-                                        <th className="p-2 border border-outline-variant text-right">Diameter Pangkal (cm)</th>
-                                        <th className="p-2 border border-outline-variant text-right">Diameter Ujung (cm)</th>
-                                        <th className="p-2 border border-outline-variant text-right">Volume (m³)</th>
-                                        <th className="p-2 border border-outline-variant text-center">Mutu</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {(!selectedDetailPohon.batangs || selectedDetailPohon.batangs.length === 0) ? (
-                                        <tr>
-                                            <td colSpan="6" className="p-4 text-center text-on-surface-variant">Tidak ada data batang.</td>
-                                        </tr>
-                                    ) : (
-                                        selectedDetailPohon.batangs.map(batang => (
-                                            <tr key={batang.id} className="hover:bg-surface-container-lowest">
-                                                <td className="p-2 border border-outline-variant text-center">{batang.no_batang}</td>
-                                                <td className="p-2 border border-outline-variant text-right">{batang.panjang}</td>
-                                                <td className="p-2 border border-outline-variant text-right">{batang.diameter_pangkal}</td>
-                                                <td className="p-2 border border-outline-variant text-right">{batang.diameter_ujung}</td>
-                                                <td className="p-2 border border-outline-variant text-right">{batang.volume}</td>
-                                                <td className="p-2 border border-outline-variant text-center">{batang.mutu}</td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <div className="mt-6 flex justify-end">
-                            <button 
-                                type="button" 
-                                onClick={() => setSelectedDetailPohon(null)} 
-                                className="px-4 py-2 bg-surface-container rounded-lg font-bold hover:bg-surface-container-high transition-colors"
-                            >
-                                Tutup
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </Modal>
         </AdminLayout>
     );
 }

@@ -23,8 +23,8 @@ class Skshhk extends Model
         });
     }
 
-    public function pohons()
+    public function batangs()
     {
-        return $this->hasMany(Pohon::class);
+        return $this->hasMany(Batang::class);
     }
 }

@@ -126,6 +126,7 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|ganis|admin_kelompok'])->
     Route::get('/lampiran-skshhk/{id}/export-pdf', [LampiranSkshhkController::class, 'exportPdf'])->name('lampiran_skshhk.export_pdf');
     Route::get('/lampiran-skshhk/{id}/export-excel', [LampiranSkshhkController::class, 'exportExcel'])->name('lampiran_skshhk.export_excel');
     Route::get('/api/lampiran-skshhk/available-trees', [LampiranSkshhkController::class, 'getAvailableTrees'])->name('lampiran_skshhk.available_trees');
+    Route::get('/api/lampiran-skshhk/migrate-old-data', [LampiranSkshhkController::class, 'migrateOldData'])->name('lampiran_skshhk.migrate_old');
 });
 
 Route::middleware(['auth', 'verified', 'role:admin_cdk'])->prefix('admin')->name('admin.')->group(function () {

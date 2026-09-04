@@ -529,10 +529,10 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
                                         </td>
                                         <td className="py-4 px-4 text-right">
                                             <div className="text-sm">{batang.no_batang}</div>
-                                            {batang.pohon?.skshhk ? (
+                                            {batang.skshhk ? (
                                                 <div className="mt-1">
                                                     <span className="inline-block px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed rounded text-[10px] font-bold" title="SKSHHK">
-                                                        {batang.pohon.skshhk.no_skshhk}
+                                                        {batang.skshhk.no_skshhk}
                                                     </span>
                                                 </div>
                                             ) : batang.pohon?.dokumen_angkutan ? (

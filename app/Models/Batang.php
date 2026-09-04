@@ -41,6 +41,11 @@ class Batang extends Model
         return $this->belongsTo(Pohon::class);
     }
 
+    public function skshhk()
+    {
+        return $this->belongsTo(Skshhk::class);
+    }
+
     public function calculateVolume()
     {
         if (!$this->pohon) {

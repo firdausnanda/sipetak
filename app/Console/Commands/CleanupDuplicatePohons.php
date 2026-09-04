@@ -76,10 +76,7 @@ class CleanupDuplicatePohons extends Command
                             $primary->save();
                         }
 
-                        if (is_null($primary->skshhk_id) && !is_null($record->skshhk_id)) {
-                            $primary->skshhk_id = $record->skshhk_id;
-                            $primary->save();
-                        }
+
 
                         // Hapus record duplikat
                         $record->delete();
