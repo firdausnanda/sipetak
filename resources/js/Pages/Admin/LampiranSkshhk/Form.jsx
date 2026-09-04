@@ -245,7 +245,8 @@ export default function Form({ skshhk, selectedBatangs, selectedPohonsData }) {
                                 <div className="w-full text-left text-sm">
                                     <div className="bg-surface-container sticky top-0 flex p-3 font-bold border-b border-outline-variant">
                                         <div className="w-10"></div>
-                                        <div className="flex-1">Barcode / No</div>
+                                        <div className="w-8"></div>
+                                        <div className="flex-[1.5]">Barcode / No</div>
                                         <div className="flex-1">Jenis</div>
                                         <div className="w-24 text-right">Volume (m³)</div>
                                     </div>
@@ -273,7 +274,7 @@ export default function Form({ skshhk, selectedBatangs, selectedPohonsData }) {
                                                                     <Square className="w-5 h-5 text-outline" />
                                                                 )}
                                                             </div>
-                                                            <div className="flex-1 font-mono cursor-pointer" onClick={() => toggleAvailableTreeExpanded(pohon.id)}>
+                                                            <div className="flex-[1.5] font-mono cursor-pointer break-all pr-2" onClick={() => toggleAvailableTreeExpanded(pohon.id)}>
                                                                 <div>{pohon.no_barcode || '-'}</div>
                                                                 <div className="text-xs text-on-surface-variant">No. Pohon: <span className='text-red-700 font-bold'>{pohon.no_pohon || '-'}</span></div>
                                                             </div>
@@ -331,7 +332,7 @@ export default function Form({ skshhk, selectedBatangs, selectedPohonsData }) {
                             <div className="w-full text-left text-sm">
                                 <div className="bg-surface-container sticky top-0 flex p-3 font-bold border-b border-outline-variant">
                                     <div className="w-8"></div>
-                                    <div className="flex-1">Barcode / No</div>
+                                    <div className="flex-[1.5]">Barcode / No</div>
                                     <div className="flex-1">Jenis</div>
                                     <div className="w-24 text-right">Volume (m³)</div>
                                     <div className="w-10"></div>
@@ -353,7 +354,7 @@ export default function Form({ skshhk, selectedBatangs, selectedPohonsData }) {
                                                         <div className="w-8 flex items-center cursor-pointer" onClick={() => toggleSelectedTreeExpanded(pohon.id)}>
                                                             {isExpanded ? <ChevronDown className="w-5 h-5 text-on-surface-variant" /> : <ChevronRight className="w-5 h-5 text-on-surface-variant" />}
                                                         </div>
-                                                        <div className="flex-1 font-mono cursor-pointer" onClick={() => toggleSelectedTreeExpanded(pohon.id)}>
+                                                        <div className="flex-[1.5] font-mono cursor-pointer break-all pr-2" onClick={() => toggleSelectedTreeExpanded(pohon.id)}>
                                                             <div>{pohon.no_barcode || '-'}</div>
                                                             <div className="text-xs text-on-surface-variant">{pohon.no_pohon || '-'}</div>
                                                         </div>
