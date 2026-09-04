@@ -1,4 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
+import { BarChart2, Activity, FileText, Truck, Paperclip, Users, Database, ChevronDown, TreePine, Map, Building, MapPin, ClipboardList, Grid, Settings, History, DownloadCloud, AlertTriangle, LogOut, Menu, RefreshCw, Bell } from 'lucide-react';
+
 import { useState, useEffect } from 'react';
 import Dropdown from '@/Components/Dropdown';
 import Swal from 'sweetalert2';
@@ -41,7 +43,7 @@ export default function AdminLayout({ children }) {
                             href={route('admin.dashboard')}
                             className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dashboard') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                         >
-                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
+                            <BarChart2 className="w-5 h-5" />
                             Hasil Tebangan
                         </Link>
                     )}
@@ -50,7 +52,7 @@ export default function AdminLayout({ children }) {
                             href={route('mobile.dashboard')}
                             className={`flex items-center gap-3 px-4 py-3 ${route().current('mobile.dashboard') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                         >
-                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>monitoring</span>
+                            <Activity className="w-5 h-5" />
                             Monitoring Operasional
                         </Link>
                     )}
@@ -59,7 +61,7 @@ export default function AdminLayout({ children }) {
                             href={route('operations.index')}
                             className={`flex items-center gap-3 px-4 py-3 ${route().current('operations.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                         >
-                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>request_quote</span>
+                            <FileText className="w-5 h-5" />
                             Prestasi Kerja Regu Tebang
                         </Link>
                     )}
@@ -68,7 +70,7 @@ export default function AdminLayout({ children }) {
                             href={route('admin.dokumen_angkutans.index')}
                             className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dokumen_angkutans.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                         >
-                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
+                            <Truck className="w-5 h-5" />
                             Dokumen Angkutan
                         </Link>
                     )}
@@ -77,7 +79,7 @@ export default function AdminLayout({ children }) {
                             href={route('admin.lampiran_skshhk.index')}
                             className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.lampiran_skshhk.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                         >
-                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>attachment</span>
+                            <Paperclip className="w-5 h-5" />
                             Lampiran SKSHHK
                         </Link>
                     )}
@@ -91,7 +93,7 @@ export default function AdminLayout({ children }) {
                             href={route('admin.users.index')}
                             className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.users.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                         >
-                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
+                            <Users className="w-5 h-5" />
                             Manajemen Pengguna
                         </Link>
                     )}
@@ -102,10 +104,10 @@ export default function AdminLayout({ children }) {
                                 className="flex items-center justify-between px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps w-full"
                             >
                                 <div className="flex items-center gap-3">
-                                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dataset</span>
+                                    <Database className="w-5 h-5" />
                                     Master
                                 </div>
-                                <span className={`material-symbols-outlined transition-transform duration-200 ${isMasterOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                                <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isMasterOpen ? 'rotate-180' : ''}`} />
                             </button>
                             
                             <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ease-in-out ${isMasterOpen ? 'max-h-[32rem] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
@@ -113,42 +115,42 @@ export default function AdminLayout({ children }) {
                                     href={route('admin.pohons.index')}
                                     className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.pohons.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                                 >
-                                    <span className="material-symbols-outlined text-sm">park</span>
+                                    <TreePine className="w-4 h-4" />
                                     Pohon
                                 </Link>
                                 <Link
                                     href={route('admin.petaks.index')}
                                     className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.petaks.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                                 >
-                                    <span className="material-symbols-outlined text-sm">map</span>
+                                    <Map className="w-4 h-4" />
                                     Petak
                                 </Link>
                                 <Link
                                     href={route('admin.penerbits.index')}
                                     className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.penerbits.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                                 >
-                                    <span className="material-symbols-outlined text-sm">business</span>
+                                    <Building className="w-4 h-4" />
                                     Tenaga Teknis
                                 </Link>
                                 <Link
                                     href={route('admin.tujuan_bongkars.index')}
                                     className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.tujuan_bongkars.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                                 >
-                                    <span className="material-symbols-outlined text-sm">location_on</span>
+                                    <MapPin className="w-4 h-4" />
                                     Tujuan Bongkar
                                 </Link>
                                 <Link
                                     href={route('admin.rencana_tebangs.index')}
                                     className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.rencana_tebangs.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                                 >
-                                    <span className="material-symbols-outlined text-sm">list_alt</span>
+                                    <ClipboardList className="w-4 h-4" />
                                     Rencana Tebang
                                 </Link>
                                 <Link
                                     href={route('admin.tabel_volumes.index')}
                                     className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.tabel_volumes.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                                 >
-                                    <span className="material-symbols-outlined text-sm">grid_on</span>
+                                    <Grid className="w-4 h-4" />
                                     Tabel Volume
                                 </Link>
                             </div>
@@ -161,10 +163,10 @@ export default function AdminLayout({ children }) {
                                 className="flex items-center justify-between px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps w-full"
                             >
                                 <div className="flex items-center gap-3">
-                                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>settings</span>
+                                    <Settings className="w-5 h-5" />
                                     Pengaturan
                                 </div>
-                                <span className={`material-symbols-outlined transition-transform duration-200 ${isPengaturanOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                                <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isPengaturanOpen ? 'rotate-180' : ''}`} />
                             </button>
                             
                             <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ease-in-out ${isPengaturanOpen ? 'max-h-40 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
@@ -172,14 +174,14 @@ export default function AdminLayout({ children }) {
                                     href={route('admin.activity-log.index')}
                                     className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.activity-log.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                                 >
-                                    <span className="material-symbols-outlined text-sm">history</span>
+                                    <History className="w-4 h-4" />
                                     Log Aktivitas
                                 </Link>
                                 <Link
                                     href={route('admin.backup.index')}
                                     className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.backup.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                                 >
-                                    <span className="material-symbols-outlined text-sm">cloud_download</span>
+                                    <DownloadCloud className="w-4 h-4" />
                                     Backup Database
                                 </Link>
                                 <a
@@ -188,7 +190,7 @@ export default function AdminLayout({ children }) {
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-3 px-4 py-2 ml-4 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps"
                                 >
-                                    <span className="material-symbols-outlined text-sm">error</span>
+                                    <AlertTriangle className="w-4 h-4" />
                                     Error Log
                                 </a>
                             </div>
@@ -202,7 +204,7 @@ export default function AdminLayout({ children }) {
                         as="button"
                         className="w-full flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps"
                     >
-                        <span className="material-symbols-outlined">logout</span>
+                        <LogOut className="w-5 h-5" />
                         Keluar
                     </Link>
                 </div>
@@ -224,7 +226,7 @@ export default function AdminLayout({ children }) {
                         href={route('admin.dashboard')}
                         className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dashboard') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                     >
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
+                        <BarChart2 className="w-5 h-5" />
                         Hasil Tebangan
                     </Link>
                     {user.permissions?.includes('view_felling_progress') && (
@@ -232,7 +234,7 @@ export default function AdminLayout({ children }) {
                             href={route('mobile.dashboard')}
                             className={`flex items-center gap-3 px-4 py-3 ${route().current('mobile.dashboard') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                         >
-                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>monitoring</span>
+                            <Activity className="w-5 h-5" />
                             Monitoring Operasional
                         </Link>
                     )}
@@ -240,7 +242,7 @@ export default function AdminLayout({ children }) {
                         href={route('operations.index')}
                         className={`flex items-center gap-3 px-4 py-3 ${route().current('operations.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                     >
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>request_quote</span>
+                        <FileText className="w-5 h-5" />
                         Prestasi Kerja Regu Tebang
                     </Link>
                     {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
@@ -248,7 +250,7 @@ export default function AdminLayout({ children }) {
                             href={route('admin.dokumen_angkutans.index')}
                             className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.dokumen_angkutans.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                         >
-                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
+                            <Truck className="w-5 h-5" />
                             Dokumen Angkutan
                         </Link>
                     )}
@@ -257,7 +259,7 @@ export default function AdminLayout({ children }) {
                             href={route('admin.lampiran_skshhk.index')}
                             className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.lampiran_skshhk.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                         >
-                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>attachment</span>
+                            <Paperclip className="w-5 h-5" />
                             Lampiran SKSHHK
                         </Link>
                     )}
@@ -271,7 +273,7 @@ export default function AdminLayout({ children }) {
                             href={route('admin.users.index')}
                             className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.users.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                         >
-                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
+                            <Users className="w-5 h-5" />
                             Manajemen Pengguna
                         </Link>
                     )}
@@ -282,10 +284,10 @@ export default function AdminLayout({ children }) {
                                 className="flex items-center justify-between px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps w-full"
                             >
                                 <div className="flex items-center gap-3">
-                                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dataset</span>
+                                    <Database className="w-5 h-5" />
                                     Master
                                 </div>
-                                <span className={`material-symbols-outlined transition-transform duration-200 ${isMasterOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                                <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isMasterOpen ? 'rotate-180' : ''}`} />
                             </button>
                             
                             <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ease-in-out ${isMasterOpen ? 'max-h-[32rem] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
@@ -293,42 +295,42 @@ export default function AdminLayout({ children }) {
                                     href={route('admin.pohons.index')}
                                     className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.pohons.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                                 >
-                                    <span className="material-symbols-outlined text-sm">park</span>
+                                    <TreePine className="w-4 h-4" />
                                     Pohon
                                 </Link>
                                 <Link
                                     href={route('admin.petaks.index')}
                                     className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.petaks.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                                 >
-                                    <span className="material-symbols-outlined text-sm">map</span>
+                                    <Map className="w-4 h-4" />
                                     Petak
                                 </Link>
                                 <Link
                                     href={route('admin.penerbits.index')}
                                     className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.penerbits.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                                 >
-                                    <span className="material-symbols-outlined text-sm">business</span>
+                                    <Building className="w-4 h-4" />
                                     Tenaga Teknis
                                 </Link>
                                 <Link
                                     href={route('admin.tujuan_bongkars.index')}
                                     className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.tujuan_bongkars.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                                 >
-                                    <span className="material-symbols-outlined text-sm">location_on</span>
+                                    <MapPin className="w-4 h-4" />
                                     Tujuan Bongkar
                                 </Link>
                                 <Link
                                     href={route('admin.rencana_tebangs.index')}
                                     className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.rencana_tebangs.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                                 >
-                                    <span className="material-symbols-outlined text-sm">list_alt</span>
+                                    <ClipboardList className="w-4 h-4" />
                                     Rencana Tebang
                                 </Link>
                                 <Link
                                     href={route('admin.tabel_volumes.index')}
                                     className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.tabel_volumes.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                                 >
-                                    <span className="material-symbols-outlined text-sm">grid_on</span>
+                                    <Grid className="w-4 h-4" />
                                     Tabel Volume
                                 </Link>
                             </div>
@@ -341,10 +343,10 @@ export default function AdminLayout({ children }) {
                                 className="flex items-center justify-between px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps w-full"
                             >
                                 <div className="flex items-center gap-3">
-                                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>settings</span>
+                                    <Settings className="w-5 h-5" />
                                     Pengaturan
                                 </div>
-                                <span className={`material-symbols-outlined transition-transform duration-200 ${isPengaturanOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                                <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isPengaturanOpen ? 'rotate-180' : ''}`} />
                             </button>
                             
                             <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ease-in-out ${isPengaturanOpen ? 'max-h-40 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
@@ -352,7 +354,7 @@ export default function AdminLayout({ children }) {
                                     href={route('admin.activity-log.index')}
                                     className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.activity-log.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                                 >
-                                    <span className="material-symbols-outlined text-sm">history</span>
+                                    <History className="w-4 h-4" />
                                     Log Aktivitas
                                 </Link>
                                 <a
@@ -361,7 +363,7 @@ export default function AdminLayout({ children }) {
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-3 px-4 py-2 ml-4 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps"
                                 >
-                                    <span className="material-symbols-outlined text-sm">error</span>
+                                    <AlertTriangle className="w-4 h-4" />
                                     Error Log
                                 </a>
                             </div>
@@ -375,7 +377,7 @@ export default function AdminLayout({ children }) {
                         as="button"
                         className="w-full flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps"
                     >
-                        <span className="material-symbols-outlined">logout</span>
+                        <LogOut className="w-5 h-5" />
                         Keluar
                     </Link>
                 </div>
@@ -391,7 +393,7 @@ export default function AdminLayout({ children }) {
                             onClick={() => setShowingNavigationDropdown(!showingNavigationDropdown)}
                             className="md:hidden w-10 h-10 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors"
                         >
-                            <span className="material-symbols-outlined">menu</span>
+                            <Menu className="w-6 h-6" />
                         </button>
                         <div className="font-headline-md text-headline-md font-bold text-primary md:hidden">SIPETAK Admin</div>
                     </div>
@@ -400,10 +402,10 @@ export default function AdminLayout({ children }) {
                             onClick={() => window.location.reload()}
                             className="w-10 h-10 flex items-center justify-center text-primary hover:bg-surface-container-high transition-colors cursor-pointer active:opacity-80 rounded-full hidden lg:flex"
                         >
-                            <span className="material-symbols-outlined">sync</span>
+                            <RefreshCw className="w-5 h-5" />
                         </button>
                         <button className="w-10 h-10 flex items-center justify-center text-primary hover:bg-surface-container-high transition-colors cursor-pointer active:opacity-80 rounded-full relative">
-                            <span className="material-symbols-outlined">notifications</span>
+                            <Bell className="w-5 h-5" />
                             <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
                         </button>
                         <div className="ml-2 relative">
