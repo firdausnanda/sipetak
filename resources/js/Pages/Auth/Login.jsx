@@ -37,13 +37,8 @@ export default function Login({ status, canResetPassword }) {
                         </p>
                     </div>
                     
-                    <div className="bg-surface-tint bg-opacity-30 p-6 rounded-xl border border-outline-variant backdrop-blur-sm inline-block self-start">
-                        <div className="flex items-center gap-3">
-                            <div>
-                                <p className="font-body-md text-body-md font-medium text-on-primary">CDK Wilayah Trenggalek</p>
-                                <p className="font-data-mono text-data-mono text-primary-fixed-dim text-sm">Sistem Pencatatan Perkiraan Hasil Kayu</p>
-                            </div>
-                        </div>
+                    <div className="absolute bottom-8 left-0 w-full text-center text-on-primary/30 text-sm font-medium tracking-wide">
+                        Copyright &copy; 2026 CDK Wilayah Trenggalek
                     </div>
                 </div>
             </div>
