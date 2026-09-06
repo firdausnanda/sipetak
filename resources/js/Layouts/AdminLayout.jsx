@@ -71,7 +71,7 @@ export default function AdminLayout({ children }) {
                             className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.lhp.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                         >
                             <ClipboardCheck className="w-5 h-5" />
-                            Laporan Hasil Produksi
+                            Laporan Hasil Produksi (LHP)
                         </Link>
                     )}
                     {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
@@ -260,7 +260,7 @@ export default function AdminLayout({ children }) {
                             className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.lhp.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                         >
                             <ClipboardCheck className="w-5 h-5" />
-                            Laporan Hasil Produksi
+                            Laporan Hasil Produksi (LHP)
                         </Link>
                     )}
                     {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
