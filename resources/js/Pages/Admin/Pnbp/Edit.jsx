@@ -1,6 +1,6 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Save, ClipboardList, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Save, ClipboardList, CheckCircle, Loader2 } from 'lucide-react';
 import Select from 'react-select';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { id } from 'date-fns/locale/id';
@@ -215,7 +215,7 @@ export default function Edit({ pnbp, lhps }) {
                             disabled={processing}
                             className="px-6 py-2.5 bg-[#FB8500] text-white rounded-lg font-bold hover:bg-opacity-90 transition-colors flex items-center gap-2 disabled:opacity-50"
                         >
-                            <Save className="w-5 h-5" />
+                            {processing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                             {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
                         </button>
                     </div>

@@ -1,6 +1,6 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, usePage, router } from '@inertiajs/react';
-import { Plus, Edit, Trash2, ClipboardList, X, SlidersHorizontal } from 'lucide-react';
+import { Plus, Edit, Trash2, ClipboardList, X, SlidersHorizontal, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import Modal from '@/Components/Modal';
 import SecondaryButton from '@/Components/SecondaryButton';
@@ -27,6 +27,8 @@ export default function Index({ pnbps, filters = {}, kelompoks = [] }) {
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [pnbpToDelete, setPnbpToDelete] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
 
     const applyFilter = (key, value) => {
         const queryParams = {
@@ -99,11 +101,13 @@ export default function Index({ pnbps, filters = {}, kelompoks = [] }) {
     };
 
     const handleDeleteSubmit = () => {
+        setIsDeleting(true);
         router.delete(route('admin.pnbp.destroy', pnbpToDelete.id), {
             onSuccess: () => {
                 setIsDeleteModalOpen(false);
                 setPnbpToDelete(null);
-            }
+            },
+            onFinish: () => setIsDeleting(false)
         });
     };
 
@@ -128,6 +132,28 @@ export default function Index({ pnbps, filters = {}, kelompoks = [] }) {
                     <p className="font-body-md text-body-md text-on-surface-variant">Kelola pencatatan dan pembayaran tagihan PNBP (PSDH).</p>
                 </div>
                 <div className="flex gap-3">
+                    <button
+                        type="button"
+                        disabled={isExporting}
+                        onClick={() => {
+                            setIsExporting(true);
+                            const params = new URLSearchParams();
+                            if (searchQuery) params.set('search', searchQuery);
+                            if (filterKelompok) params.set('kelompok_id', filterKelompok);
+                            if (filterTanggalBilling) params.set('tanggal_billing', filterTanggalBilling);
+                            if (filterStatus) params.set('status', filterStatus);
+                            const query = params.toString();
+                            const url = route('admin.pnbp.export_rekonsiliasi') + (query ? '?' + query : '');
+                            window.location.href = url;
+                            setTimeout(() => setIsExporting(false), 5000);
+                        }}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors min-h-[48px] font-bold shadow-sm ${isExporting ? 'bg-[#0284c7]/60 text-white cursor-not-allowed' : 'bg-[#0284c7] text-white hover:bg-opacity-90'}`}
+                    >
+                        {isExporting
+                            ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
+                            : 'Export Excel'
+                        }
+                    </button>
                     <Link href={route('admin.pnbp.create')} className="flex items-center gap-2 bg-[#FB8500] text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors min-h-[48px] font-bold shadow-sm">
                         <Plus className="w-[18px] h-[18px]" />
                         Buat Tagihan Baru
@@ -333,7 +359,10 @@ export default function Index({ pnbps, filters = {}, kelompoks = [] }) {
                     </p>
                     <div className="flex justify-end gap-3">
                         <SecondaryButton onClick={() => setIsDeleteModalOpen(false)}>Batal</SecondaryButton>
-                        <DangerButton onClick={handleDeleteSubmit}>Ya, Hapus</DangerButton>
+                        <DangerButton onClick={handleDeleteSubmit} disabled={isDeleting} className="flex items-center gap-2">
+                            {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                            {isDeleting ? 'Menghapus...' : 'Ya, Hapus'}
+                        </DangerButton>
                     </div>
                 </div>
             </Modal>

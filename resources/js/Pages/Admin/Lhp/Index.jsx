@@ -1,6 +1,6 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, usePage, router } from '@inertiajs/react';
-import { Plus, Edit, Trash2, ClipboardCheck, X, SlidersHorizontal } from 'lucide-react';
+import { Plus, Edit, Trash2, ClipboardCheck, X, SlidersHorizontal, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import Modal from '@/Components/Modal';
 import SecondaryButton from '@/Components/SecondaryButton';
@@ -29,6 +29,7 @@ export default function Index({ lhps, filters = {}, kelompoks = [] }) {
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [lhpToDelete, setLhpToDelete] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const applyFilter = (key, value) => {
         const queryParams = {
@@ -105,11 +106,13 @@ export default function Index({ lhps, filters = {}, kelompoks = [] }) {
     };
 
     const handleDeleteSubmit = () => {
+        setIsDeleting(true);
         router.delete(route('admin.lhp.destroy', lhpToDelete.id), {
             onSuccess: () => {
                 setIsDeleteModalOpen(false);
                 setLhpToDelete(null);
-            }
+            },
+            onFinish: () => setIsDeleting(false)
         });
     };
 
@@ -360,7 +363,10 @@ export default function Index({ lhps, filters = {}, kelompoks = [] }) {
                     </p>
                     <div className="flex justify-end gap-3">
                         <SecondaryButton onClick={() => setIsDeleteModalOpen(false)}>Batal</SecondaryButton>
-                        <DangerButton onClick={handleDeleteSubmit}>Ya, Hapus</DangerButton>
+                        <DangerButton onClick={handleDeleteSubmit} disabled={isDeleting} className="flex items-center gap-2">
+                            {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                            {isDeleting ? 'Menghapus...' : 'Ya, Hapus'}
+                        </DangerButton>
                     </div>
                 </div>
             </Modal>

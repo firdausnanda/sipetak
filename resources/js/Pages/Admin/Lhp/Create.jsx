@@ -1,6 +1,6 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
-import { Save, ClipboardCheck } from 'lucide-react';
+import { Save, ClipboardCheck, Loader2 } from 'lucide-react';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
 import InputError from '@/Components/InputError';
@@ -42,6 +42,29 @@ export default function Create({ kelompoks, jenis_pohons, sortimens }) {
             setData('psdh', (volume * tarif).toFixed(2));
         }
     }, [data.volume, data.tarif]);
+
+    const formatRupiah = (value) => {
+        if (value === null || value === undefined || value === '') return '';
+        let valString = value.toString().replace('.', ',');
+        const split = valString.split(',');
+        const sisa = split[0].length % 3;
+        let rupiah = split[0].substr(0, sisa);
+        const ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+        if (ribuan) {
+            const separator = sisa ? '.' : '';
+            rupiah += separator + ribuan.join('.');
+        }
+        return split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+    };
+
+    const handleRupiahChange = (field, value) => {
+        let cleanValue = value.replace(/[^,\d]/g, '');
+        const split = cleanValue.split(',');
+        if (split.length > 2) {
+            cleanValue = split[0] + ',' + split.slice(1).join('');
+        }
+        setData(field, cleanValue.replace(',', '.'));
+    };
 
     const submit = (e) => {
         e.preventDefault();
@@ -169,13 +192,12 @@ export default function Create({ kelompoks, jenis_pohons, sortimens }) {
                             <InputLabel htmlFor="tarif" value="Tarif (Rp)" />
                             <TextInput
                                 id="tarif"
-                                type="number"
-                                step="0.01"
+                                type="text"
                                 name="tarif"
-                                value={data.tarif}
+                                value={formatRupiah(data.tarif)}
                                 className="mt-1 block w-full"
-                                onChange={(e) => setData('tarif', e.target.value)}
-                                placeholder="Contoh: 50000"
+                                onChange={(e) => handleRupiahChange('tarif', e.target.value)}
+                                placeholder="Contoh: 50.000"
                                 required
                             />
                             <InputError message={errors.tarif} className="mt-2" />
@@ -185,13 +207,12 @@ export default function Create({ kelompoks, jenis_pohons, sortimens }) {
                             <InputLabel htmlFor="psdh" value="PSDH (Otomatis Dihitung: Volume x Tarif)" />
                             <TextInput
                                 id="psdh"
-                                type="number"
-                                step="0.01"
+                                type="text"
                                 name="psdh"
-                                value={data.psdh}
+                                value={formatRupiah(data.psdh)}
                                 className="mt-1 block w-full bg-surface-container-high"
-                                onChange={(e) => setData('psdh', e.target.value)}
-                                placeholder="0.00"
+                                onChange={(e) => handleRupiahChange('psdh', e.target.value)}
+                                placeholder="0"
                                 required
                             />
                             <InputError message={errors.psdh} className="mt-2" />
@@ -204,8 +225,8 @@ export default function Create({ kelompoks, jenis_pohons, sortimens }) {
                         Batal
                     </SecondaryButton>
                     <PrimaryButton className="flex items-center gap-2" disabled={processing}>
-                        <Save className="w-4 h-4" />
-                        Simpan LHP
+                        {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                        {processing ? 'Menyimpan...' : 'Simpan LHP'}
                     </PrimaryButton>
                 </div>
             </form>

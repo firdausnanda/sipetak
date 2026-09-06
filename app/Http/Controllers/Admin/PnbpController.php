@@ -9,8 +9,66 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\RekonsiliasiPsdhExport;
+
 class PnbpController extends Controller
 {
+    public function exportRekonsiliasi(Request $request)
+    {
+        $user = Auth::user();
+        
+        // We need LHPs with their PNBP, Kelompok, and JenisPohon
+        $query = Lhp::with(['pnbp', 'kelompok', 'jenisPohon']);
+
+        if ($user->hasRole('admin_kelompok') && $user->kelompok_id) {
+            $query->where('kelompok_id', $user->kelompok_id);
+        }
+
+        // Apply filters similar to index
+        if ($request->filled('kelompok_id')) {
+            $query->where('kelompok_id', $request->kelompok_id);
+        }
+        
+        if ($request->filled('tanggal_billing')) {
+            $query->whereHas('pnbp', function($q) use ($request) {
+                $q->whereDate('tanggal_kode_billing', $request->tanggal_billing);
+            });
+        }
+        
+        if ($request->filled('status')) {
+            if ($request->status === 'lunas') {
+                $query->whereHas('pnbp', function($q) {
+                    $q->whereNotNull('ntpn');
+                });
+            } elseif ($request->status === 'belum_lunas') {
+                $query->whereHas('pnbp', function($q) {
+                    $q->whereNull('ntpn');
+                })->orWhereDoesntHave('pnbp');
+            }
+        }
+
+        $lhps = $query->orderBy('tanggal', 'asc')->get();
+        
+        // Determine Kelompok name for header
+        $kelompokName = 'Semua Kelompok';
+        if ($request->filled('kelompok_id')) {
+            $kelompok = \App\Models\Kelompok::find($request->kelompok_id);
+            if ($kelompok) {
+                $kelompokName = 'KTH ' . $kelompok->nama_kelompok;
+            }
+        } elseif ($user->hasRole('admin_kelompok') && $user->kelompok) {
+            $kelompokName = 'KTH ' . $user->kelompok->nama_kelompok;
+        }
+
+        // Determine Periode (e.g. from filtering by month/year)
+        // Since we don't have a specific month filter in the request yet, we'll leave it generic
+        // Or you can format the current quarter/year
+        $periode = 'Tahun ' . date('Y');
+
+        return Excel::download(new RekonsiliasiPsdhExport($lhps, $kelompokName, $periode), 'Rekonsiliasi_PSDH.xlsx');
+    }
+
     public function index(Request $request)
     {
         $user = Auth::user();

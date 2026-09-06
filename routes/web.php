@@ -134,6 +134,7 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok'])->prefix
     Route::resource('lhp', \App\Http\Controllers\Admin\LhpController::class);
     
     // PNBP (Penerimaan Negara Bukan Pajak)
+    Route::get('pnbp/export-rekonsiliasi', [\App\Http\Controllers\Admin\PnbpController::class, 'exportRekonsiliasi'])->name('pnbp.export_rekonsiliasi');
     Route::resource('pnbp', \App\Http\Controllers\Admin\PnbpController::class);
 });
 
