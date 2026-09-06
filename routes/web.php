@@ -129,6 +129,11 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|ganis|admin_kelompok'])->
     Route::get('/api/lampiran-skshhk/migrate-old-data', [LampiranSkshhkController::class, 'migrateOldData'])->name('lampiran_skshhk.migrate_old');
 });
 
+Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok'])->prefix('admin')->name('admin.')->group(function () {
+    // LHP (Laporan Hasil Produksi)
+    Route::resource('lhp', \App\Http\Controllers\Admin\LhpController::class);
+});
+
 Route::middleware(['auth', 'verified', 'role:admin_cdk'])->prefix('admin')->name('admin.')->group(function () {
     // Log
     Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');

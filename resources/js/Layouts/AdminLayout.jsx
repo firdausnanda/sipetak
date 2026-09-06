@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BarChart2, Activity, FileText, Truck, Paperclip, Users, Database, ChevronDown, TreePine, Map, Building, MapPin, ClipboardList, Grid, Settings, History, DownloadCloud, AlertTriangle, LogOut, Menu, RefreshCw, Bell } from 'lucide-react';
+import { BarChart2, Activity, FileText, ClipboardCheck, Truck, Paperclip, Users, Database, ChevronDown, TreePine, Map, Building, MapPin, ClipboardList, Grid, Settings, History, DownloadCloud, AlertTriangle, LogOut, Menu, RefreshCw, Bell } from 'lucide-react';
 
 import { useState, useEffect } from 'react';
 import Dropdown from '@/Components/Dropdown';
@@ -63,6 +63,15 @@ export default function AdminLayout({ children }) {
                         >
                             <FileText className="w-5 h-5" />
                             Prestasi Kerja Regu Tebang
+                        </Link>
+                    )}
+                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('admin_kelompok')) && (
+                        <Link
+                            href={route('admin.lhp.index')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.lhp.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <ClipboardCheck className="w-5 h-5" />
+                            Laporan Hasil Produksi
                         </Link>
                     )}
                     {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
@@ -245,6 +254,15 @@ export default function AdminLayout({ children }) {
                         <FileText className="w-5 h-5" />
                         Prestasi Kerja Regu Tebang
                     </Link>
+                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('admin_kelompok')) && (
+                        <Link
+                            href={route('admin.lhp.index')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.lhp.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <ClipboardCheck className="w-5 h-5" />
+                            Laporan Hasil Produksi
+                        </Link>
+                    )}
                     {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
                         <Link
                             href={route('admin.dokumen_angkutans.index')}
