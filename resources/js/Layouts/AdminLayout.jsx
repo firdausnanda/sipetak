@@ -357,6 +357,13 @@ export default function AdminLayout({ children }) {
                                     <History className="w-4 h-4" />
                                     Log Aktivitas
                                 </Link>
+                                <Link
+                                    href={route('admin.backup.index')}
+                                    className={`flex items-center gap-3 px-4 py-2 ml-4 ${route().current('admin.backup.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl transition-all active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                                >
+                                    <DownloadCloud className="w-4 h-4" />
+                                    Backup Database
+                                </Link>
                                 <a
                                     href="/admin/error-log"
                                     target="_blank"
