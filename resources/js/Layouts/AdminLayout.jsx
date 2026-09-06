@@ -74,6 +74,15 @@ export default function AdminLayout({ children }) {
                             Laporan Hasil Produksi (LHP)
                         </Link>
                     )}
+                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('admin_kelompok')) && (
+                        <Link
+                            href={route('admin.pnbp.index')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.pnbp.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <ClipboardList className="w-5 h-5" />
+                            PNBP
+                        </Link>
+                    )}
                     {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (
                         <Link
                             href={route('admin.dokumen_angkutans.index')}
@@ -261,6 +270,15 @@ export default function AdminLayout({ children }) {
                         >
                             <ClipboardCheck className="w-5 h-5" />
                             Laporan Hasil Produksi (LHP)
+                        </Link>
+                    )}
+                    {(user.roles?.includes('admin_cdk') || user.roles?.includes('admin_kelompok')) && (
+                        <Link
+                            href={route('admin.pnbp.index')}
+                            className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.pnbp.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
+                        >
+                            <ClipboardList className="w-5 h-5" />
+                            PNBP
                         </Link>
                     )}
                     {(user.roles?.includes('admin_cdk') || user.roles?.includes('ganis')) && (

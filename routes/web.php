@@ -132,6 +132,9 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|ganis|admin_kelompok'])->
 Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok'])->prefix('admin')->name('admin.')->group(function () {
     // LHP (Laporan Hasil Produksi)
     Route::resource('lhp', \App\Http\Controllers\Admin\LhpController::class);
+    
+    // PNBP (Penerimaan Negara Bukan Pajak)
+    Route::resource('pnbp', \App\Http\Controllers\Admin\PnbpController::class);
 });
 
 Route::middleware(['auth', 'verified', 'role:admin_cdk'])->prefix('admin')->name('admin.')->group(function () {

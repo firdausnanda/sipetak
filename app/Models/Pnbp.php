@@ -8,23 +8,24 @@ use Mattiverse\Userstamps\Traits\Userstamps;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
-class Lhp extends Model
+class Pnbp extends Model
 {
     use HasFactory, Userstamps, LogsActivity;
 
     protected $fillable = [
-        'kelompok_id',
-        'no_lhp',
-        'tanggal',
-        'jenis_pohon_id',
-        'sortimen',
-        'volume',
-        'tarif',
-        'psdh',
+        'lhp_id',
+        'kode_billing',
+        'tanggal_kode_billing',
+        'tanggal_bayar',
+        'ntpn',
+        'jumlah',
+        'keterangan',
     ];
 
     protected $casts = [
-        'sortimen' => \App\Enums\SortimenEnum::class,
+        'tanggal_kode_billing' => 'date',
+        'tanggal_bayar' => 'date',
+        'jumlah' => 'decimal:2',
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -35,18 +36,8 @@ class Lhp extends Model
             ->dontLogEmptyChanges();
     }
 
-    public function kelompok()
+    public function lhp()
     {
-        return $this->belongsTo(Kelompok::class);
-    }
-
-    public function jenisPohon()
-    {
-        return $this->belongsTo(JenisPohon::class, 'jenis_pohon_id');
-    }
-
-    public function pnbp()
-    {
-        return $this->hasOne(Pnbp::class);
+        return $this->belongsTo(Lhp::class);
     }
 }
