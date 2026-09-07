@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\TabelVolumeController;
 use App\Http\Controllers\DashboardMonitoringController;
 use App\Http\Controllers\DailyOperationController;
 use App\Http\Controllers\VerificationController;
+use App\Http\Controllers\Admin\MigrationCheckController;
 
 Route::get('/verifikasi/{token}', [VerificationController::class, 'show'])->name('verifikasi.show');
 
@@ -147,6 +148,11 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk'])->prefix('admin')->name
     Route::post('/backup', [BackupController::class, 'store'])->name('backup.store');
     Route::get('/backup/download', [BackupController::class, 'download'])->name('backup.download');
     Route::delete('/backup', [BackupController::class, 'destroy'])->name('backup.destroy');
+
+    // Migration Check – cek tabel di DB vs migrasi pending & mark as migrated
+    Route::get('/migration-check', [MigrationCheckController::class, 'index'])->name('migration-check.index');
+    Route::post('/migration-check/mark-as-migrated', [MigrationCheckController::class, 'markAsMigrated'])->name('migration-check.mark');
+    Route::get('/migration-check/mark-all-existing', [MigrationCheckController::class, 'markAllExisting'])->name('migration-check.mark-all');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
