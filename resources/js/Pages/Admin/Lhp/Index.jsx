@@ -308,7 +308,7 @@ export default function Index({ lhps, filters = {}, kelompoks = [] }) {
                                             Rp {Number(lhp.tarif).toLocaleString('id-ID')}
                                         </td>
                                         <td className="py-4 px-4 text-sm text-right whitespace-nowrap">
-                                            <span className="font-bold text-[#FB8500]">Rp {Number(lhp.psdh).toLocaleString('id-ID')}</span>
+                                            <span className="font-bold text-[#FB8500]">Rp {Math.ceil(Number(lhp.psdh)).toLocaleString('id-ID')}</span>
                                         </td>
                                         <td className="py-4 px-4 text-right">
                                             <div className="flex items-center justify-end gap-2">

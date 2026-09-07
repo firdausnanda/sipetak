@@ -45,12 +45,13 @@
         
         @foreach($lhps as $index => $lhp)
             @php
-                $subTotalPsdh += $lhp->psdh;
-                $jumlahPnbp = $lhp->pnbp ? $lhp->pnbp->jumlah : 0;
-                $subTotalJumlah += $jumlahPnbp;
+                $psdh_ceil = ceil($lhp->psdh);
+                $jumlah_ceil = $lhp->pnbp ? ceil($lhp->pnbp->jumlah) : 0;
+                $subTotalPsdh += $psdh_ceil;
+                $subTotalJumlah += $jumlah_ceil;
                 
-                $grandTotalPsdh += $lhp->psdh;
-                $grandTotalJumlah += $jumlahPnbp;
+                $grandTotalPsdh += $psdh_ceil;
+                $grandTotalJumlah += $jumlah_ceil;
             @endphp
             <tr>
                 <!-- Print Nomor LHP and Tanggal on every row -->
@@ -59,13 +60,13 @@
                 <td style="border: 1px solid black;">{{ $lhp->jenisPohon->nama_jenis ?? '' }} {{ $lhp->sortimen }}</td>
                 <td style="border: 1px solid black;">{{ number_format($lhp->volume, 2, ',', '.') }}</td>
                 <td style="border: 1px solid black;">Rp {{ number_format($lhp->tarif, 0, ',', '.') }}</td>
-                <td style="border: 1px solid black;">Rp {{ number_format($lhp->psdh, 0, ',', '.') }}</td>
-                <td style="border: 1px solid black;">Rp {{ number_format($lhp->psdh, 0, ',', '.') }}</td>
+                <td style="border: 1px solid black;">Rp {{ number_format($psdh_ceil, 0, ',', '.') }}</td>
+                <td style="border: 1px solid black;">Rp {{ number_format($psdh_ceil, 0, ',', '.') }}</td>
                 <td style="border: 1px solid black;">{!! $lhp->pnbp && $lhp->pnbp->kode_billing ? '=&quot;' . $lhp->pnbp->kode_billing . '&quot;' : '' !!}</td>
                 <td style="border: 1px solid black;">{{ $lhp->pnbp?->tanggal_kode_billing ? \Carbon\Carbon::parse($lhp->pnbp->tanggal_kode_billing)->format('d/m/Y') : '' }}</td>
                 <td style="border: 1px solid black;">{{ $lhp->pnbp?->tanggal_bayar ? \Carbon\Carbon::parse($lhp->pnbp->tanggal_bayar)->format('d/m/Y') : '' }}</td>
                 <td style="border: 1px solid black;">{!! $lhp->pnbp && $lhp->pnbp->ntpn ? '=&quot;' . $lhp->pnbp->ntpn . '&quot;' : '' !!}</td>
-                <td style="border: 1px solid black;">{{ $lhp->pnbp?->jumlah ? 'Rp ' . number_format($lhp->pnbp->jumlah, 0, ',', '.') : '' }}</td>
+                <td style="border: 1px solid black;">{{ $lhp->pnbp?->jumlah ? 'Rp ' . number_format($jumlah_ceil, 0, ',', '.') : '' }}</td>
                 <td style="border: 1px solid black;"></td>{{-- Selisih diisi di baris Sub Total --}}
                 <td style="border: 1px solid black;">{{ $lhp->pnbp?->keterangan ?? '' }}</td>
             </tr>

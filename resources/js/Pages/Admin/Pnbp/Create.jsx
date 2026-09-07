@@ -21,7 +21,7 @@ export default function Create({ lhps }) {
 
     const lhpOptions = lhps.map(l => ({
         value: l.id,
-        label: `${l.no_lhp} - ${l.kelompok?.nama_kelompok || 'Tidak ada kelompok'} (Rp ${Number(l.psdh).toLocaleString('id-ID')})`,
+        label: `${l.no_lhp} - ${l.kelompok?.nama_kelompok || 'Tidak ada kelompok'} (Rp ${Math.ceil(Number(l.psdh)).toLocaleString('id-ID')})`,
         psdh: l.psdh
     }));
 
@@ -34,7 +34,7 @@ export default function Create({ lhps }) {
         setData(prevData => ({
             ...prevData,
             lhp_id: selected ? selected.value : '',
-            jumlah: selected ? selected.psdh : ''
+            jumlah: selected ? Math.ceil(Number(selected.psdh)).toString() : ''
         }));
     };
 

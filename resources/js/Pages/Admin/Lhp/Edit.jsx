@@ -39,7 +39,7 @@ export default function Edit({ lhp, kelompoks, jenis_pohons, sortimens }) {
         const volume = parseFloat(data.volume) || 0;
         const tarif = parseFloat(data.tarif) || 0;
         if (volume > 0 && tarif > 0) {
-            setData('psdh', (volume * tarif).toFixed(2));
+            setData('psdh', Math.ceil(volume * tarif).toString());
         }
     }, [data.volume, data.tarif]);
 

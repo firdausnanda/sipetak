@@ -291,7 +291,7 @@ export default function Index({ pnbps, filters = {}, kelompoks = [] }) {
                                         </td>
                                         <td className="py-4 px-4 text-sm font-bold font-mono">{pnbp.kode_billing}</td>
                                         <td className="py-4 px-4 text-sm text-on-surface-variant">{formatDate(pnbp.tanggal_kode_billing)}</td>
-                                        <td className="py-4 px-4 text-sm font-bold text-[#FB8500]">Rp {Number(pnbp.jumlah).toLocaleString('id-ID')}</td>
+                                        <td className="py-4 px-4 text-sm font-bold text-[#FB8500]">Rp {Math.ceil(Number(pnbp.jumlah)).toLocaleString('id-ID')}</td>
                                         <td className="py-4 px-4 text-sm">
                                             {pnbp.ntpn ? (
                                                 <div>
