@@ -57,7 +57,7 @@
                 <td style="border: 1px solid black;">{{ $lhp->no_lhp }}</td>
                 <td style="border: 1px solid black;">{{ $lhp->tanggal ? \Carbon\Carbon::parse($lhp->tanggal)->format('d/m/Y') : '' }}</td>
                 <td style="border: 1px solid black;">{{ $lhp->jenisPohon->nama_jenis ?? '' }} {{ $lhp->sortimen }}</td>
-                <td style="border: 1px solid black;">{{ str_replace('.', ',', (float) round($lhp->volume, 2)) }}</td>
+                <td style="border: 1px solid black;">{{ number_format($lhp->volume, 2, ',', '.') }}</td>
                 <td style="border: 1px solid black;">Rp {{ number_format($lhp->tarif, 0, ',', '.') }}</td>
                 <td style="border: 1px solid black;">Rp {{ number_format($lhp->psdh, 0, ',', '.') }}</td>
                 <td style="border: 1px solid black;">Rp {{ number_format($lhp->psdh, 0, ',', '.') }}</td>

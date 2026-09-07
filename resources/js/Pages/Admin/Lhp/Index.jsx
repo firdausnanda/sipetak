@@ -276,14 +276,15 @@ export default function Index({ lhps, filters = {}, kelompoks = [] }) {
                                 <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Tanggal</th>
                                 <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Jenis Kayu / Sortimen</th>
                                 <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Volume</th>
-                                <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Tarif / PSDH</th>
+                                <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant text-right">Tarif</th>
+                                <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant text-right">PSDH</th>
                                 <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant text-right">Aksi</th>
                             </tr>
                         </thead>
                         <tbody className="font-body-md text-body-md text-[#1B4332] divide-y divide-outline-variant">
                             {lhps.data.length === 0 ? (
                                 <tr>
-                                    <td colSpan="7" className="py-12 text-center">
+                                    <td colSpan="8" className="py-12 text-center">
                                         <div className="flex flex-col items-center justify-center text-on-surface-variant">
                                             <ClipboardCheck className="w-12 h-12 mb-3 opacity-50" />
                                             <p className="font-bold text-lg mb-1">Tidak ada data LHP ditemukan</p>
@@ -300,16 +301,14 @@ export default function Index({ lhps, filters = {}, kelompoks = [] }) {
                                             <div className="font-bold">{lhp.jenis_pohon?.nama_jenis || '-'}</div>
                                             <div className="text-xs text-on-surface-variant uppercase">{lhp.sortimen}</div>
                                         </td>
-                                        <td className="py-4 px-4 text-sm font-semibold">{lhp.volume} <span className="text-xs text-on-surface-variant font-normal">m³</span></td>
-                                        <td className="py-4 px-4 text-sm">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs text-on-surface-variant">Tarif:</span>
-                                                <span>Rp {Number(lhp.tarif).toLocaleString('id-ID')}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs text-on-surface-variant">PSDH:</span>
-                                                <span className="font-bold text-[#FB8500]">Rp {Number(lhp.psdh).toLocaleString('id-ID')}</span>
-                                            </div>
+                                        <td className="py-4 px-4 text-sm font-semibold">
+                                            {Number(lhp.volume).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs text-on-surface-variant font-normal">m³</span>
+                                        </td>
+                                        <td className="py-4 px-4 text-sm text-right whitespace-nowrap">
+                                            Rp {Number(lhp.tarif).toLocaleString('id-ID')}
+                                        </td>
+                                        <td className="py-4 px-4 text-sm text-right whitespace-nowrap">
+                                            <span className="font-bold text-[#FB8500]">Rp {Number(lhp.psdh).toLocaleString('id-ID')}</span>
                                         </td>
                                         <td className="py-4 px-4 text-right">
                                             <div className="flex items-center justify-end gap-2">
