@@ -57,14 +57,14 @@
                 <td style="border: 1px solid black;">{{ $lhp->no_lhp }}</td>
                 <td style="border: 1px solid black;">{{ $lhp->tanggal ? \Carbon\Carbon::parse($lhp->tanggal)->format('d/m/Y') : '' }}</td>
                 <td style="border: 1px solid black;">{{ $lhp->jenisPohon->nama_jenis ?? '' }} {{ $lhp->sortimen }}</td>
-                <td style="border: 1px solid black;">{{ $lhp->volume }}</td>
+                <td style="border: 1px solid black;">{{ str_replace('.', ',', (float) round($lhp->volume, 2)) }}</td>
                 <td style="border: 1px solid black;">Rp {{ number_format($lhp->tarif, 0, ',', '.') }}</td>
                 <td style="border: 1px solid black;">Rp {{ number_format($lhp->psdh, 0, ',', '.') }}</td>
                 <td style="border: 1px solid black;"></td>
-                <td style="border: 1px solid black;">{{ $lhp->pnbp?->kode_billing ?? '' }}</td>
+                <td style="border: 1px solid black; mso-number-format:'\@';">{{ $lhp->pnbp?->kode_billing ?? '' }}</td>
                 <td style="border: 1px solid black;">{{ $lhp->pnbp?->tanggal_kode_billing ? \Carbon\Carbon::parse($lhp->pnbp->tanggal_kode_billing)->format('d/m/Y') : '' }}</td>
                 <td style="border: 1px solid black;">{{ $lhp->pnbp?->tanggal_bayar ? \Carbon\Carbon::parse($lhp->pnbp->tanggal_bayar)->format('d/m/Y') : '' }}</td>
-                <td style="border: 1px solid black;">{{ $lhp->pnbp?->ntpn ?? '' }}</td>
+                <td style="border: 1px solid black; mso-number-format:'\@';">{{ $lhp->pnbp?->ntpn ?? '' }}</td>
                 <td style="border: 1px solid black;">{{ $lhp->pnbp?->jumlah ? 'Rp ' . number_format($lhp->pnbp->jumlah, 0, ',', '.') : '' }}</td>
                 <td style="border: 1px solid black;"></td>{{-- Selisih diisi di baris Sub Total --}}
                 <td style="border: 1px solid black;">{{ $lhp->pnbp?->keterangan ?? '' }}</td>

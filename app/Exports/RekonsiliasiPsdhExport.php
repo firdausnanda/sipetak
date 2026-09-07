@@ -10,7 +10,10 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class RekonsiliasiPsdhExport implements FromView, ShouldAutoSize, WithStyles
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+
+class RekonsiliasiPsdhExport implements FromView, ShouldAutoSize, WithStyles, WithColumnFormatting
 {
     protected $lhps;
     protected $kelompokName;
@@ -82,5 +85,13 @@ class RekonsiliasiPsdhExport implements FromView, ShouldAutoSize, WithStyles
                 ],
             ]);
         }
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'H' => NumberFormat::FORMAT_TEXT, // Kode Billing
+            'K' => NumberFormat::FORMAT_TEXT, // NTPN
+        ];
     }
 }
