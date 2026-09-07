@@ -4,9 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class MigrationCheckController extends Controller
 {
@@ -17,7 +15,7 @@ class MigrationCheckController extends Controller
     public function index()
     {
         $pendingMigrations = $this->getPendingMigrations();
-        $existingTables    = Schema::getTableListing();
+        $existingTables    = $this->getExistingTables();
         $maxBatch          = DB::table('migrations')->max('batch') ?? 0;
 
         $results = [];
@@ -30,17 +28,17 @@ class MigrationCheckController extends Controller
             }
 
             $results[] = [
-                'migration'    => $migration,
-                'guessed_table'=> $guessedTable,
-                'table_exists' => $tableExists,
-                'can_mark'     => $tableExists || $this->isAlterMigration($migration),
+                'migration'     => $migration,
+                'guessed_table' => $guessedTable,
+                'table_exists'  => $tableExists,
+                'can_mark'      => $tableExists || $this->isAlterMigration($migration),
             ];
         }
 
         return response()->json([
-            'max_batch'           => $maxBatch,
-            'existing_tables'     => $existingTables,
-            'pending_migrations'  => $results,
+            'max_batch'          => $maxBatch,
+            'existing_tables'    => $existingTables,
+            'pending_migrations' => $results,
         ]);
     }
 
@@ -58,10 +56,10 @@ class MigrationCheckController extends Controller
             'migrations.*' => 'required|string',
         ]);
 
-        $maxBatch  = (DB::table('migrations')->max('batch') ?? 0) + 1;
-        $pending   = $this->getPendingMigrations();
-        $marked    = [];
-        $skipped   = [];
+        $maxBatch = (DB::table('migrations')->max('batch') ?? 0) + 1;
+        $pending  = $this->getPendingMigrations();
+        $marked   = [];
+        $skipped  = [];
 
         foreach ($request->input('migrations') as $migration) {
             if (!in_array($migration, $pending)) {
@@ -69,7 +67,6 @@ class MigrationCheckController extends Controller
                 continue;
             }
 
-            // Pastikan belum ada di tabel migrations
             $exists = DB::table('migrations')
                 ->where('migration', $migration)
                 ->exists();
@@ -88,11 +85,11 @@ class MigrationCheckController extends Controller
         }
 
         return response()->json([
-            'success'  => true,
-            'batch'    => $maxBatch,
-            'marked'   => $marked,
-            'skipped'  => $skipped,
-            'message'  => count($marked) . ' migrasi berhasil di-mark sebagai migrated.',
+            'success' => true,
+            'batch'   => $maxBatch,
+            'marked'  => $marked,
+            'skipped' => $skipped,
+            'message' => count($marked) . ' migrasi berhasil di-mark sebagai migrated.',
         ]);
     }
 
@@ -105,7 +102,7 @@ class MigrationCheckController extends Controller
     public function markAllExisting()
     {
         $pendingMigrations = $this->getPendingMigrations();
-        $existingTables    = Schema::getTableListing();
+        $existingTables    = $this->getExistingTables();
         $maxBatch          = (DB::table('migrations')->max('batch') ?? 0) + 1;
 
         $marked  = [];
@@ -116,14 +113,15 @@ class MigrationCheckController extends Controller
             $canMark      = false;
 
             if ($guessedTable && in_array($guessedTable, $existingTables)) {
+                // Tabel sudah ada di DB
                 $canMark = true;
             } elseif ($this->isAlterMigration($migration)) {
-                // Migrasi ADD/ALTER/REMOVE column – asumsikan tabel sudah ada
+                // Migrasi ADD/ALTER/REMOVE column – tabel target pasti sudah ada
                 $canMark = true;
             }
 
             if (!$canMark) {
-                $skipped[] = $migration . ' (tabel tidak ditemukan di database)';
+                $skipped[] = $migration . ' (tabel tidak ditemukan: ' . ($guessedTable ?? '?') . ')';
                 continue;
             }
 
@@ -158,17 +156,33 @@ class MigrationCheckController extends Controller
     // -------------------------------------------------------------------------
 
     /**
+     * Ambil nama tabel yang benar-benar ada di database aktif saat ini.
+     * Menggunakan INFORMATION_SCHEMA agar tidak terpengaruh prefix schema
+     * yang dikembalikan oleh Schema::getTableListing() di MySQL multi-DB.
+     */
+    private function getExistingTables(): array
+    {
+        $database = config('database.connections.' . config('database.default') . '.database');
+
+        $tables = DB::select(
+            'SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = ?',
+            [$database]
+        );
+
+        return array_map(fn($row) => $row->TABLE_NAME, $tables);
+    }
+
+    /**
      * Ambil daftar nama migrasi yang statusnya "Pending".
      */
     private function getPendingMigrations(): array
     {
-        // Semua file migrasi yang ada
         $migrationFiles = glob(database_path('migrations/*.php'));
-        $allMigrations  = array_map(function ($file) {
-            return pathinfo($file, PATHINFO_FILENAME);
-        }, $migrationFiles);
+        $allMigrations  = array_map(
+            fn($file) => pathinfo($file, PATHINFO_FILENAME),
+            $migrationFiles
+        );
 
-        // Yang sudah ada di tabel migrations (sudah ran)
         $ranMigrations = DB::table('migrations')->pluck('migration')->toArray();
 
         return array_values(array_diff($allMigrations, $ranMigrations));
@@ -185,7 +199,7 @@ class MigrationCheckController extends Controller
             return $m[1];
         }
 
-        // add_xxx_to_yyy_table
+        // add_xxx_to_yyy_table  /  remove_xxx_from_yyy_table
         if (preg_match('/(?:add|remove|drop)_.+_(?:to|from|in)_(.+?)(?:_table)?$/', $migration, $m)) {
             return $m[1];
         }
@@ -208,13 +222,17 @@ class MigrationCheckController extends Controller
      */
     private function isAlterMigration(string $migration): bool
     {
-        $alterKeywords = ['add_', 'remove_', 'drop_', 'alter_', 'change_', 'move_', 'update_', 'rename_'];
-        foreach ($alterKeywords as $keyword) {
-            // Cari setelah prefix tanggal: "2026_08_21_092754_"
-            if (preg_match('/\d{4}_\d{2}_\d{2}_\d{6}_(' . preg_quote($keyword, '/') . ')/', $migration)) {
-                return true;
+        // Cari keyword setelah prefix tanggal: "2026_08_21_092754_"
+        if (preg_match('/\d{4}_\d{2}_\d{2}_\d{6}_(.+)/', $migration, $m)) {
+            $name = $m[1];
+            $alterKeywords = ['add_', 'remove_', 'drop_', 'alter_', 'change_', 'move_', 'update_', 'rename_'];
+            foreach ($alterKeywords as $keyword) {
+                if (str_starts_with($name, $keyword)) {
+                    return true;
+                }
             }
         }
+
         return false;
     }
 }
