@@ -10,3 +10,8 @@ Artisan::command('inspire', function () {
 
 // Menjadwalkan backup database setiap jam 2 pagi
 Schedule::command('backup:run --only-db')->dailyAt('02:00');
+
+// TASK TESTING CRON JOB (Bisa dihapus jika sudah berhasil)
+Schedule::call(function () {
+    \Illuminate\Support\Facades\Log::info('Test Cron Job Berhasil! Waktu: ' . now());
+})->everyMinute();
