@@ -1,6 +1,6 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, usePage, router } from '@inertiajs/react';
-import { Plus, Edit, Trash2, ClipboardCheck, X, SlidersHorizontal, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, ClipboardCheck, X, SlidersHorizontal, Loader2, User } from 'lucide-react';
 import { useState } from 'react';
 import Modal from '@/Components/Modal';
 import SecondaryButton from '@/Components/SecondaryButton';
@@ -12,7 +12,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 registerLocale('id', id);
 
-export default function Index({ lhps, filters = {}, kelompoks = [] }) {
+export default function Index({ lhps, filters = {}, kelompoks = [], summary = {} }) {
     const { auth } = usePage().props;
     const user = auth.user;
     
@@ -144,6 +144,53 @@ export default function Index({ lhps, filters = {}, kelompoks = [] }) {
                 </div>
             </div>
 
+            {/* Stats/Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm relative overflow-hidden transition-all hover:shadow-md hover:border-[#10b981]/40 group">
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#10b981]/5 rounded-bl-[100px] -z-10 transition-transform group-hover:scale-110"></div>
+                    <div className="flex items-center justify-between relative z-10">
+                        <div className="flex flex-col">
+                            <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total LHP</span>
+                            <span className="font-display text-[2rem] font-bold text-on-surface">
+                                {new Intl.NumberFormat('id-ID').format(summary.total_lhp || 0)} <span className="text-sm font-medium text-on-surface-variant">Data</span>
+                            </span>
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-[#10b981]/10 flex items-center justify-center text-[#10b981]">
+                            <ClipboardCheck className="w-6 h-6" />
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm relative overflow-hidden transition-all hover:shadow-md hover:border-[#f59e0b]/40 group">
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#f59e0b]/5 rounded-bl-[100px] -z-10 transition-transform group-hover:scale-110"></div>
+                    <div className="flex items-center justify-between relative z-10">
+                        <div className="flex flex-col">
+                            <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total Volume</span>
+                            <span className="font-display text-[2rem] font-bold text-on-surface">
+                                {new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(summary.total_volume || 0)} <span className="text-sm font-medium text-on-surface-variant">m³</span>
+                            </span>
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-[#f59e0b]/10 flex items-center justify-center text-[#f59e0b]">
+                            <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm relative overflow-hidden transition-all hover:shadow-md hover:border-[#3b82f6]/40 group">
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#3b82f6]/5 rounded-bl-[100px] -z-10 transition-transform group-hover:scale-110"></div>
+                    <div className="flex items-center justify-between relative z-10">
+                        <div className="flex flex-col">
+                            <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total PSDH</span>
+                            <span className="font-display text-[2rem] font-bold text-on-surface">
+                                <span className="text-sm font-medium text-on-surface-variant mr-1">Rp</span>
+                                {new Intl.NumberFormat('id-ID').format(Math.ceil(summary.total_psdh || 0))}
+                            </span>
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-[#3b82f6]/10 flex items-center justify-center text-[#3b82f6]">
+                            <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* Filter Section */}
             <div className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm mb-6 z-20 relative">
                 <div className="flex flex-col sm:flex-row gap-4 items-end">
@@ -272,19 +319,18 @@ export default function Index({ lhps, filters = {}, kelompoks = [] }) {
                         <thead className="bg-surface-container-low border-b border-outline-variant sticky top-0 z-10">
                             <tr>
                                 <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">No LHP</th>
-                                <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Kelompok</th>
-                                <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Tanggal</th>
+                                <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Kelompok / Tanggal</th>
                                 <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Jenis Kayu / Sortimen</th>
                                 <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Volume</th>
-                                <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant text-right">Tarif</th>
-                                <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant text-right">PSDH</th>
+                                <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant text-right">Tarif / PSDH</th>
+                                <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">Input Oleh</th>
                                 <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant text-right">Aksi</th>
                             </tr>
                         </thead>
                         <tbody className="font-body-md text-body-md text-[#1B4332] divide-y divide-outline-variant">
                             {lhps.data.length === 0 ? (
                                 <tr>
-                                    <td colSpan="8" className="py-12 text-center">
+                                    <td colSpan="7" className="py-12 text-center">
                                         <div className="flex flex-col items-center justify-center text-on-surface-variant">
                                             <ClipboardCheck className="w-12 h-12 mb-3 opacity-50" />
                                             <p className="font-bold text-lg mb-1">Tidak ada data LHP ditemukan</p>
@@ -295,8 +341,10 @@ export default function Index({ lhps, filters = {}, kelompoks = [] }) {
                                 lhps.data.map((lhp) => (
                                     <tr key={lhp.id} className="even:bg-surface/30 odd:bg-surface-container-lowest hover:bg-surface-container transition-colors">
                                         <td className="py-4 px-4 font-bold text-sm text-primary">{lhp.no_lhp}</td>
-                                        <td className="py-4 px-4 text-sm text-on-surface-variant">{lhp.kelompok?.nama_kelompok || '-'}</td>
-                                        <td className="py-4 px-4 text-sm text-on-surface-variant">{formatDate(lhp.tanggal)}</td>
+                                        <td className="py-4 px-4 text-sm text-on-surface-variant">
+                                            <div className="font-bold text-on-surface">{lhp.kelompok?.nama_kelompok || '-'}</div>
+                                            <div className="text-xs mt-1">{formatDate(lhp.tanggal)}</div>
+                                        </td>
                                         <td className="py-4 px-4 text-sm">
                                             <div className="font-bold">{lhp.jenis_pohon?.nama_jenis || '-'}</div>
                                             <div className="text-xs text-on-surface-variant uppercase">{lhp.sortimen}</div>
@@ -305,10 +353,14 @@ export default function Index({ lhps, filters = {}, kelompoks = [] }) {
                                             {Number(lhp.volume).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs text-on-surface-variant font-normal">m³</span>
                                         </td>
                                         <td className="py-4 px-4 text-sm text-right whitespace-nowrap">
-                                            Rp {Number(lhp.tarif).toLocaleString('id-ID')}
+                                            <div className="text-on-surface-variant text-xs mb-1">Rp {Number(lhp.tarif).toLocaleString('id-ID')}</div>
+                                            <div className="font-bold text-[#FB8500]">Rp {Math.ceil(Number(lhp.psdh)).toLocaleString('id-ID')}</div>
                                         </td>
-                                        <td className="py-4 px-4 text-sm text-right whitespace-nowrap">
-                                            <span className="font-bold text-[#FB8500]">Rp {Math.ceil(Number(lhp.psdh)).toLocaleString('id-ID')}</span>
+                                        <td className="py-4 px-4 text-sm whitespace-nowrap text-on-surface-variant">
+                                            <div className="flex items-center gap-2">
+                                                <User className="text-outline w-[14px] h-[14px]" />
+                                                {lhp.creator?.name || 'Sistem'}
+                                            </div>
                                         </td>
                                         <td className="py-4 px-4 text-right">
                                             <div className="flex items-center justify-end gap-2">

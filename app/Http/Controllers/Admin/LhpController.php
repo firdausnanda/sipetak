@@ -15,7 +15,7 @@ class LhpController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $query = Lhp::with(['kelompok', 'jenisPohon']);
+        $query = Lhp::with(['kelompok', 'jenisPohon', 'creator']);
 
         // Scope by user's kelompok if admin_kelompok
         if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
@@ -52,6 +52,12 @@ class LhpController extends Controller
             $query->where('volume', '<=', $request->max_volume);
         }
 
+        $summary = [
+            'total_lhp' => (clone $query)->count(),
+            'total_volume' => (clone $query)->sum('volume'),
+            'total_psdh' => (clone $query)->sum('psdh'),
+        ];
+
         $lhps = $query->latest()->paginate(10)->withQueryString();
 
         $kelompoks = [];
@@ -61,6 +67,7 @@ class LhpController extends Controller
 
         return Inertia::render('Admin/Lhp/Index', [
             'lhps' => $lhps,
+            'summary' => $summary,
             'filters' => $request->only(['search', 'kelompok_id', 'tanggal', 'sortimen', 'min_volume', 'max_volume']),
             'kelompoks' => $kelompoks
         ]);
