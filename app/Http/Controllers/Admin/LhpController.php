@@ -52,7 +52,20 @@ class LhpController extends Controller
             $query->where('volume', '<=', $request->max_volume);
         }
 
+        $batangQuery = \App\Models\Batang::whereHas('pohon', function($q) use ($user, $request) {
+            if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
+                $q->where('kelompok_id', $user->kelompok_id);
+            }
+            if ($request->filled('kelompok_id')) {
+                $q->where('kelompok_id', $request->kelompok_id);
+            }
+            if ($request->filled('tanggal')) {
+                $q->whereDate('tanggal', $request->tanggal);
+            }
+        });
+
         $summary = [
+            'total_volume_batang' => $batangQuery->sum('volume'),
             'total_lhp' => (clone $query)->count(),
             'total_volume' => (clone $query)->sum('volume'),
             'total_psdh' => (clone $query)->sum('psdh'),

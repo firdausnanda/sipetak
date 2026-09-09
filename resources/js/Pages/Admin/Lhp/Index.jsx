@@ -1,6 +1,6 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, usePage, router } from '@inertiajs/react';
-import { Plus, Edit, Trash2, ClipboardCheck, X, SlidersHorizontal, Loader2, User } from 'lucide-react';
+import { Plus, Edit, Trash2, ClipboardCheck, X, SlidersHorizontal, Loader2, User, Trees } from 'lucide-react';
 import { useState } from 'react';
 import Modal from '@/Components/Modal';
 import SecondaryButton from '@/Components/SecondaryButton';
@@ -146,17 +146,17 @@ export default function Index({ lhps, filters = {}, kelompoks = [], summary = {}
 
             {/* Stats/Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm relative overflow-hidden transition-all hover:shadow-md hover:border-[#10b981]/40 group">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#10b981]/5 rounded-bl-[100px] -z-10 transition-transform group-hover:scale-110"></div>
+                <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm relative overflow-hidden transition-all hover:shadow-md hover:border-[#8b5cf6]/40 group">
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#8b5cf6]/5 rounded-bl-[100px] -z-10 transition-transform group-hover:scale-110"></div>
                     <div className="flex items-center justify-between relative z-10">
                         <div className="flex flex-col">
-                            <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total LHP</span>
+                            <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total Volume Batang</span>
                             <span className="font-display text-[2rem] font-bold text-on-surface">
-                                {new Intl.NumberFormat('id-ID').format(summary.total_lhp || 0)} <span className="text-sm font-medium text-on-surface-variant">Data</span>
+                                {new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(summary.total_volume_batang || 0)} <span className="text-sm font-medium text-on-surface-variant">m³</span>
                             </span>
                         </div>
-                        <div className="w-12 h-12 rounded-xl bg-[#10b981]/10 flex items-center justify-center text-[#10b981]">
-                            <ClipboardCheck className="w-6 h-6" />
+                        <div className="w-12 h-12 rounded-xl bg-[#8b5cf6]/10 flex items-center justify-center text-[#8b5cf6]">
+                            <Trees className="w-6 h-6" />
                         </div>
                     </div>
                 </div>
@@ -164,13 +164,16 @@ export default function Index({ lhps, filters = {}, kelompoks = [], summary = {}
                     <div className="absolute right-0 top-0 w-24 h-24 bg-[#f59e0b]/5 rounded-bl-[100px] -z-10 transition-transform group-hover:scale-110"></div>
                     <div className="flex items-center justify-between relative z-10">
                         <div className="flex flex-col">
-                            <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total Volume</span>
+                            <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Volume & Jumlah LHP</span>
                             <span className="font-display text-[2rem] font-bold text-on-surface">
                                 {new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(summary.total_volume || 0)} <span className="text-sm font-medium text-on-surface-variant">m³</span>
                             </span>
+                            <span className="text-sm font-bold text-on-surface-variant mt-1">
+                                {new Intl.NumberFormat('id-ID').format(summary.total_lhp || 0)} Data LHP
+                            </span>
                         </div>
                         <div className="w-12 h-12 rounded-xl bg-[#f59e0b]/10 flex items-center justify-center text-[#f59e0b]">
-                            <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                            <ClipboardCheck className="w-6 h-6" />
                         </div>
                     </div>
                 </div>
@@ -178,13 +181,13 @@ export default function Index({ lhps, filters = {}, kelompoks = [], summary = {}
                     <div className="absolute right-0 top-0 w-24 h-24 bg-[#3b82f6]/5 rounded-bl-[100px] -z-10 transition-transform group-hover:scale-110"></div>
                     <div className="flex items-center justify-between relative z-10">
                         <div className="flex flex-col">
-                            <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total PSDH</span>
-                            <span className="font-display text-[2rem] font-bold text-on-surface">
+                            <span className="font-label-lg text-label-lg text-on-surface-variant mb-1">Total PSDH Dibayarkan</span>
+                            <span className="font-display text-[1.5rem] md:text-[2rem] font-bold text-on-surface">
                                 <span className="text-sm font-medium text-on-surface-variant mr-1">Rp</span>
                                 {new Intl.NumberFormat('id-ID').format(Math.ceil(summary.total_psdh || 0))}
                             </span>
                         </div>
-                        <div className="w-12 h-12 rounded-xl bg-[#3b82f6]/10 flex items-center justify-center text-[#3b82f6]">
+                        <div className="w-12 h-12 rounded-xl bg-[#3b82f6]/10 flex items-center justify-center text-[#3b82f6] shrink-0">
                             <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
                         </div>
                     </div>
