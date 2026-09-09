@@ -172,4 +172,21 @@ class DashboardController extends Controller
 
         return redirect()->back()->with('success', 'Data batang berhasil diperbarui.');
     }
+
+    public function destroyBatang($id)
+    {
+        $batang = Batang::findOrFail($id);
+
+        $currentUser = auth()->user();
+        if ($currentUser->hasRole('admin_kelompok') || $currentUser->hasRole('ganis')) {
+            $batang->load('pohon');
+            if ($batang->pohon->kelompok_id != $currentUser->kelompok_id) {
+                abort(403, 'Unauthorized action.');
+            }
+        }
+
+        $batang->delete();
+
+        return redirect()->back()->with('success', 'Data batang berhasil dihapus.');
+    }
 }

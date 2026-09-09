@@ -80,6 +80,7 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok|ganis'])->
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/export', [AdminDashboardController::class, 'export'])->name('dashboard.export');
     Route::put('/dashboard/batangs/{id}', [AdminDashboardController::class, 'updateBatang'])->name('dashboard.batang.update');
+    Route::delete('/dashboard/batangs/{id}', [AdminDashboardController::class, 'destroyBatang'])->name('dashboard.batang.destroy');
     
     // User Management
     Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);

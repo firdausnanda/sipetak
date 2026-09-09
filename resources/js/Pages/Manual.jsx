@@ -118,20 +118,33 @@ export default function Manual() {
             return;
         }
 
-        post(route('manual.store'), {
-            onSuccess: () => {
-                Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Data berhasil disimpan!', timer: 2000, showConfirmButton: false });
-                setData('no_pohon', '');
-                setData('batangs', []);
-            },
-            onError: (err) => {
-                let errorMessage = 'Terjadi kesalahan saat menyimpan data.';
-                if (err && err.error) {
-                    errorMessage = err.error;
-                } else if (err && typeof err === 'object' && Object.keys(err).length > 0) {
-                    errorMessage = Object.values(err).join('\n');
-                }
-                Swal.fire({ icon: 'error', title: 'Gagal', text: errorMessage });
+        Swal.fire({
+            title: 'Konfirmasi Simpan',
+            text: 'Apakah Anda yakin ingin menyimpan data ini?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#FB8500',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Simpan!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                post(route('manual.store'), {
+                    onSuccess: () => {
+                        Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Data berhasil disimpan!', timer: 2000, showConfirmButton: false });
+                        setData('no_pohon', '');
+                        setData('batangs', []);
+                    },
+                    onError: (err) => {
+                        let errorMessage = 'Terjadi kesalahan saat menyimpan data.';
+                        if (err && err.error) {
+                            errorMessage = err.error;
+                        } else if (err && typeof err === 'object' && Object.keys(err).length > 0) {
+                            errorMessage = Object.values(err).join('\n');
+                        }
+                        Swal.fire({ icon: 'error', title: 'Gagal', text: errorMessage });
+                    }
+                });
             }
         });
     };

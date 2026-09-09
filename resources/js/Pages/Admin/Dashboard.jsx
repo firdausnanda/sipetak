@@ -2,11 +2,12 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, router, Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import Select from 'react-select';
-import { Table as TableIcon, Users, Map, Search, ChevronsUpDown, ArrowUp, ArrowDown, PackageOpen, QrCode, TreePine, User, Calendar, SlidersHorizontal, X, Loader2, Edit2 } from 'lucide-react';
+import { Table as TableIcon, Users, Map, Search, ChevronsUpDown, ArrowUp, ArrowDown, PackageOpen, QrCode, TreePine, User, Calendar, SlidersHorizontal, X, Loader2, Edit2, Trash2 } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { format, parseISO } from 'date-fns';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import Modal from '@/Components/Modal';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
@@ -57,6 +58,41 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
         updateBatang(route('admin.dashboard.batang.update', editingBatang.id), {
             preserveScroll: true,
             onSuccess: () => closeEditModal(),
+        });
+    };
+
+    const handleDelete = (id) => {
+        Swal.fire({
+            title: 'Konfirmasi Hapus',
+            text: 'Apakah Anda yakin ingin menghapus data batang ini? Tindakan ini tidak dapat dibatalkan.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route('admin.dashboard.batang.destroy', id), {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Terhapus!',
+                            text: 'Data batang berhasil dihapus.',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    },
+                    onError: (err) => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: err.error || 'Terjadi kesalahan saat menghapus data.'
+                        });
+                    }
+                });
+            }
         });
     };
 
@@ -556,13 +592,22 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
                                             </div>
                                         </td>
                                         <td className="py-4 px-4 text-center whitespace-nowrap">
-                                            <button 
-                                                onClick={() => openEditModal(batang)}
-                                                className="text-primary hover:text-primary/80 transition-colors p-1"
-                                                title="Edit Batang"
-                                            >
-                                                <Edit2 className="w-[16px] h-[16px]" />
-                                            </button>
+                                            <div className="flex items-center justify-center gap-2">
+                                                <button 
+                                                    onClick={() => openEditModal(batang)}
+                                                    className="text-primary hover:text-primary/80 transition-colors p-1"
+                                                    title="Edit Batang"
+                                                >
+                                                    <Edit2 className="w-[16px] h-[16px]" />
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDelete(batang.id)}
+                                                    className="text-error hover:text-error/80 transition-colors p-1"
+                                                    title="Hapus Batang"
+                                                >
+                                                    <Trash2 className="w-[16px] h-[16px]" />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))

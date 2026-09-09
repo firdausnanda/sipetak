@@ -197,16 +197,29 @@ export default function Barcode() {
             return;
         }
 
-        post(route('barcode.store'), {
-            onSuccess: () => {
-                Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Data berhasil disimpan!', timer: 2000, showConfirmButton: false });
-                setData('no_barcode', '');
-                setData('no_pohon', '');
-                setData('batangs', []);
-                setIsScanning(true);
-            },
-            onError: (err) => {
-                Swal.fire({ icon: 'error', title: 'Gagal', text: err.error || 'Terjadi kesalahan saat menyimpan data.' });
+        Swal.fire({
+            title: 'Konfirmasi Simpan',
+            text: 'Apakah Anda yakin ingin menyimpan data ini?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#FB8500',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Simpan!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                post(route('barcode.store'), {
+                    onSuccess: () => {
+                        Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Data berhasil disimpan!', timer: 2000, showConfirmButton: false });
+                        setData('no_barcode', '');
+                        setData('no_pohon', '');
+                        setData('batangs', []);
+                        setIsScanning(true);
+                    },
+                    onError: (err) => {
+                        Swal.fire({ icon: 'error', title: 'Gagal', text: err.error || 'Terjadi kesalahan saat menyimpan data.' });
+                    }
+                });
             }
         });
     };
