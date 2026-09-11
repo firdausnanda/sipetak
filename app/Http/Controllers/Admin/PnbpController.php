@@ -110,7 +110,7 @@ class PnbpController extends Controller
             });
         }
 
-        $pnbps = $query->latest()->paginate(10)->withQueryString();
+        $pnbps = $query->orderBy('tanggal_kode_billing', 'desc')->paginate(10)->withQueryString();
 
         $kelompoks = [];
         if ($user->hasRole('admin_cdk')) {

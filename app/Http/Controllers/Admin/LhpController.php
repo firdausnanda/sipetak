@@ -71,7 +71,7 @@ class LhpController extends Controller
             'total_psdh' => (clone $query)->sum('psdh'),
         ];
 
-        $lhps = $query->latest()->paginate(10)->withQueryString();
+        $lhps = $query->orderBy('tanggal', 'desc')->paginate(10)->withQueryString();
 
         $kelompoks = [];
         if (!$user->hasAnyRole(['admin_kelompok', 'ganis'])) {
