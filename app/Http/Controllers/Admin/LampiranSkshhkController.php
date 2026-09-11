@@ -23,7 +23,7 @@ class LampiranSkshhkController extends Controller
                 $q->select(DB::raw('count(distinct(pohon_id))'));
             }])
             ->withSum('batangs as total_volume', 'volume')
-            ->latest();
+            ->orderBy('tanggal', 'desc');
 
         $summaryQuery = Skshhk::query();
 

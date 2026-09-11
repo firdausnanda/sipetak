@@ -25,7 +25,7 @@ class DokumenAngkutanController extends Controller
             ->withCount('pohons')
             ->withCount('batangs')
             ->withSum('batangs', 'volume')
-            ->latest();
+            ->orderBy('tanggal', 'desc');
         
         $summaryQuery = DokumenAngkutan::query();
 
