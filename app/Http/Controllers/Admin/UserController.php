@@ -53,7 +53,7 @@ class UserController extends Controller
         $perPage = $request->input('per_page', 10);
         $users = $query->paginate($perPage)->withQueryString();
         
-        $rolesQuery = Role::whereIn('name', ['user', 'admin_cdk', 'admin_kelompok', 'ganis']);
+        $rolesQuery = Role::whereIn('name', ['user', 'admin_cdk', 'admin_kelompok', 'ganis', 'monitoring_viewer']);
         $kelompoksQuery = Kelompok::orderBy('nama_kelompok');
 
         if ($currentUser->hasAnyRole(['admin_kelompok', 'ganis'])) {
@@ -76,7 +76,7 @@ class UserController extends Controller
     {
         $currentUser = auth()->user();
         
-        if (! $currentUser->hasRole('admin_cdk') && $request->role === 'admin_cdk') {
+        if (! $currentUser->hasRole('admin_cdk') && in_array($request->role, ['admin_cdk', 'monitoring_viewer'])) {
             abort(403, 'Unauthorized role assignment.');
         }
 
@@ -88,7 +88,9 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'role' => 'required|string|exists:roles,name',
+            'role' => ['required', 'string', Rule::in($currentUser->hasRole('admin_cdk')
+                ? ['user', 'admin_cdk', 'admin_kelompok', 'ganis', 'monitoring_viewer']
+                : ['user', 'admin_kelompok', 'ganis'])],
             'kelompok_id' => 'nullable|exists:kelompoks,id',
         ]);
 
@@ -108,7 +110,7 @@ class UserController extends Controller
     {
         $currentUser = auth()->user();
         
-        if (! $currentUser->hasRole('admin_cdk') && $request->role === 'admin_cdk') {
+        if (! $currentUser->hasRole('admin_cdk') && in_array($request->role, ['admin_cdk', 'monitoring_viewer'])) {
             abort(403, 'Unauthorized role assignment.');
         }
 
@@ -123,7 +125,9 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8',
-            'role' => 'required|string|exists:roles,name',
+            'role' => ['required', 'string', Rule::in($currentUser->hasRole('admin_cdk')
+                ? ['user', 'admin_cdk', 'admin_kelompok', 'ganis', 'monitoring_viewer']
+                : ['user', 'admin_kelompok', 'ganis'])],
             'kelompok_id' => 'nullable|exists:kelompoks,id',
         ]);
 

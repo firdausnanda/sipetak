@@ -2,26 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Kelompok;
+use App\Services\MonitoringSummary;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
 class DashboardMonitoringController extends Controller
 {
-    public function index()
+    public function index(Request $request, MonitoringSummary $monitoring)
     {
-        // Simple logic for fetching percentage
-        // In a real scenario, this would query the DB. For now, let's pass mock or simple aggregates.
-        $totalPohon = \App\Models\Pohon::count();
-        // Assume is_tebang doesn't exist yet, just mock 0 if empty
-        $pohonDitebang = 0; // \App\Models\Pohon::where('status', 'ditebang')->count();
-        $persentaseTebang = $totalPohon > 0 ? ($pohonDitebang / $totalPohon) * 100 : 0;
+        $user = $request->user();
+        $validated = $request->validate([
+            'days' => ['sometimes', Rule::in(['7', '30', '90', 'all'])],
+            'kelompok_id' => ['sometimes', 'nullable', 'integer', 'exists:kelompoks,id'],
+        ]);
+        $days = ($validated['days'] ?? '7') === 'all' ? 'all' : (int) ($validated['days'] ?? 7);
+        $kelompokId = $user->kelompok_id
+            ? (int) $user->kelompok_id
+            : (isset($validated['kelompok_id']) ? (int) $validated['kelompok_id'] : null);
 
-        $totalBatang = \App\Models\Batang::count();
-        $batangDiangkut = 0; 
-        $persentaseAngkut = $totalBatang > 0 ? ($batangDiangkut / $totalBatang) * 100 : 0;
-
-        return \Inertia\Inertia::render('Monitoring/Dashboard', [
-            'persentaseTebang' => $persentaseTebang,
-            'persentaseAngkut' => $persentaseAngkut
+        return Inertia::render('Monitoring/Dashboard', [
+            ...$monitoring->forScope($kelompokId, $days),
+            'filters' => ['days' => $days, 'kelompok_id' => $kelompokId],
+            'namaKelompok' => $kelompokId ? Kelompok::find($kelompokId)?->nama_kelompok : null,
+            'canFilterKelompok' => ! $user->kelompok_id,
+            'kelompokOptions' => $user->kelompok_id ? [] : Kelompok::orderBy('nama_kelompok')->get(['id', 'nama_kelompok']),
         ]);
     }
 }

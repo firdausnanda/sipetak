@@ -10,6 +10,9 @@ class HomeController extends Controller
     {
         if (auth()->check()) {
             $user = auth()->user();
+            if ($user->hasRole('monitoring_viewer')) {
+                return redirect()->route('mobile.dashboard');
+            }
             if ($user->hasRole(['admin_cdk', 'admin_kelompok', 'ganis'])) {
                 return redirect()->route('admin.dashboard');
             }

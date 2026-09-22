@@ -33,6 +33,10 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        if ($request->user()->hasRole('monitoring_viewer')) {
+            return redirect()->intended(route('mobile.dashboard', absolute: false));
+        }
+
         if ($request->user()->hasAnyRole(['admin_cdk', 'admin_kelompok', 'ganis'])) {
             return redirect()->intended(route('admin.dashboard', absolute: false));
         }

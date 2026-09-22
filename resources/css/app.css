@@ -5,6 +5,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 /* Custom NProgress styling for thickness */
 #nprogress .bar {
     height: 4px !important;

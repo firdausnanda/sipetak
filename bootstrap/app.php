@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            \App\Http\Middleware\RestrictMonitoringViewer::class,
         ]);
 
         $middleware->alias([
@@ -28,6 +29,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->redirectUsersTo(function (Request $request) {
+            if ($request->user()?->hasRole('monitoring_viewer')) {
+                return route('mobile.dashboard');
+            }
             if ($request->user() && $request->user()->hasRole(['admin_cdk', 'admin_kelompok'])) {
                 return route('admin.dashboard');
             }

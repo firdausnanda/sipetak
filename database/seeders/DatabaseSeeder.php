@@ -28,7 +28,8 @@ class DatabaseSeeder extends Seeder
             PetakSeeder::class,
             JenisPohonSeeder::class,
             DummyDataSeeder::class,
-            GanisRoleSeeder::class
+            GanisRoleSeeder::class,
+            MonitoringRoleSeeder::class,
         ]);
     }
 }
