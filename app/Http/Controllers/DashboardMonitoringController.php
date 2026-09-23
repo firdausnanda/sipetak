@@ -17,7 +17,7 @@ class DashboardMonitoringController extends Controller
             'days' => ['sometimes', Rule::in(['7', '30', '90', 'all'])],
             'kelompok_id' => ['sometimes', 'nullable', 'integer', 'exists:kelompoks,id'],
         ]);
-        $days = ($validated['days'] ?? '7') === 'all' ? 'all' : (int) ($validated['days'] ?? 7);
+        $days = ($validated['days'] ?? '30') === 'all' ? 'all' : (int) ($validated['days'] ?? 30);
         $kelompokId = $user->kelompok_id
             ? (int) $user->kelompok_id
             : (isset($validated['kelompok_id']) ? (int) $validated['kelompok_id'] : null);
