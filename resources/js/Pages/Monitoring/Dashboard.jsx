@@ -6,7 +6,6 @@ import { Activity, ArrowDown, ArrowUp, Banknote, CalendarDays, FileCheck2, Refre
 
 const fmt = (value) => Number(value || 0).toLocaleString('id-ID');
 const fmtVolume = (value) => Number(value || 0).toLocaleString('id-ID', { maximumFractionDigits: 3 });
-const fmtTargetVolume = (value) => Number(value || 0).toLocaleString('id-ID', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
 const fmtRupiah = (value) => Number(value || 0).toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 const fmtFullDate = (value) => new Date(`${value}T00:00:00`).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
 const fmtTrendDate = (value, granularity) => new Date(`${value}T00:00:00`).toLocaleDateString('id-ID', granularity === 'month' ? { month: 'long', year: 'numeric' } : { day: 'numeric', month: 'short', year: 'numeric' });
@@ -98,24 +97,7 @@ function GroupTable({ rows }) {
     </section>;
 }
 
-function ProgressMetric({ label, actual, target, percent, unit, format, targetLabel = 'target' }) {
-    return <div className="rounded-xl bg-surface-container-low p-4">
-        <p className="text-xs font-semibold text-on-surface-variant">{label}</p>
-        <div className="mt-2 flex flex-wrap items-baseline gap-2"><strong className="text-xl font-bold tabular-nums text-primary">{format(actual)}</strong><span className="text-xs text-on-surface-variant">{unit} tercatat dari {target === null ? 'target belum ditetapkan' : `${format(target)} ${unit} ${targetLabel}`}</span></div>
-        {target !== null && <><div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white" role="progressbar" aria-label={`Capaian ${label}`} aria-valuenow={Math.min(percent, 100)} aria-valuemin="0" aria-valuemax="100"><div className="h-full rounded-full bg-emerald-700" style={{ width: `${Math.min(percent, 100)}%` }} /></div><p className="mt-2 text-sm font-bold tabular-nums text-primary">{fmt(percent)}% tercapai</p></>}
-    </div>;
-}
-
-function AnnualProgressPanel({ progress, years, showTotal, onYearChange, isFiltering }) {
-    const cards = showTotal && progress.total.target ? [{ id: 'total', name: `Gabungan ${progress.total.targetedGroups} kelompok bertarget`, ...progress.total }, ...progress.groups] : progress.groups;
-    return <section className="space-y-4">
-        <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-emerald-800">Target dan capaian</p><h2 className="font-monitoring text-xl font-bold md:text-2xl">Tebangan tahunan</h2><p className="mt-1 text-sm text-on-surface-variant">Realisasi dihitung dari tanggal tebangan pada tahun terpilih dan tidak mengikuti filter periode harian.</p></div><label className="text-xs font-semibold text-on-surface-variant">Tahun target<select disabled={isFiltering} value={progress.year} onChange={(event) => onYearChange(event.target.value)} className="mt-1.5 block min-h-11 min-w-32 rounded-lg border-outline-variant text-sm">{years.map((year) => <option key={year} value={year}>{year}</option>)}</select></label></div>
-        {cards.length === 0 ? <div className="rounded-2xl border border-outline-variant bg-white p-5 text-sm text-on-surface-variant">Belum ada kelompok untuk ditampilkan.</div> : <div className="grid gap-4 xl:grid-cols-2">{cards.map((row) => <article key={row.id} className={`rounded-2xl border p-5 shadow-sm ${row.id === 'total' ? 'border-emerald-300 bg-emerald-50/50' : 'border-outline-variant bg-white'}`}><div className="mb-4 flex flex-wrap items-center justify-between gap-2"><h3 className="font-monitoring text-lg font-bold">{row.name}</h3>{!row.target && <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-800">Belum ditetapkan</span>}</div><div className="grid gap-3 sm:grid-cols-2"><ProgressMetric label="Jumlah pohon" actual={row.actual.trees} target={row.target?.trees ?? null} percent={row.percent?.trees ?? null} unit="pohon" format={fmt} /><ProgressMetric label="Volume hasil" actual={row.actual.volume} target={row.target?.volume ?? null} percent={row.percent?.volume ?? null} unit="m³" format={fmtTargetVolume} targetLabel="target taksasi" /></div></article>)}</div>}
-        {showTotal && progress.total.target && progress.groups.length > progress.total.targetedGroups && <p className="text-xs text-on-surface-variant">Total gabungan hanya mencakup kelompok yang targetnya sudah ditetapkan.</p>}
-    </section>;
-}
-
-export default function Dashboard({ auth, summary, trend, kelompok, periode, filters, updatedAt, namaKelompok, canFilterKelompok, kelompokOptions, annualProgress, yearOptions }) {
+export default function Dashboard({ auth, summary, trend, kelompok, periode, filters, updatedAt, namaKelompok, canFilterKelompok, kelompokOptions }) {
     const Layout = auth.user.roles?.includes('monitoring_viewer') ? MonitoringLayout : AdminLayout;
     const [isFiltering, setIsFiltering] = useState(false);
     const [showLoading, setShowLoading] = useState(false);
@@ -131,8 +113,6 @@ export default function Dashboard({ auth, summary, trend, kelompok, periode, fil
     const changeFilter = (changes) => {
         if (changes.days) {
             setLoadingTarget(changes.days === 'all' ? 'seluruh periode data' : `periode ${changes.days} hari`);
-        } else if (changes.year) {
-            setLoadingTarget(`target tahun ${changes.year}`);
         } else if (Object.prototype.hasOwnProperty.call(changes, 'kelompok_id')) {
             const selected = kelompokOptions.find((item) => String(item.id) === String(changes.kelompok_id));
             setLoadingTarget(selected ? `kelompok ${selected.nama_kelompok}` : 'seluruh kelompok');
@@ -140,7 +120,6 @@ export default function Dashboard({ auth, summary, trend, kelompok, periode, fil
         setIsFiltering(true);
         router.get(route('mobile.dashboard'), {
             days: filters.days,
-            year: filters.year,
             ...(canFilterKelompok && filters.kelompok_id ? { kelompok_id: filters.kelompok_id } : {}),
             ...changes,
         }, {
@@ -178,8 +157,6 @@ export default function Dashboard({ auth, summary, trend, kelompok, periode, fil
                     <select id="monitoring-kelompok" disabled={isFiltering} value={filters.kelompok_id || ''} onChange={(event) => changeFilter({ kelompok_id: event.target.value || null })} className="min-h-11 w-full rounded-lg border-outline-variant text-sm disabled:opacity-60"><option value="">Semua kelompok</option>{kelompokOptions.map((item) => <option key={item.id} value={item.id}>{item.nama_kelompok}</option>)}</select>
                 </div>}
             </div>
-
-            <AnnualProgressPanel progress={annualProgress} years={yearOptions} showTotal={!filters.kelompok_id} onYearChange={(year) => changeFilter({ year })} isFiltering={isFiltering} />
 
             <section><SectionHeading eyebrow="Gambaran umum" title="Ringkasan periode" description={filters.days === 'all' ? 'Seluruh data pada cakupan kelompok terpilih.' : `Data ${fmtFullDate(periode.from)} sampai ${fmtFullDate(periode.to)} pada cakupan kelompok terpilih.`} right={<p className="flex items-center gap-1.5 text-xs text-on-surface-variant"><CalendarDays size={14} /> Dibuat {new Date(updatedAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</p>} /><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><StatCard icon={TreePine} label="Hasil tebangan" value={fmt(summary.batang)} unit="batang" detail={`${fmt(summary.pohon)} pohon · ${fmtVolume(summary.volume)} m³`} /><StatCard icon={Truck} label="Masuk dokumen angkutan" value={fmt(summary.batangTerdokumen)} unit="batang" detail={`${fmt(summary.dokumenAngkutan)} dokumen · ${fmtVolume(summary.volumeTerdokumen)} m³`} /><StatCard icon={FileCheck2} label="Masuk SKSHHK" value={fmt(summary.batangSkshhkTerdokumen)} unit="batang" detail={`${fmt(summary.skshhk)} SKSHHK · ${fmtVolume(summary.volumeSkshhkTerdokumen)} m³`} accent /><StatCard icon={Activity} label="Volume hasil" value={fmtVolume(summary.volume)} unit="m³" detail="Total volume batang hasil tebangan dalam periode" /></div></section>
 

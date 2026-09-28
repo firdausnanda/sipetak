@@ -50,36 +50,22 @@ class AnnualFellingProgressTest extends TestCase
         $this->assertNull($scoped['total']['target']);
     }
 
-    public function test_monitoring_defaults_to_current_year_and_respects_user_group_scope(): void
+    public function test_monitoring_omits_removed_annual_progress_data(): void
     {
         $this->seed(MonitoringRoleSeeder::class);
         $a = $this->group('A');
         $b = $this->group('B');
-        $this->target($a, 2026, 2, 1.500);
-        $this->target($b, 2026, 5, 3.000);
-        $this->target($b, 2020, 5, 3.000);
-        $this->tree($a, '2026-01-01', [1.000]);
-        $this->travelTo(\Carbon\Carbon::parse('2026-09-28'));
         $user = User::factory()->create(['kelompok_id' => $a]);
         $user->assignRole('monitoring_viewer');
 
-        $this->actingAs($user)->get('/mobile/dashboard?days=7&kelompok_id='.$b)
-            ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('Monitoring/Dashboard')
-                ->where('annualProgress.year', 2026)
-                ->has('annualProgress.groups', 1)
-                ->where('annualProgress.groups.0.id', $a)
-                ->where('annualProgress.groups.0.actual.trees', 1)
-                ->where('yearOptions', [2026])
-                ->where('filters.days', 7)
-                ->etc());
         $this->actingAs($user)->get('/mobile/dashboard?days=7&year=2025&kelompok_id='.$b)
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->where('annualProgress.year', 2025)
-                ->where('annualProgress.groups.0.id', $a)
-                ->where('annualProgress.groups.0.target', null)
+                ->component('Monitoring/Dashboard')
+                ->missing('annualProgress')
+                ->missing('yearOptions')
+                ->missing('filters.year')
+                ->where('filters.kelompok_id', $a)
                 ->where('filters.days', 7)
                 ->etc());
     }
