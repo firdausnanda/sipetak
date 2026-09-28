@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\DokumenAngkutanController;
 use App\Http\Controllers\Admin\LampiranSkshhkController;
 use App\Http\Controllers\Admin\RencanaTebangController;
 use App\Http\Controllers\Admin\TabelVolumeController;
+use App\Http\Controllers\Admin\TargetTebangController;
 use App\Http\Controllers\DashboardMonitoringController;
 use App\Http\Controllers\DailyOperationController;
 use App\Http\Controllers\VerificationController;
@@ -141,6 +142,7 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok'])->prefix
 });
 
 Route::middleware(['auth', 'verified', 'role:admin_cdk'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('target-tebangs', TargetTebangController::class)->only(['index', 'store', 'update', 'destroy'])->names('target_tebangs');
     // Log
     Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
     

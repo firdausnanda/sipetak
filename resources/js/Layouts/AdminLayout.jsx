@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BarChart2, Activity, FileText, ClipboardCheck, Truck, Paperclip, Users, Database, ChevronDown, TreePine, Map, Building, MapPin, ClipboardList, Grid, Settings, History, DownloadCloud, AlertTriangle, LogOut, Menu, RefreshCw, Bell, Landmark } from 'lucide-react';
+import { BarChart2, Activity, FileText, ClipboardCheck, Truck, Paperclip, Users, Database, ChevronDown, TreePine, Map, Building, MapPin, ClipboardList, Grid, Settings, History, DownloadCloud, AlertTriangle, LogOut, Menu, RefreshCw, Bell, Landmark, Target } from 'lucide-react';
 
 import { useState, useEffect } from 'react';
 import Dropdown from '@/Components/Dropdown';
@@ -54,6 +54,11 @@ export default function AdminLayout({ children }) {
                         >
                             <Activity className="w-5 h-5" />
                             Monitoring Operasional
+                        </Link>
+                    )}
+                    {user.roles?.includes('admin_cdk') && (
+                        <Link href={route('admin.target_tebangs.index')} className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.target_tebangs.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}>
+                            <Target className="w-5 h-5" /> Target Tebangan Tahunan
                         </Link>
                     )}
                     {(user.roles?.includes('admin_cdk') || user.roles?.includes('admin_kelompok')) && (
@@ -254,6 +259,11 @@ export default function AdminLayout({ children }) {
                         >
                             <Activity className="w-5 h-5" />
                             Monitoring Operasional
+                        </Link>
+                    )}
+                    {user.roles?.includes('admin_cdk') && (
+                        <Link href={route('admin.target_tebangs.index')} className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.target_tebangs.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}>
+                            <Target className="w-5 h-5" /> Target Tebangan Tahunan
                         </Link>
                     )}
                     <Link

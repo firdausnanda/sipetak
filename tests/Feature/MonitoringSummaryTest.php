@@ -32,7 +32,7 @@ class MonitoringSummaryTest extends TestCase
         $this->assertSame(0, $withoutDocuments['batangSkshhkTerdokumen']);
 
         $document = DB::table('dokumen_angkutans')->insertGetId([
-            'kelompok_id' => $groupA, 'no_dokumen' => 'DOC-A', 'tanggal' => today(),
+            'kelompok_id' => $groupA, 'no_dokumen' => 'DOC-A', 'tanggal' => today()->toDateString(),
         ]);
         DB::table('pohons')->where('id', $treeA)->update(['dokumen_angkutan_id' => $document]);
         $withTransport = $service->forScope($groupA, 7)['summary'];
@@ -40,7 +40,7 @@ class MonitoringSummaryTest extends TestCase
         $this->assertSame(0, $withTransport['batangSkshhkTerdokumen']);
 
         $skshhk = DB::table('skshhks')->insertGetId([
-            'no_skshhk' => 'SK-A', 'tanggal' => today(),
+            'no_skshhk' => 'SK-A', 'tanggal' => today()->toDateString(),
         ]);
         DB::table('batangs')->where('pohon_id', $treeA)->update(['skshhk_id' => $skshhk]);
         DB::table('batangs')->where('pohon_id', $treeB)->update(['skshhk_id' => $skshhk]);
@@ -96,7 +96,7 @@ class MonitoringSummaryTest extends TestCase
             DB::table('lhps')->insert([
                 'kelompok_id' => $groupId,
                 'no_lhp' => 'LHP-'.$number,
-                'tanggal' => today(),
+                'tanggal' => today()->toDateString(),
                 'sortimen' => 'AI',
                 'volume' => 1,
                 'tarif' => $amount,
@@ -106,15 +106,15 @@ class MonitoringSummaryTest extends TestCase
         $lhpA = DB::table('lhps')->where('no_lhp', 'LHP-A')->value('id');
         $lhpB = DB::table('lhps')->where('no_lhp', 'LHP-B')->value('id');
         foreach ([
-            [$lhpA, 'PAID-A', 70, today(), 'NTPN-A'],
-            [$lhpA, 'OLD-A', 20, today()->subMonth(), 'NTPN-OLD'],
+            [$lhpA, 'PAID-A', 70, today()->toDateString(), 'NTPN-A'],
+            [$lhpA, 'OLD-A', 20, today()->subMonth()->toDateString(), 'NTPN-OLD'],
             [$lhpA, 'UNPAID-A', 30, null, null],
-            [$lhpA, 'NO-NTPN', 10, today(), null],
-            [$lhpB, 'PAID-B', 50, today(), 'NTPN-B'],
+            [$lhpA, 'NO-NTPN', 10, today()->toDateString(), null],
+            [$lhpB, 'PAID-B', 50, today()->toDateString(), 'NTPN-B'],
         ] as [$lhpId, $billing, $amount, $paidAt, $ntpn]) {
             DB::table('pnbps')->insert([
                 'lhp_id' => $lhpId, 'kode_billing' => $billing,
-                'tanggal_kode_billing' => today(), 'tanggal_bayar' => $paidAt,
+                'tanggal_kode_billing' => today()->toDateString(), 'tanggal_bayar' => $paidAt,
                 'ntpn' => $ntpn, 'jumlah' => $amount,
             ]);
         }
@@ -140,13 +140,13 @@ class MonitoringSummaryTest extends TestCase
         $this->batang($oldTree);
         $this->batang($this->tree($group));
         $document = DB::table('dokumen_angkutans')->insertGetId([
-            'kelompok_id' => $group, 'no_dokumen' => 'DOC-OLD', 'tanggal' => today(),
+            'kelompok_id' => $group, 'no_dokumen' => 'DOC-OLD', 'tanggal' => today()->toDateString(),
         ]);
-        $skshhk = DB::table('skshhks')->insertGetId(['no_skshhk' => 'SK-OLD', 'tanggal' => today()]);
+        $skshhk = DB::table('skshhks')->insertGetId(['no_skshhk' => 'SK-OLD', 'tanggal' => today()->toDateString()]);
         DB::table('pohons')->where('id', $oldTree)->update(['dokumen_angkutan_id' => $document]);
         DB::table('batangs')->where('pohon_id', $oldTree)->update(['skshhk_id' => $skshhk]);
         DB::table('lhps')->insert([
-            'kelompok_id' => $group, 'no_lhp' => 'LHP-OLD', 'tanggal' => today()->subMonth(),
+            'kelompok_id' => $group, 'no_lhp' => 'LHP-OLD', 'tanggal' => today()->subMonth()->toDateString(),
             'sortimen' => 'AI', 'volume' => 1, 'tarif' => 100, 'psdh' => 100,
         ]);
 
@@ -184,7 +184,7 @@ class MonitoringSummaryTest extends TestCase
 
         return DB::table('pohons')->insertGetId([
             'kelompok_id' => $group, 'petak_id' => $petak, 'jenis_pohon_id' => $jenis,
-            'tanggal' => today(), 'tipe' => 'non_barcode',
+            'tanggal' => today()->toDateString(), 'tipe' => 'non_barcode',
         ]);
     }
 
