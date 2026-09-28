@@ -63,12 +63,12 @@ export default function Index({ backups }) {
                         >
                             {isBackingUp ? (
                                 <>
-                                    <span className="material-symbols-outlined animate-spin" style={{ fontVariationSettings: "'FILL' 1" }}>sync</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5 animate-spin" fill="currentColor"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
                                     Memproses...
                                 </>
                             ) : (
                                 <>
-                                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>cloud_upload</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
                                     Backup Sekarang
                                 </>
                             )}
@@ -92,7 +92,7 @@ export default function Index({ backups }) {
                                             <tr key={index} className="border-b border-outline-variant last:border-0 hover:bg-surface-container-high transition-colors">
                                                 <td className="p-4">
                                                     <div className="flex items-center gap-3">
-                                                        <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>folder_zip</span>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-6 h-6 text-primary" fill="currentColor"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-4 4h-2v2h2v-2zm-2 2h-2v2h2v-2zm2 2h-2v2h2v-2zm-2 2h-2v2h2v-2h-2v-2h2v-2h-2v-2h2V8h2v2h-2v2h2v2z"/></svg>
                                                         <span className="font-body-large text-on-surface">{backup.file_name}</span>
                                                     </div>
                                                 </td>
@@ -105,14 +105,14 @@ export default function Index({ backups }) {
                                                             className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors group"
                                                             title="Download"
                                                         >
-                                                            <span className="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">download</span>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5 group-hover:scale-110 transition-transform" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                                                         </button>
                                                         <button
                                                             onClick={() => handleDelete(backup.file_path)}
                                                             className="p-2 text-error hover:bg-error/10 rounded-lg transition-colors group"
                                                             title="Hapus"
                                                         >
-                                                            <span className="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">delete</span>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5 group-hover:scale-110 transition-transform" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                                                         </button>
                                                     </div>
                                                 </td>
