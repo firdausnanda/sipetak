@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Services\MonitoringSummary;
+use Carbon\Carbon;
 use Database\Seeders\MonitoringRoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,93 @@ use Tests\TestCase;
 class MonitoringSummaryTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_periods_end_today_year_starts_january_and_all_excludes_future_records(): void
+    {
+        $this->travelTo(Carbon::parse('2026-09-28'));
+        $group = $this->group('A');
+        foreach (['2025-12-31', '2026-01-01', '2026-09-21', '2026-09-28', '2026-09-29'] as $date) {
+            $tree = $this->tree($group);
+            DB::table('pohons')->where('id', $tree)->update(['tanggal' => $date]);
+            $this->batang($tree);
+            if ($date === '2026-09-28') {
+                $todayTree = $tree;
+            }
+        }
+        $futureDocument = DB::table('dokumen_angkutans')->insertGetId([
+            'kelompok_id' => $group, 'no_dokumen' => 'DOC-FUTURE', 'tanggal' => '2026-09-29',
+        ]);
+        $futureShipment = DB::table('skshhks')->insertGetId([
+            'no_skshhk' => 'SK-FUTURE', 'tanggal' => '2026-09-29',
+        ]);
+        DB::table('pohons')->where('id', $todayTree)->update(['dokumen_angkutan_id' => $futureDocument]);
+        DB::table('batangs')->where('pohon_id', $todayTree)->update(['skshhk_id' => $futureShipment]);
+        foreach ([['2025-12-31', 10], ['2026-01-01', 20], ['2026-09-29', 30]] as [$date, $amount]) {
+            DB::table('lhps')->insert([
+                'kelompok_id' => $group, 'no_lhp' => 'LHP-'.$date,
+                'tanggal' => $date, 'sortimen' => 'AI',
+                'volume' => 1, 'tarif' => $amount, 'psdh' => $amount,
+            ]);
+        }
+
+        $service = app(MonitoringSummary::class);
+        $week = $service->forScope($group, 7);
+        $month = $service->forScope($group, 30);
+        $quarter = $service->forScope($group, 90);
+        $year = $service->forScope($group, 'year');
+        $all = $service->forScope($group, 'all');
+
+        $this->assertSame('2026-09-22', $week['periode']['from']);
+        $this->assertSame('2026-09-28', $week['periode']['to']);
+        $this->assertSame(1, $week['summary']['pohon']);
+        $this->assertSame(1, $week['kelompok'][0]['pohon']);
+        $this->assertEquals(0, $week['summary']['totalPsdh']);
+        $this->assertSame('2026-08-30', $month['periode']['from']);
+        $this->assertSame('2026-07-01', $quarter['periode']['from']);
+        $this->assertSame('2026-01-01', $year['periode']['from']);
+        $this->assertSame('month', $year['periode']['granularity']);
+        $this->assertSame(3, $year['summary']['pohon']);
+        $this->assertSame(3, $year['summary']['pohonPeriode']);
+        $this->assertSame(3, array_sum(array_column($year['trend'], 'pohon')));
+        $this->assertSame(3, $year['kelompok'][0]['pohon']);
+        $this->assertSame(0, $year['summary']['batangTerdokumen']);
+        $this->assertSame(0, $year['summary']['batangSkshhkTerdokumen']);
+        $this->assertEquals(20, $year['summary']['totalPsdh']);
+        $this->assertSame(4, $all['summary']['pohon']);
+        $this->assertSame(4, $all['kelompok'][0]['pohon']);
+        $this->assertSame(0, $all['summary']['batangTerdokumen']);
+        $this->assertSame(0, $all['summary']['batangSkshhkTerdokumen']);
+        $this->assertEquals(30, $all['summary']['totalPsdh']);
+        $this->assertSame('month', $all['periode']['granularity']);
+    }
+
+    public function test_empty_recent_period_still_ends_today_instead_of_last_harvest(): void
+    {
+        $this->travelTo(Carbon::parse('2026-09-28'));
+        $group = $this->group('A');
+        $tree = $this->tree($group);
+        DB::table('pohons')->where('id', $tree)->update(['tanggal' => '2026-01-01']);
+
+        $recent = app(MonitoringSummary::class)->forScope($group, 7);
+
+        $this->assertSame('2026-09-22', $recent['periode']['from']);
+        $this->assertSame('2026-09-28', $recent['periode']['to']);
+        $this->assertSame(0, $recent['summary']['pohon']);
+        $this->assertCount(7, $recent['trend']);
+        $this->assertSame(0, array_sum(array_column($recent['trend'], 'pohon')));
+    }
+
+    public function test_year_filter_advances_automatically_in_next_calendar_year(): void
+    {
+        $this->travelTo(Carbon::parse('2027-02-01'));
+
+        $year = app(MonitoringSummary::class)->forScope(null, 'year');
+
+        $this->assertSame('2027-01-01', $year['periode']['from']);
+        $this->assertSame('2027-02-01', $year['periode']['to']);
+        $this->assertSame('month', $year['periode']['granularity']);
+        $this->assertCount(2, $year['trend']);
+    }
 
     public function test_batang_funnel_uses_matching_documents_and_group_scope(): void
     {
@@ -167,8 +255,10 @@ class MonitoringSummaryTest extends TestCase
         $this->assertSame(1, $recent['summary']['batangPeriode']);
         $this->assertSame(1, $recent['summary']['batang']);
         $this->assertSame(1, $recent['kelompok'][0]['batang']);
-        $this->assertSame(0, $recent['summary']['batangTerdokumen']);
-        $this->assertSame(0, $recent['summary']['batangSkshhkTerdokumen']);
+        $this->assertSame(1, $recent['summary']['batangTerdokumen']);
+        $this->assertSame(1, $recent['summary']['batangSkshhkTerdokumen']);
+        $this->assertSame(1, $recent['kelompok'][0]['batangTerdokumen']);
+        $this->assertSame(1, $recent['kelompok'][0]['batangSkshhkTerdokumen']);
         $this->assertEquals(0, $recent['summary']['totalPsdh']);
     }
 

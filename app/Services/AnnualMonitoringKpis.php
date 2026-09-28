@@ -5,24 +5,26 @@ namespace App\Services;
 use App\Models\Lhp;
 use App\Models\Pohon;
 use App\Models\TargetTebang;
-use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
 class AnnualMonitoringKpis
 {
-    public function forScope(?int $kelompokId): array
+    public function forScope(?int $kelompokId, ?MonitoringPeriod $period = null): array
     {
-        $today = CarbonImmutable::today();
-        $from = $today->startOfYear()->toDateString();
-        $through = $today->toDateString();
-        $year = $today->year;
+        $period ??= MonitoringPeriod::forDays('year');
+        $through = $period->to->toDateString();
+        $year = $period->to->year;
+        $yearStart = $period->to->startOfYear();
+        $targetFrom = $period->from && $period->from->greaterThan($yearStart)
+            ? $period->from->toDateString()
+            : $yearStart->toDateString();
 
-        $harvestTrees = Pohon::query()
-            ->when($kelompokId, fn ($query) => $query->where('kelompok_id', $kelompokId))
-            ->whereBetween('tanggal', [$from, $through])->count();
+        $harvestTrees = $this->inPeriod(Pohon::query()
+            ->when($kelompokId, fn ($query) => $query->where('kelompok_id', $kelompokId)), 'tanggal', $period)->count();
         $harvestLogs = $this->totals(
-            $this->logs($kelompokId)->whereBetween('pohons.tanggal', [$from, $through])
+            $this->inPeriod($this->logs($kelompokId), 'pohons.tanggal', $period)
         );
 
         $targets = TargetTebang::query()->where('tahun', $year)
@@ -30,25 +32,25 @@ class AnnualMonitoringKpis
             ->get(['kelompok_id', 'jumlah_pohon', 'volume_taksasi']);
         $targetIds = $targets->pluck('kelompok_id')->all();
         $targetedTrees = $targetIds
-            ? Pohon::query()->whereIn('kelompok_id', $targetIds)->whereBetween('tanggal', [$from, $through])->count()
+            ? Pohon::query()->whereIn('kelompok_id', $targetIds)->whereBetween('tanggal', [$targetFrom, $through])->count()
             : 0;
         $targetedVolume = $targetIds
             ? (float) $this->logs($kelompokId)->whereIn('pohons.kelompok_id', $targetIds)
-                ->whereBetween('pohons.tanggal', [$from, $through])->sum('batangs.volume')
+                ->whereBetween('pohons.tanggal', [$targetFrom, $through])->sum('batangs.volume')
             : 0.0;
         $targetTrees = $targets->isEmpty() ? null : (int) $targets->sum('jumlah_pohon');
         $targetVolume = $targets->isEmpty() ? null : round((float) $targets->sum('volume_taksasi'), 3);
 
         $tpkIn = $this->totals(
-            $this->logs($kelompokId)
-                ->join('dokumen_angkutans', 'dokumen_angkutans.id', '=', 'pohons.dokumen_angkutan_id')
-                ->whereBetween('dokumen_angkutans.tanggal', [$from, $through])
+            $this->inPeriod($this->logs($kelompokId)
+                ->join('dokumen_angkutans', 'dokumen_angkutans.id', '=', 'pohons.dokumen_angkutan_id'),
+                'dokumen_angkutans.tanggal', $period)
         );
         $buyerOut = $this->totals(
-            $this->logs($kelompokId)
+            $this->inPeriod($this->logs($kelompokId)
                 ->whereNotNull('pohons.dokumen_angkutan_id')
-                ->join('skshhks', 'skshhks.id', '=', 'batangs.skshhk_id')
-                ->whereBetween('skshhks.tanggal', [$from, $through])
+                ->join('skshhks', 'skshhks.id', '=', 'batangs.skshhk_id'),
+                'skshhks.tanggal', $period)
         );
         $stockIn = $this->totals(
             $this->logs($kelompokId)
@@ -66,12 +68,10 @@ class AnnualMonitoringKpis
             'logs' => $stockIn['logs'] - $stockOut['logs'],
             'volume' => round($stockIn['volume'] - $stockOut['volume'], 4),
         ];
-        $lhpVolume = (float) Lhp::query()
-            ->when($kelompokId, fn ($query) => $query->where('kelompok_id', $kelompokId))
-            ->whereBetween('tanggal', [$from, $through])->sum('volume');
+        $lhpVolume = (float) $this->inPeriod(Lhp::query()
+            ->when($kelompokId, fn ($query) => $query->where('kelompok_id', $kelompokId)), 'tanggal', $period)->sum('volume');
 
-        $qualityRows = $this->logs($kelompokId)
-            ->whereBetween('pohons.tanggal', [$from, $through])
+        $qualityRows = $this->inPeriod($this->logs($kelompokId), 'pohons.tanggal', $period)
             ->selectRaw('batangs.mutu as code, COUNT(*) as logs, COALESCE(SUM(batangs.volume), 0) as volume')
             ->groupBy('batangs.mutu')->get()->keyBy('code');
         $quality = array_map(fn (string $code) => [
@@ -102,12 +102,11 @@ class AnnualMonitoringKpis
             ],
             'lhp' => [
                 'volume' => $lhpVolume,
-                'volumePercent' => $this->percent($lhpVolume, $stock['volume']),
+                'volumePercent' => $this->percent($lhpVolume, $tpkIn['volume']),
             ],
             'buyerOut' => [
                 ...$buyerOut,
-                'logPercent' => $this->percent($buyerOut['logs'], $stock['logs']),
-                'volumePercent' => $this->percent($buyerOut['volume'], $stock['volume']),
+                'volumePercent' => $this->percent($buyerOut['volume'], $lhpVolume),
             ],
             'stock' => $stock,
             'quality' => $quality,
@@ -119,6 +118,13 @@ class AnnualMonitoringKpis
         return DB::table('batangs')
             ->join('pohons', 'pohons.id', '=', 'batangs.pohon_id')
             ->when($kelompokId, fn (Builder $query) => $query->where('pohons.kelompok_id', $kelompokId));
+    }
+
+    private function inPeriod(EloquentBuilder|Builder $query, string $column, MonitoringPeriod $period): EloquentBuilder|Builder
+    {
+        return $period->from
+            ? $query->whereBetween($column, [$period->from->toDateString(), $period->to->toDateString()])
+            : $query->where($column, '<=', $period->to->toDateString());
     }
 
     private function totals(Builder $query): array

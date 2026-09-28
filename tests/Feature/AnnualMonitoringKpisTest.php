@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Services\AnnualMonitoringKpis;
+use App\Services\MonitoringPeriod;
 use Carbon\Carbon;
 use Database\Seeders\MonitoringRoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,6 +15,58 @@ use Tests\TestCase;
 class AnnualMonitoringKpisTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_cards_use_selected_period_and_each_source_date(): void
+    {
+        $this->travelTo(Carbon::parse('2026-09-28'));
+        $group = $this->group('A');
+        $this->target($group, 2, 4);
+        $tree = $this->tree($group, '2026-09-20');
+        $log = $this->log($tree, 'P', 2);
+        $this->document($tree, $group, '2026-09-23');
+        $this->shipment($log, '2026-09-28');
+        $this->lhp($group, '2026-09-25', 2);
+        $this->lhp($group, '2026-09-21', 5);
+        $this->lhp($group, '2026-09-29', 7);
+
+        $week = app(AnnualMonitoringKpis::class)->forScope($group, MonitoringPeriod::forDays(7));
+        $year = app(AnnualMonitoringKpis::class)->forScope($group, MonitoringPeriod::forDays('year'));
+        $all = app(AnnualMonitoringKpis::class)->forScope($group, MonitoringPeriod::forDays('all'));
+
+        $this->assertSame(0, $week['harvest']['trees']);
+        $this->assertSame(1, $week['tpkIn']['logs']);
+        $this->assertEquals(2, $week['tpkIn']['volume']);
+        $this->assertEquals(2, $week['lhp']['volume']);
+        $this->assertSame(1, $week['buyerOut']['logs']);
+        $this->assertEquals(2, $week['buyerOut']['volume']);
+        $this->assertEquals(100, $week['lhp']['volumePercent']);
+        $this->assertEquals(100, $week['buyerOut']['volumePercent']);
+        $this->assertNull($week['tpkIn']['volumePercent']);
+        $this->assertSame(1, $year['harvest']['trees']);
+        $this->assertEquals(7, $year['lhp']['volume']);
+        $this->assertEquals(7, $all['lhp']['volume']);
+    }
+
+    public function test_rolling_period_crosses_year_but_target_percentage_only_uses_current_year(): void
+    {
+        $this->travelTo(Carbon::parse('2026-01-03'));
+        $group = $this->group('A');
+        $this->target($group, 2, 4);
+        $this->log($this->tree($group, '2025-12-30'), 'P', 2);
+        $this->log($this->tree($group, '2026-01-02'), 'D', 1);
+
+        $week = app(AnnualMonitoringKpis::class)->forScope($group, MonitoringPeriod::forDays(7));
+        $all = app(AnnualMonitoringKpis::class)->forScope($group, MonitoringPeriod::forDays('all'));
+
+        $this->assertSame(2, $week['harvest']['trees']);
+        $this->assertEquals(3, $week['harvest']['volume']);
+        $this->assertSame(1, $week['harvest']['targetedActualTrees']);
+        $this->assertEquals(1, $week['harvest']['targetedActualVolume']);
+        $this->assertEquals(50, $week['harvest']['treePercent']);
+        $this->assertEquals(25, $week['harvest']['volumePercent']);
+        $this->assertSame(2, $all['harvest']['trees']);
+        $this->assertEquals(50, $all['harvest']['treePercent']);
+    }
 
     public function test_yearly_kpis_use_each_event_date_and_only_targeted_groups_for_target_percentages(): void
     {
@@ -69,11 +122,10 @@ class AnnualMonitoringKpisTest extends TestCase
         $this->assertEquals(80, $kpis['tpkIn']['logPercent']);
         $this->assertEquals(116.7, $kpis['tpkIn']['volumePercent']);
         $this->assertEquals(4.5, $kpis['lhp']['volume']);
-        $this->assertEquals(300, $kpis['lhp']['volumePercent']);
+        $this->assertEquals(64.3, $kpis['lhp']['volumePercent']);
         $this->assertSame(2, $kpis['buyerOut']['logs']);
         $this->assertEquals(5.5, $kpis['buyerOut']['volume']);
-        $this->assertEquals(100, $kpis['buyerOut']['logPercent']);
-        $this->assertEquals(366.7, $kpis['buyerOut']['volumePercent']);
+        $this->assertEquals(122.2, $kpis['buyerOut']['volumePercent']);
         $this->assertSame(2, $kpis['stock']['logs']);
         $this->assertEquals(1.5, $kpis['stock']['volume']);
         $this->assertSame([
@@ -90,7 +142,15 @@ class AnnualMonitoringKpisTest extends TestCase
         $this->assertEquals(150, $scoped['harvest']['volumePercent']);
         $this->assertSame(3, $scoped['tpkIn']['logs']);
         $this->assertEquals(3, $scoped['lhp']['volume']);
+        $this->assertEquals(50, $scoped['lhp']['volumePercent']);
+        $this->assertEquals(183.3, $scoped['buyerOut']['volumePercent']);
         $this->assertSame(1, $scoped['stock']['logs']);
+
+        $allHistory = app(AnnualMonitoringKpis::class)->forScope(null, MonitoringPeriod::forDays('all'));
+        $this->assertSame(5, $allHistory['harvest']['trees']);
+        $this->assertEquals(10, $allHistory['harvest']['volume']);
+        $this->assertEquals(14.5, $allHistory['lhp']['volume']);
+        $this->assertEquals(150, $allHistory['harvest']['treePercent']);
     }
 
     public function test_stock_uses_all_history_through_today_and_zero_denominators_have_no_percentage(): void
@@ -112,6 +172,10 @@ class AnnualMonitoringKpisTest extends TestCase
         $this->assertSame(0, $kpis['buyerOut']['logs']);
         $this->assertSame(2, $kpis['stock']['logs']);
         $this->assertEquals(3, $kpis['stock']['volume']);
+        $this->assertSame($kpis['stock'], app(AnnualMonitoringKpis::class)
+            ->forScope($group, MonitoringPeriod::forDays(7))['stock']);
+        $this->assertSame($kpis['stock'], app(AnnualMonitoringKpis::class)
+            ->forScope($group, MonitoringPeriod::forDays('all'))['stock']);
         $this->assertNull($kpis['harvest']['treePercent']);
         $this->assertNull($kpis['harvest']['volumePercent']);
 
@@ -119,13 +183,57 @@ class AnnualMonitoringKpisTest extends TestCase
         $this->assertNull($empty['tpkIn']['logPercent']);
         $this->assertNull($empty['tpkIn']['volumePercent']);
         $this->assertNull($empty['lhp']['volumePercent']);
-        $this->assertNull($empty['buyerOut']['logPercent']);
         $this->assertNull($empty['buyerOut']['volumePercent']);
         $this->assertSame(['P', 'D', 'T', 'M'], array_column($empty['quality'], 'code'));
         $this->assertSame([0, 0, 0, 0], array_column($empty['quality'], 'logs'));
     }
 
-    public function test_monitoring_exposes_group_scoped_annual_kpis_independent_of_days_filter(): void
+    public function test_lhp_percentage_is_zero_when_lhp_volume_is_zero_but_incoming_wood_exists(): void
+    {
+        $this->travelTo(Carbon::parse('2026-09-28'));
+        $group = $this->group('A');
+        $tree = $this->tree($group, '2026-02-01');
+        $this->log($tree, 'P', 2);
+        $this->document($tree, $group, '2026-03-01');
+
+        $kpis = app(AnnualMonitoringKpis::class)->forScope($group);
+
+        $this->assertEquals(2, $kpis['tpkIn']['volume']);
+        $this->assertEquals(0, $kpis['lhp']['volume']);
+        $this->assertEquals(0, $kpis['lhp']['volumePercent']);
+    }
+
+    public function test_lhp_percentage_is_unavailable_when_incoming_wood_volume_is_zero(): void
+    {
+        $this->travelTo(Carbon::parse('2026-09-28'));
+        $group = $this->group('A');
+        $this->lhp($group, '2026-03-01', 2);
+
+        $kpis = app(AnnualMonitoringKpis::class)->forScope($group);
+
+        $this->assertEquals(0, $kpis['tpkIn']['volume']);
+        $this->assertEquals(2, $kpis['lhp']['volume']);
+        $this->assertNull($kpis['lhp']['volumePercent']);
+    }
+
+    public function test_buyer_volume_percentage_is_unavailable_when_lhp_volume_is_zero(): void
+    {
+        $this->travelTo(Carbon::parse('2026-09-28'));
+        $group = $this->group('A');
+        $tree = $this->tree($group, '2026-02-01');
+        $log = $this->log($tree, 'P', 2);
+        $this->log($tree, 'D', 1);
+        $this->document($tree, $group, '2026-03-01');
+        $this->shipment($log, '2026-04-01');
+
+        $kpis = app(AnnualMonitoringKpis::class)->forScope($group);
+
+        $this->assertEquals(2, $kpis['buyerOut']['volume']);
+        $this->assertEquals(0, $kpis['lhp']['volume']);
+        $this->assertNull($kpis['buyerOut']['volumePercent']);
+    }
+
+    public function test_monitoring_exposes_group_scoped_kpis_for_selected_period(): void
     {
         $this->travelTo(Carbon::parse('2026-09-28'));
         $this->seed(MonitoringRoleSeeder::class);
@@ -136,13 +244,35 @@ class AnnualMonitoringKpisTest extends TestCase
         $user = User::factory()->create(['kelompok_id' => $a]);
         $user->assignRole('monitoring_viewer');
 
+        $this->actingAs($user)->get('/mobile/dashboard?kelompok_id='.$b)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Monitoring/Dashboard')
+                ->where('filters.days', 'year')
+                ->where('periode.from', '2026-01-01')
+                ->where('annualKpis.harvest.trees', 1)
+                ->where('filters.kelompok_id', $a)
+                ->etc());
+
         $this->actingAs($user)->get('/mobile/dashboard?days=7&kelompok_id='.$b)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Monitoring/Dashboard')
+                ->where('annualKpis.harvest.trees', 0)
+                ->where('annualKpis.harvest.volume', 0)
+                ->where('filters.days', 7)
+                ->where('filters.kelompok_id', $a)
+                ->etc());
+
+        $this->actingAs($user)->get('/mobile/dashboard?days=year&kelompok_id='.$b)
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Monitoring/Dashboard')
                 ->where('annualKpis.harvest.trees', 1)
                 ->where('annualKpis.harvest.volume', 1)
-                ->where('filters.days', 7)
+                ->where('filters.days', 'year')
+                ->where('periode.from', '2026-01-01')
+                ->where('periode.to', '2026-09-28')
                 ->where('filters.kelompok_id', $a)
                 ->etc());
     }
