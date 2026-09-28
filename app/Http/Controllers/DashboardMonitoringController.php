@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kelompok;
+use App\Services\AnnualMonitoringKpis;
 use App\Services\MonitoringSummary;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -10,7 +11,7 @@ use Inertia\Inertia;
 
 class DashboardMonitoringController extends Controller
 {
-    public function index(Request $request, MonitoringSummary $monitoring)
+    public function index(Request $request, MonitoringSummary $monitoring, AnnualMonitoringKpis $annualKpis)
     {
         $user = $request->user();
         $validated = $request->validate([
@@ -23,6 +24,7 @@ class DashboardMonitoringController extends Controller
             : (isset($validated['kelompok_id']) ? (int) $validated['kelompok_id'] : null);
         return Inertia::render('Monitoring/Dashboard', [
             ...$monitoring->forScope($kelompokId, $days),
+            'annualKpis' => $annualKpis->forScope($kelompokId),
             'filters' => ['days' => $days, 'kelompok_id' => $kelompokId],
             'namaKelompok' => $kelompokId ? Kelompok::find($kelompokId)?->nama_kelompok : null,
             'canFilterKelompok' => ! $user->kelompok_id,

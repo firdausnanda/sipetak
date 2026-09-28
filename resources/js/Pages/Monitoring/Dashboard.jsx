@@ -2,7 +2,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import MonitoringLayout from '@/Layouts/MonitoringLayout';
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
-import { Activity, ArrowDown, ArrowUp, Banknote, CalendarDays, FileCheck2, RefreshCw, TreePine, Truck, Waypoints } from 'lucide-react';
+import { Activity, ArrowDown, ArrowUp, Banknote, CalendarDays, FileCheck2, RefreshCw, Send, TreePine, Truck, Warehouse, Waypoints } from 'lucide-react';
 
 const fmt = (value) => Number(value || 0).toLocaleString('id-ID');
 const fmtVolume = (value) => Number(value || 0).toLocaleString('id-ID', { maximumFractionDigits: 3 });
@@ -17,13 +17,33 @@ function SectionHeading({ eyebrow, title, description, right }) {
     </div>;
 }
 
-function StatCard({ icon: Icon, label, value, unit, detail, accent = false }) {
-    return <article className="relative overflow-hidden rounded-2xl border border-outline-variant bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+function KpiCard({ icon: Icon, title, children, note, accent = false }) {
+    return <article className="relative flex min-w-0 flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
         <div className={`absolute inset-x-0 top-0 h-1 ${accent ? 'bg-orange-500' : 'bg-emerald-800'}`} />
-        <div className="flex items-center justify-between gap-3"><p className="text-sm font-medium text-on-surface-variant">{label}</p><span className={`rounded-xl p-2.5 ${accent ? 'bg-orange-50 text-orange-700' : 'bg-emerald-50 text-emerald-900'}`}><Icon size={19} aria-hidden="true" /></span></div>
-        <div className="mt-5 flex flex-wrap items-baseline gap-1.5"><strong className="font-monitoring text-3xl font-bold tracking-tight text-on-surface md:text-4xl">{value}</strong><span className="text-sm text-on-surface-variant">{unit}</span></div>
-        <p className="mt-3 min-h-10 border-t border-outline-variant pt-3 text-xs leading-5 text-on-surface-variant">{detail}</p>
+        <div className="flex items-center justify-between gap-3">
+            <h3 className="text-sm font-bold text-on-surface">{title}</h3>
+            <span className={`shrink-0 rounded-xl p-2.5 ${accent ? 'bg-orange-50 text-orange-700' : 'bg-emerald-50 text-emerald-900'}`}><Icon size={19} aria-hidden="true" /></span>
+        </div>
+        <div className="mt-5 flex-1">{children}</div>
+        {note && <p className="mt-4 border-t border-outline-variant pt-3 text-xs leading-5 text-on-surface-variant">{note}</p>}
     </article>;
+}
+
+function KpiValue({ label, value, unit }) {
+    return <div className="min-w-0">
+        <p className="text-xs font-medium text-on-surface-variant">{label}</p>
+        <p className="mt-1 flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+            <strong className="font-monitoring text-2xl font-bold tracking-tight text-on-surface tabular-nums md:text-3xl">{value}</strong>
+            <span className="text-xs text-on-surface-variant">{unit}</span>
+        </p>
+    </div>;
+}
+
+function KpiPercent({ label, value, comparison }) {
+    return <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-xs">
+        <span className="text-on-surface-variant">{label}{comparison && <span className="block text-[11px]">{comparison}</span>}</span>
+        <strong className="font-monitoring text-sm font-bold tabular-nums text-primary">{value === null ? '—' : `${fmt(value)}%`}</strong>
+    </div>;
 }
 
 function FlowRow({ label, part, total, caption, accent = false }) {
@@ -97,7 +117,7 @@ function GroupTable({ rows }) {
     </section>;
 }
 
-export default function Dashboard({ auth, summary, trend, kelompok, periode, filters, updatedAt, namaKelompok, canFilterKelompok, kelompokOptions }) {
+export default function Dashboard({ auth, summary, trend, kelompok, periode, filters, updatedAt, namaKelompok, canFilterKelompok, kelompokOptions, annualKpis }) {
     const Layout = auth.user.roles?.includes('monitoring_viewer') ? MonitoringLayout : AdminLayout;
     const [isFiltering, setIsFiltering] = useState(false);
     const [showLoading, setShowLoading] = useState(false);
@@ -158,7 +178,82 @@ export default function Dashboard({ auth, summary, trend, kelompok, periode, fil
                 </div>}
             </div>
 
-            <section><SectionHeading eyebrow="Gambaran umum" title="Ringkasan periode" description={filters.days === 'all' ? 'Seluruh data pada cakupan kelompok terpilih.' : `Data ${fmtFullDate(periode.from)} sampai ${fmtFullDate(periode.to)} pada cakupan kelompok terpilih.`} right={<p className="flex items-center gap-1.5 text-xs text-on-surface-variant"><CalendarDays size={14} /> Dibuat {new Date(updatedAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</p>} /><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><StatCard icon={TreePine} label="Hasil tebangan" value={fmt(summary.batang)} unit="batang" detail={`${fmt(summary.pohon)} pohon · ${fmtVolume(summary.volume)} m³`} /><StatCard icon={Truck} label="Masuk dokumen angkutan" value={fmt(summary.batangTerdokumen)} unit="batang" detail={`${fmt(summary.dokumenAngkutan)} dokumen · ${fmtVolume(summary.volumeTerdokumen)} m³`} /><StatCard icon={FileCheck2} label="Masuk SKSHHK" value={fmt(summary.batangSkshhkTerdokumen)} unit="batang" detail={`${fmt(summary.skshhk)} SKSHHK · ${fmtVolume(summary.volumeSkshhkTerdokumen)} m³`} accent /><StatCard icon={Activity} label="Volume hasil" value={fmtVolume(summary.volume)} unit="m³" detail="Total volume batang hasil tebangan dalam periode" /></div></section>
+            <section>
+                <SectionHeading
+                    eyebrow="Gambaran umum"
+                    title={`Ringkasan tahun ${annualKpis.year}`}
+                    description={`Data sejak 1 Januari sampai ${fmtFullDate(annualKpis.through)}. Pilihan 7/30/90 hari berlaku untuk grafik dan rincian periode di bawah.`}
+                    right={<p className="flex items-center gap-1.5 text-xs text-on-surface-variant"><CalendarDays size={14} /> Dibuat {new Date(updatedAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</p>}
+                />
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    <KpiCard
+                        icon={TreePine}
+                        title="Hasil Tebangan"
+                        note={annualKpis.harvest.targetTrees === null
+                            ? 'Target tahunan belum ditetapkan.'
+                            : (canFilterKelompok && !filters.kelompok_id
+                                ? `Persentase hanya mencakup ${fmt(annualKpis.harvest.targetedGroups)} kelompok bertarget; angka utama mencakup semua kelompok.`
+                                : 'Realisasi tahun berjalan dibanding target tahunan.')}
+                    >
+                        <div className="grid gap-3 2xl:grid-cols-2">
+                            <KpiValue label="Pohon" value={fmt(annualKpis.harvest.trees)} unit="pohon" />
+                            <KpiValue label="Volume" value={fmtVolume(annualKpis.harvest.volume)} unit="m³" />
+                        </div>
+                        <p className="mt-4 rounded-lg bg-surface-container-low px-3 py-2 text-sm font-semibold text-primary">{fmt(annualKpis.harvest.logs)} batang hasil tebangan</p>
+                        <div className="mt-4 space-y-2 border-t border-outline-variant pt-3">
+                            <KpiPercent label="Capaian target pohon" value={annualKpis.harvest.treePercent} comparison={annualKpis.harvest.targetTrees === null ? 'Belum ditetapkan' : `${fmt(annualKpis.harvest.targetedActualTrees)} dari ${fmt(annualKpis.harvest.targetTrees)} pohon`} />
+                            <KpiPercent label="Capaian target volume" value={annualKpis.harvest.volumePercent} comparison={annualKpis.harvest.targetVolume === null ? 'Belum ditetapkan' : `${fmtVolume(annualKpis.harvest.targetedActualVolume)} dari ${fmtVolume(annualKpis.harvest.targetVolume)} m³`} />
+                        </div>
+                    </KpiCard>
+
+                    <KpiCard icon={Truck} title="Kayu Masuk TPK" note="Berdasarkan batang pada Dokumen Angkutan bertanggal tahun ini; belum menunjukkan konfirmasi tiba secara fisik.">
+                        <div className="grid gap-3 2xl:grid-cols-2">
+                            <KpiValue label="Batang" value={fmt(annualKpis.tpkIn.logs)} unit="batang" />
+                            <KpiValue label="Volume" value={fmtVolume(annualKpis.tpkIn.volume)} unit="m³" />
+                        </div>
+                        <div className="mt-4 space-y-2 border-t border-outline-variant pt-3">
+                            <KpiPercent label="Dari batang hasil tebangan" value={annualKpis.tpkIn.logPercent} />
+                            <KpiPercent label="Dari volume hasil tebangan" value={annualKpis.tpkIn.volumePercent} />
+                        </div>
+                    </KpiCard>
+
+                    <KpiCard icon={FileCheck2} title="Sah LHP" note="Volume seluruh LHP tersimpan bertanggal tahun ini. LHP belum mencatat jumlah batang.">
+                        <KpiValue label="Volume LHP" value={fmtVolume(annualKpis.lhp.volume)} unit="m³" />
+                        <div className="mt-4 border-t border-outline-variant pt-3">
+                            <KpiPercent label="Dibanding volume stok TPK" value={annualKpis.lhp.volumePercent} />
+                        </div>
+                    </KpiCard>
+
+                    <KpiCard icon={Send} title="Pengiriman ke Buyer" note="Berdasarkan batang yang tercantum pada SKSHHK bertanggal tahun ini." accent>
+                        <div className="grid gap-3 2xl:grid-cols-2">
+                            <KpiValue label="Batang" value={fmt(annualKpis.buyerOut.logs)} unit="batang" />
+                            <KpiValue label="Volume" value={fmtVolume(annualKpis.buyerOut.volume)} unit="m³" />
+                        </div>
+                        <div className="mt-4 space-y-2 border-t border-outline-variant pt-3">
+                            <KpiPercent label="Dibanding batang stok TPK" value={annualKpis.buyerOut.logPercent} />
+                            <KpiPercent label="Dibanding volume stok TPK" value={annualKpis.buyerOut.volumePercent} />
+                        </div>
+                    </KpiCard>
+
+                    <KpiCard icon={Warehouse} title="Stok Kayu di TPK" note={`Seluruh riwayat sampai ${fmtFullDate(annualKpis.through)}: kayu masuk TPK dikurangi pengiriman ke buyer.`}>
+                        <div className="grid gap-3 2xl:grid-cols-2">
+                            <KpiValue label="Batang" value={fmt(annualKpis.stock.logs)} unit="batang" />
+                            <KpiValue label="Volume" value={fmtVolume(annualKpis.stock.volume)} unit="m³" />
+                        </div>
+                        <p className="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-primary">Stok kumulatif, tidak mengikuti filter 7/30/90 hari.</p>
+                    </KpiCard>
+
+                    <KpiCard icon={Activity} title="Hasil Mutu Kayu" note="Mutu batang hasil tebangan tahun berjalan.">
+                        <div className="grid grid-cols-2 gap-2.5">
+                            {annualKpis.quality.map((item) => <div key={item.code} className="rounded-xl bg-surface-container-low p-3">
+                                <p className="text-sm font-bold text-primary">Mutu {item.code}</p>
+                                <p className="mt-2 font-monitoring text-lg font-bold tabular-nums text-on-surface">{fmt(item.logs)} <span className="text-xs font-normal text-on-surface-variant">batang</span></p>
+                                <p className="mt-1 text-xs tabular-nums text-on-surface-variant">{fmtVolume(item.volume)} m³</p>
+                            </div>)}
+                        </div>
+                    </KpiCard>
+                </div>
+            </section>
 
             <section className="grid gap-4 md:grid-cols-2"><div className="rounded-2xl border border-outline-variant bg-white p-5 shadow-sm md:p-6"><div className="flex items-center gap-3"><span className="rounded-xl bg-orange-50 p-3 text-orange-800"><Banknote size={22} aria-hidden="true" /></span><div><h2 className="text-sm font-bold text-on-surface">Total PSDH pada LHP</h2><p className="mt-1 text-xs text-on-surface-variant">Berdasarkan tanggal LHP pada periode terpilih</p></div></div><p className="mt-5 font-monitoring text-2xl font-bold tabular-nums text-primary md:text-3xl">Rp {fmtRupiah(summary.totalPsdh)}</p>{summary.psdhTanpaKelompok > 0 && <p className="mt-1 text-xs text-on-surface-variant">Termasuk Rp {fmtRupiah(summary.psdhTanpaKelompok)} tanpa kelompok</p>}</div><div className="rounded-2xl border border-outline-variant bg-white p-5 shadow-sm md:p-6"><div className="flex items-center gap-3"><span className="rounded-xl bg-emerald-50 p-3 text-primary"><Banknote size={22} aria-hidden="true" /></span><div><h2 className="text-sm font-bold text-on-surface">Total PNBP dibayarkan</h2><p className="mt-1 text-xs text-on-surface-variant">Berdasarkan tanggal bayar dan NTPN</p></div></div><p className="mt-5 font-monitoring text-2xl font-bold tabular-nums text-primary md:text-3xl">Rp {fmtRupiah(summary.totalPnbpDibayar)}</p><p className="mt-1 text-xs text-on-surface-variant">{fmt(summary.pnbpDibayarCount)} pembayaran tercatat{summary.pnbpTanpaKelompok > 0 ? ` · Rp ${fmtRupiah(summary.pnbpTanpaKelompok)} tanpa kelompok` : ''}</p></div></section>
 
