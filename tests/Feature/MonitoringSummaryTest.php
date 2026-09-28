@@ -220,6 +220,31 @@ class MonitoringSummaryTest extends TestCase
         $this->assertEquals(140, app(MonitoringSummary::class)->forScope(null, 'all')['summary']['totalPnbpDibayar']);
     }
 
+    public function test_psdh_and_pnbp_totals_ceil_only_after_summing_records(): void
+    {
+        $group = $this->group('A');
+        foreach ([1, 2] as $number) {
+            $lhpId = DB::table('lhps')->insertGetId([
+                'kelompok_id' => $group, 'no_lhp' => 'LHP-'.$number,
+                'tanggal' => today()->toDateString(), 'sortimen' => 'AI',
+                'volume' => 1, 'tarif' => 1.2, 'psdh' => 1.2,
+            ]);
+            DB::table('pnbps')->insert([
+                'lhp_id' => $lhpId, 'kode_billing' => 'BILL-'.$number,
+                'tanggal_kode_billing' => today()->toDateString(),
+                'tanggal_bayar' => today()->toDateString(),
+                'ntpn' => 'NTPN-'.$number, 'jumlah' => 0.2,
+            ]);
+        }
+
+        $result = app(MonitoringSummary::class)->forScope(null, 'year');
+
+        $this->assertSame(3, $result['summary']['totalPsdh']);
+        $this->assertSame(1, $result['summary']['totalPnbpDibayar']);
+        $this->assertSame(3, $result['kelompok'][0]['totalPsdh']);
+        $this->assertSame(1, $result['kelompok'][0]['totalPnbpDibayar']);
+    }
+
     public function test_all_data_trend_groups_records_by_month(): void
     {
         $group = $this->group('A');

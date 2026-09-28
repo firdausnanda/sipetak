@@ -52,12 +52,12 @@ function KpiPercent({ label, value }) {
     </div>;
 }
 
-function FlowRow({ label, part, total, caption, accent = false }) {
-    const ratio = total > 0 ? Math.round(part / total * 100) : null;
+function FlowRow({ label, caption, part, total, percent, accent = false }) {
+    const progress = Math.min(100, Math.max(0, percent ?? 0));
     return <div className="py-5 first:pt-0 last:pb-0">
-        <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between"><div className="min-w-0"><h3 className="text-sm font-semibold leading-5 text-on-surface">{label}</h3><p className="mt-1 text-xs leading-5 text-on-surface-variant">{caption}</p></div><span className={`shrink-0 rounded-lg px-2.5 py-1 font-monitoring tabular-nums text-sm font-semibold ${accent ? 'bg-orange-50 text-orange-800' : 'bg-emerald-50 text-emerald-900'}`}>{ratio === null ? '—' : `${fmt(ratio)}%`}</span></div>
-        <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-surface-container" role="progressbar" aria-label={label} aria-valuenow={Math.min(ratio || 0, 100)} aria-valuemin="0" aria-valuemax="100"><div className={`h-full rounded-full ${accent ? 'bg-orange-500' : 'bg-emerald-800'}`} style={{ width: `${Math.min(ratio || 0, 100)}%` }} /></div>
-        <p className="mt-2 text-xs font-medium text-on-surface-variant">{fmt(part)} dari {fmt(total)} batang{ratio === null ? ' · Belum ada data pembanding' : ''}</p>
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between"><div className="min-w-0"><h3 className="text-sm font-semibold leading-5 text-on-surface">{label}</h3><p className="mt-1 text-xs leading-5 text-on-surface-variant">{caption}</p></div><span className={`shrink-0 rounded-lg px-2.5 py-1 font-monitoring tabular-nums text-sm font-semibold ${accent ? 'bg-orange-50 text-orange-800' : 'bg-emerald-50 text-emerald-900'}`}>{percent === null ? '—' : `${fmt(percent)}%`}</span></div>
+        <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-surface-container" role="progressbar" aria-label={label} aria-valuenow={percent === null ? undefined : progress} aria-valuetext={percent === null ? 'Belum ada data pembanding' : `${fmt(percent)} persen`} aria-valuemin="0" aria-valuemax="100"><div className={`h-full rounded-full ${accent ? 'bg-orange-500' : 'bg-emerald-800'}`} style={{ width: `${progress}%` }} /></div>
+        <p className="mt-2 text-xs font-medium tabular-nums text-on-surface-variant">{fmtVolume(part)} dari {fmtVolume(total)} m³{percent === null ? ' · Belum ada data pembanding' : ''}</p>
     </div>;
 }
 
@@ -188,7 +188,7 @@ export default function Dashboard({ auth, summary, trend, kelompok, periode, fil
                 <SectionHeading
                     eyebrow="Gambaran umum"
                     title={filters.days === 'all' ? 'Ringkasan seluruh data' : filters.days === 'year' ? `Ringkasan tahun ${annualKpis.year}` : `Ringkasan ${filters.days} hari terakhir`}
-                    description={`${filters.days === 'all' ? 'Seluruh riwayat sampai' : `${fmtFullDate(periode.from)} –`} ${fmtFullDate(periode.to)} · Stok TPK adalah saldo kumulatif.`}
+                    description={`${filters.days === 'all' ? 'Seluruh riwayat sampai' : `${fmtFullDate(periode.from)} –`} ${fmtFullDate(periode.to)}`}
                     right={<p className="flex items-center gap-1.5 text-xs text-on-surface-variant"><CalendarDays size={14} /> Dibuat {new Date(updatedAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</p>}
                 />
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -241,7 +241,7 @@ export default function Dashboard({ auth, summary, trend, kelompok, periode, fil
                         </div>
                     </KpiCard>
 
-                    <KpiCard icon={Warehouse} title="Stok Kayu di TPK" note={`Saldo kumulatif hingga ${fmtFullDate(periode.to)}.`}>
+                    <KpiCard icon={Warehouse} title="Stok Kayu di TPK" note={`Sisa kayu tercatat hingga ${fmtFullDate(periode.to)}: masuk TPK dikurangi pengiriman.`}>
                         <div className="grid grid-cols-2 gap-2">
                             <KpiValue label="Batang" value={fmt(annualKpis.stock.logs)} unit="batang" />
                             <KpiValue label="Volume" value={fmtVolume(annualKpis.stock.volume)} unit="m³" />
@@ -269,7 +269,7 @@ export default function Dashboard({ auth, summary, trend, kelompok, periode, fil
 
             <section className="grid gap-4 md:grid-cols-2"><div className="rounded-2xl border border-outline-variant bg-white p-5 shadow-sm md:p-6"><div className="flex items-center gap-3"><span className="rounded-xl bg-orange-50 p-3 text-orange-800"><Banknote size={22} aria-hidden="true" /></span><div><h2 className="text-sm font-bold text-on-surface">Total PSDH pada LHP</h2><p className="mt-1 text-xs text-on-surface-variant">Berdasarkan tanggal LHP pada periode terpilih</p></div></div><p className="mt-5 font-monitoring text-2xl font-bold tabular-nums text-primary md:text-3xl">Rp {fmtRupiah(summary.totalPsdh)}</p>{summary.psdhTanpaKelompok > 0 && <p className="mt-1 text-xs text-on-surface-variant">Termasuk Rp {fmtRupiah(summary.psdhTanpaKelompok)} tanpa kelompok</p>}</div><div className="rounded-2xl border border-outline-variant bg-white p-5 shadow-sm md:p-6"><div className="flex items-center gap-3"><span className="rounded-xl bg-emerald-50 p-3 text-primary"><Banknote size={22} aria-hidden="true" /></span><div><h2 className="text-sm font-bold text-on-surface">Total PNBP dibayarkan</h2><p className="mt-1 text-xs text-on-surface-variant">Berdasarkan tanggal bayar dan NTPN</p></div></div><p className="mt-5 font-monitoring text-2xl font-bold tabular-nums text-primary md:text-3xl">Rp {fmtRupiah(summary.totalPnbpDibayar)}</p><p className="mt-1 text-xs text-on-surface-variant">{fmt(summary.pnbpDibayarCount)} pembayaran tercatat{summary.pnbpTanpaKelompok > 0 ? ` · Rp ${fmtRupiah(summary.pnbpTanpaKelompok)} tanpa kelompok` : ''}</p></div></section>
 
-            <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.55fr)]"><section className="min-w-0 rounded-2xl border border-outline-variant bg-white p-4 shadow-sm sm:p-5 md:p-6"><h2 className="font-monitoring text-xl font-bold">Alur pencatatan</h2><p className="mt-1 text-sm leading-5 text-on-surface-variant">Perbandingan jumlah batang berdasarkan tanggal tiap tahap</p><div className="mt-6 divide-y divide-outline-variant"><FlowRow label="Tebangan → dokumen angkutan" part={summary.batangTerdokumen} total={summary.batang} caption="Batang pada Dokumen Angkutan bertanggal dalam periode terpilih." /><FlowRow label="Dokumen angkutan → SKSHHK" part={summary.batangSkshhkTerdokumen} total={summary.batangTerdokumen} caption="Batang pada SKSHHK bertanggal dalam periode terpilih." accent /></div><p className="mt-6 rounded-xl bg-orange-50 px-3 py-3 text-xs leading-5 text-orange-900 sm:px-4">Persentase menunjukkan pencatatan dokumen, bukan status tiba di tujuan.</p></section><TrendPanel trend={trend} periode={periode} total={summary.pohonPeriode} totalBatang={summary.batangPeriode} totalVolume={summary.volumePeriode} /></div>
+            <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.55fr)]"><section className="min-w-0 rounded-2xl border border-outline-variant bg-white p-4 shadow-sm sm:p-5 md:p-6"><h2 className="font-monitoring text-xl font-bold">Alur pencatatan</h2><p className="mt-1 text-sm leading-5 text-on-surface-variant">Perbandingan volume · {filters.days === 'all' ? 'seluruh data' : filters.days === 'year' ? `tahun ${annualKpis.year}` : `${filters.days} hari terakhir`}</p><div className="mt-6 divide-y divide-outline-variant"><FlowRow label="Hasil Tebangan → Kayu Masuk TPK" caption="Kayu masuk berdasarkan tanggal Dokumen Angkutan." part={annualKpis.tpkIn.volume} total={annualKpis.harvest.volume} percent={annualKpis.tpkIn.volumePercent} /><FlowRow label="Kayu Masuk TPK → Sah LHP" caption="Volume LHP dibanding volume kayu masuk TPK." part={annualKpis.lhp.volume} total={annualKpis.tpkIn.volume} percent={annualKpis.lhp.volumePercent} /><FlowRow label="Sah LHP → Pengiriman ke Buyer" caption="Volume SKSHHK dibanding volume LHP." part={annualKpis.buyerOut.volume} total={annualKpis.lhp.volume} percent={annualKpis.buyerOut.volumePercent} accent /></div><p className="mt-5 text-[11px] leading-4 text-on-surface-variant">Setiap tahap mengikuti tanggal pencatatannya; persentase dapat melebihi 100%.</p></section><TrendPanel trend={trend} periode={periode} total={summary.pohonPeriode} totalBatang={summary.batangPeriode} totalVolume={summary.volumePeriode} /></div>
 
             <GroupTable rows={kelompok} />
         </div>

@@ -137,12 +137,12 @@ class MonitoringSummary
                 'skshhk' => (clone $shipmentBatangs)->distinct()->count('skshhks.id'),
                 'batangSkshhkTerdokumen' => (clone $shipmentBatangs)->count(),
                 'volumeSkshhkTerdokumen' => (float) (clone $shipmentBatangs)->sum('batangs.volume'),
-                'totalPsdh' => (float) (clone $lhps)->sum('psdh'),
-                'totalPnbpDibayar' => (float) (clone $pnbpPaid)->sum('jumlah'),
+                'totalPsdh' => (int) ceil((float) (clone $lhps)->sum('psdh')),
+                'totalPnbpDibayar' => (int) ceil((float) (clone $pnbpPaid)->sum('jumlah')),
                 'pnbpDibayarCount' => (clone $pnbpPaid)->count(),
-                'psdhTanpaKelompok' => $kelompokId ? 0 : (float) $this->inPeriod(Lhp::query()->whereNull('kelompok_id'), 'tanggal', $period)->sum('psdh'),
-                'pnbpTanpaKelompok' => $kelompokId ? 0 : (float) (clone $pnbpPaid)
-                    ->whereHas('lhp', fn (Builder $lhp) => $lhp->whereNull('kelompok_id'))->sum('jumlah'),
+                'psdhTanpaKelompok' => $kelompokId ? 0 : (int) ceil((float) $this->inPeriod(Lhp::query()->whereNull('kelompok_id'), 'tanggal', $period)->sum('psdh')),
+                'pnbpTanpaKelompok' => $kelompokId ? 0 : (int) ceil((float) (clone $pnbpPaid)
+                    ->whereHas('lhp', fn (Builder $lhp) => $lhp->whereNull('kelompok_id'))->sum('jumlah')),
                 'pohonPeriode' => (int) $trendRows->sum(),
                 'batangPeriode' => (int) $trendBatangRows->sum('total'),
                 'volumePeriode' => (float) $trendBatangRows->sum('volume_total'),
@@ -160,8 +160,8 @@ class MonitoringSummary
                 'pohonSkshhkTerdokumen' => (int) ($shipmentByKelompok[$row->id]?->pohon_total ?? 0),
                 'batangSkshhkTerdokumen' => (int) ($shipmentByKelompok[$row->id]?->batang_total ?? 0),
                 'volumeSkshhkTerdokumen' => (float) ($shipmentByKelompok[$row->id]?->volume_total ?? 0),
-                'totalPsdh' => (float) ($psdhByKelompok[$row->id] ?? 0),
-                'totalPnbpDibayar' => (float) ($pnbpByKelompok[$row->id] ?? 0),
+                'totalPsdh' => (int) ceil((float) ($psdhByKelompok[$row->id] ?? 0)),
+                'totalPnbpDibayar' => (int) ceil((float) ($pnbpByKelompok[$row->id] ?? 0)),
             ])->all(),
         ];
     }
