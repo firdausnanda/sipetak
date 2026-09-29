@@ -234,6 +234,11 @@ export default function Dashboard({ auth, summary, trend, kelompok, periode, fil
                         <div className="mt-3">
                             <KpiPercent label="Realisasi Volume" value={annualKpis.lhp.volumePercent} suffix="dari kayu masuk TPK" />
                         </div>
+                        <div className="mt-3 border-t border-outline-variant pt-2">
+                            <p className="text-[11px] text-on-surface-variant">Total PNBP dibayarkan</p>
+                            <p className="mt-0.5 font-monitoring text-base font-bold tabular-nums text-on-surface">Rp {fmtRupiah(summary.totalPnbpDibayar)}</p>
+                            <p className="mt-0.5 text-[11px] text-on-surface-variant">Berdasarkan tanggal bayar dan NTPN</p>
+                        </div>
                     </KpiCard>
 
                     <KpiCard icon={Send} title="Pengiriman ke Buyer" accent>
