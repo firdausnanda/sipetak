@@ -129,10 +129,10 @@ class AnnualMonitoringKpisTest extends TestCase
         $this->assertSame(2, $kpis['stock']['logs']);
         $this->assertEquals(1.5, $kpis['stock']['volume']);
         $this->assertSame([
-            ['code' => 'P', 'logs' => 2, 'volume' => 3.5],
-            ['code' => 'D', 'logs' => 1, 'volume' => 0.5],
-            ['code' => 'T', 'logs' => 1, 'volume' => 1.0],
-            ['code' => 'M', 'logs' => 1, 'volume' => 1.0],
+            ['code' => 'P', 'logs' => 2, 'volume' => 3.5, 'volumePercent' => 58.3],
+            ['code' => 'D', 'logs' => 1, 'volume' => 0.5, 'volumePercent' => 8.3],
+            ['code' => 'T', 'logs' => 1, 'volume' => 1.0, 'volumePercent' => 16.7],
+            ['code' => 'M', 'logs' => 1, 'volume' => 1.0, 'volumePercent' => 16.7],
         ], $kpis['quality']);
 
         $scoped = app(AnnualMonitoringKpis::class)->forScope($a);
@@ -186,6 +186,7 @@ class AnnualMonitoringKpisTest extends TestCase
         $this->assertNull($empty['buyerOut']['volumePercent']);
         $this->assertSame(['P', 'D', 'T', 'M'], array_column($empty['quality'], 'code'));
         $this->assertSame([0, 0, 0, 0], array_column($empty['quality'], 'logs'));
+        $this->assertSame([null, null, null, null], array_column($empty['quality'], 'volumePercent'));
     }
 
     public function test_lhp_percentage_is_zero_when_lhp_volume_is_zero_but_incoming_wood_exists(): void

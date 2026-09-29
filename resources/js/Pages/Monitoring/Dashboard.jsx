@@ -45,10 +45,15 @@ function KpiValue({ label, value, unit }) {
     </div>;
 }
 
-function KpiPercent({ label, value }) {
-    return <div className="rounded-lg bg-surface-container-low px-2.5 py-2">
-        <span className="block text-[11px] leading-4 text-on-surface-variant">{label}</span>
-        <strong className="font-monitoring text-sm font-bold tabular-nums text-primary">{value === null ? '—' : `${fmt(value)}%`}</strong>
+function KpiPercent({ label, value, suffix }) {
+    return <div className="rounded-lg bg-surface-container-low px-2.5 py-2 flex flex-col justify-center">
+        <span className="block text-[11px] leading-4 text-on-surface-variant mb-0.5">{label}</span>
+        <div className="flex items-baseline flex-wrap gap-x-1">
+            <strong className="font-monitoring text-sm font-bold tabular-nums text-primary">
+                {value === null ? '—' : `${fmt(value)}%`}
+            </strong>
+            {suffix && <span className="text-[9px] leading-tight font-medium text-on-surface-variant/80">{suffix}</span>}
+        </div>
     </div>;
 }
 
@@ -203,48 +208,48 @@ export default function Dashboard({ auth, summary, trend, kelompok, periode, fil
                             ].filter(Boolean).join(' ')}
                     >
                         <div className="grid grid-cols-2 gap-2">
-                            <KpiValue label="Pohon" value={fmt(annualKpis.harvest.trees)} unit="pohon" />
-                            <KpiValue label="Volume" value={fmtVolume(annualKpis.harvest.volume)} unit="m³" />
+                            <KpiValue label="Total Pohon" value={fmt(annualKpis.harvest.trees)} unit="pohon" />
+                            <KpiValue label="Total Volume" value={fmtVolume(annualKpis.harvest.volume)} unit="m³" />
                         </div>
                         <p className="mt-2 text-xs font-semibold text-primary">{fmt(annualKpis.harvest.logs)} batang</p>
                         <div className="mt-3 grid grid-cols-2 gap-2">
-                            <KpiPercent label={`Target pohon ${annualKpis.year}`} value={annualKpis.harvest.treePercent} />
-                            <KpiPercent label={`Target volume ${annualKpis.year}`} value={annualKpis.harvest.volumePercent} />
+                            <KpiPercent label={`Realisasi pohon ${annualKpis.year}`} value={annualKpis.harvest.treePercent} suffix="dari rencana tebang" />
+                            <KpiPercent label={`Realisasi volume ${annualKpis.year}`} value={annualKpis.harvest.volumePercent} suffix="dari rencana tebang" />
                         </div>
                     </KpiCard>
 
                     <KpiCard icon={Truck} title="Kayu Masuk TPK">
                         <div className="grid grid-cols-2 gap-2">
-                            <KpiValue label="Batang" value={fmt(annualKpis.tpkIn.logs)} unit="batang" />
-                            <KpiValue label="Volume" value={fmtVolume(annualKpis.tpkIn.volume)} unit="m³" />
+                            <KpiValue label="Total Batang" value={fmt(annualKpis.tpkIn.logs)} unit="batang" />
+                            <KpiValue label="Total Volume" value={fmtVolume(annualKpis.tpkIn.volume)} unit="m³" />
                         </div>
                         <div className="mt-3 grid grid-cols-2 gap-2">
-                            <KpiPercent label="Batang / hasil" value={annualKpis.tpkIn.logPercent} />
-                            <KpiPercent label="Volume / hasil" value={annualKpis.tpkIn.volumePercent} />
+                            <KpiPercent label="Realisasi Batang" value={annualKpis.tpkIn.logPercent} suffix="dari hasil tebangan" />
+                            <KpiPercent label="Realisasi Volume" value={annualKpis.tpkIn.volumePercent} suffix="dari hasil tebangan" />
                         </div>
                     </KpiCard>
 
                     <KpiCard icon={FileCheck2} title="Sah LHP">
-                        <KpiValue label="Volume LHP" value={fmtVolume(annualKpis.lhp.volume)} unit="m³" />
+                        <KpiValue label="Total Volume LHP" value={fmtVolume(annualKpis.lhp.volume)} unit="m³" />
                         <div className="mt-3">
-                            <KpiPercent label="LHP / masuk TPK" value={annualKpis.lhp.volumePercent} />
+                            <KpiPercent label="Realisasi Volume" value={annualKpis.lhp.volumePercent} suffix="dari kayu masuk TPK" />
                         </div>
                     </KpiCard>
 
                     <KpiCard icon={Send} title="Pengiriman ke Buyer" accent>
                         <div className="grid grid-cols-2 gap-2">
-                            <KpiValue label="Batang" value={fmt(annualKpis.buyerOut.logs)} unit="batang" />
-                            <KpiValue label="Volume" value={fmtVolume(annualKpis.buyerOut.volume)} unit="m³" />
+                            <KpiValue label="Total Batang" value={fmt(annualKpis.buyerOut.logs)} unit="batang" />
+                            <KpiValue label="Total Volume" value={fmtVolume(annualKpis.buyerOut.volume)} unit="m³" />
                         </div>
                         <div className="mt-3">
-                            <KpiPercent label="Volume / LHP" value={annualKpis.buyerOut.volumePercent} />
+                            <KpiPercent label="Realisasi Volume" value={annualKpis.buyerOut.volumePercent} suffix="dari sah LHP" />
                         </div>
                     </KpiCard>
 
                     <KpiCard icon={Warehouse} title="Stok Kayu di TPK" note={`Sisa kayu tercatat hingga ${fmtFullDate(periode.to)}: masuk TPK dikurangi pengiriman.`}>
                         <div className="grid grid-cols-2 gap-2">
-                            <KpiValue label="Batang" value={fmt(annualKpis.stock.logs)} unit="batang" />
-                            <KpiValue label="Volume" value={fmtVolume(annualKpis.stock.volume)} unit="m³" />
+                            <KpiValue label="Total Batang" value={fmt(annualKpis.stock.logs)} unit="batang" />
+                            <KpiValue label="Total Volume" value={fmtVolume(annualKpis.stock.volume)} unit="m³" />
                         </div>
                     </KpiCard>
 
@@ -257,8 +262,9 @@ export default function Dashboard({ auth, summary, trend, kelompok, periode, fil
                                         <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-xs font-bold ${style.badge}`} aria-hidden="true">{item.code}</span>
                                         <span className={`text-xs font-semibold ${style.text}`}>Mutu {item.code}</span>
                                     </div>
-                                    <p className={`mt-1.5 font-monitoring text-base font-bold tabular-nums ${style.text}`}>{fmt(item.logs)} <span className="text-[11px] font-medium">batang</span></p>
-                                    <p className={`mt-0.5 text-xs tabular-nums ${style.text}`}>{fmtVolume(item.volume)} m³</p>
+                                    <p className={`mt-2 font-monitoring text-base font-bold leading-tight tabular-nums ${style.text}`}>{fmtVolume(item.volume)} <span className="text-[11px] font-medium">m³</span></p>
+                                    <p className={`mt-0.5 text-[10px] leading-4 tabular-nums opacity-80 ${style.text}`}>{fmt(item.logs)} batang</p>
+                                    <p className={`mt-2 border-t border-current/15 pt-1.5 text-[11px] leading-4 ${style.text}`}><strong className="tabular-nums">{item.volumePercent === null ? '—' : `${fmt(item.volumePercent)}%`}</strong> dari volume hasil tebangan</p>
                                 </div>;
                             })}
                         </div>

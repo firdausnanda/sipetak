@@ -78,6 +78,7 @@ class AnnualMonitoringKpis
             'code' => $code,
             'logs' => (int) ($qualityRows[$code]->logs ?? 0),
             'volume' => (float) ($qualityRows[$code]->volume ?? 0),
+            'volumePercent' => $this->percent((float) ($qualityRows[$code]->volume ?? 0), $harvestLogs['volume']),
         ], ['P', 'D', 'T', 'M']);
 
         return [
