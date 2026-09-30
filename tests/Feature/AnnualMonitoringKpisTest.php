@@ -40,10 +40,11 @@ class AnnualMonitoringKpisTest extends TestCase
         $this->assertSame(1, $week['buyerOut']['logs']);
         $this->assertEquals(2, $week['buyerOut']['volume']);
         $this->assertEquals(100, $week['lhp']['volumePercent']);
-        $this->assertEquals(100, $week['buyerOut']['volumePercent']);
+        $this->assertNull($week['buyerOut']['volumePercent']);
         $this->assertNull($week['tpkIn']['volumePercent']);
         $this->assertSame(1, $year['harvest']['trees']);
         $this->assertEquals(7, $year['lhp']['volume']);
+        $this->assertEquals(100, $year['buyerOut']['volumePercent']);
         $this->assertEquals(7, $all['lhp']['volume']);
     }
 
@@ -125,7 +126,7 @@ class AnnualMonitoringKpisTest extends TestCase
         $this->assertEquals(64.3, $kpis['lhp']['volumePercent']);
         $this->assertSame(2, $kpis['buyerOut']['logs']);
         $this->assertEquals(5.5, $kpis['buyerOut']['volume']);
-        $this->assertEquals(122.2, $kpis['buyerOut']['volumePercent']);
+        $this->assertEquals(91.7, $kpis['buyerOut']['volumePercent']);
         $this->assertSame(2, $kpis['stock']['logs']);
         $this->assertEquals(1.5, $kpis['stock']['volume']);
         $this->assertSame([
@@ -217,7 +218,7 @@ class AnnualMonitoringKpisTest extends TestCase
         $this->assertNull($kpis['lhp']['volumePercent']);
     }
 
-    public function test_buyer_volume_percentage_is_unavailable_when_lhp_volume_is_zero(): void
+    public function test_buyer_volume_percentage_uses_harvest_even_when_lhp_volume_is_zero(): void
     {
         $this->travelTo(Carbon::parse('2026-09-28'));
         $group = $this->group('A');
@@ -231,7 +232,7 @@ class AnnualMonitoringKpisTest extends TestCase
 
         $this->assertEquals(2, $kpis['buyerOut']['volume']);
         $this->assertEquals(0, $kpis['lhp']['volume']);
-        $this->assertNull($kpis['buyerOut']['volumePercent']);
+        $this->assertEquals(66.7, $kpis['buyerOut']['volumePercent']);
     }
 
     public function test_monitoring_exposes_group_scoped_kpis_for_selected_period(): void

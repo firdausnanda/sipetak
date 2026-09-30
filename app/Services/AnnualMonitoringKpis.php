@@ -107,7 +107,7 @@ class AnnualMonitoringKpis
             ],
             'buyerOut' => [
                 ...$buyerOut,
-                'volumePercent' => $this->percent($buyerOut['volume'], $lhpVolume),
+                'volumePercent' => $this->percent($buyerOut['volume'], $harvestLogs['volume']),
             ],
             'stock' => $stock,
             'quality' => $quality,
