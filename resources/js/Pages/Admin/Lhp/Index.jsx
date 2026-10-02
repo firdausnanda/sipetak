@@ -12,19 +12,25 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 registerLocale('id', id);
 
+const parseFilterDate = (value) => value ? new Date(`${value}T00:00:00`) : null;
+const formatFilterDate = (date) => date
+    ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+    : '';
+
 export default function Index({ lhps, filters = {}, kelompoks = [], summary = {} }) {
     const { auth } = usePage().props;
     const user = auth.user;
     
     const [searchQuery, setSearchQuery] = useState(filters?.search || '');
     const [filterKelompok, setFilterKelompok] = useState(filters?.kelompok_id || '');
-    const [filterTanggal, setFilterTanggal] = useState(filters?.tanggal || '');
+    const [filterTanggalMulai, setFilterTanggalMulai] = useState(filters?.tanggal_mulai || '');
+    const [filterTanggalAkhir, setFilterTanggalAkhir] = useState(filters?.tanggal_akhir || '');
     const [filterSortimen, setFilterSortimen] = useState(filters?.sortimen || '');
     const [filterMinVolume, setFilterMinVolume] = useState(filters?.min_volume || '');
     const [filterMaxVolume, setFilterMaxVolume] = useState(filters?.max_volume || '');
 
     const [showAdvanced, setShowAdvanced] = useState(
-        !!(filters?.tanggal || filters?.sortimen || filters?.min_volume || filters?.max_volume)
+        !!(filters?.tanggal_mulai || filters?.tanggal_akhir || filters?.sortimen || filters?.min_volume || filters?.max_volume)
     );
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -35,7 +41,8 @@ export default function Index({ lhps, filters = {}, kelompoks = [], summary = {}
         const queryParams = {
             search: key === 'search' ? value : searchQuery,
             kelompok_id: key === 'kelompok_id' ? value : filterKelompok,
-            tanggal: key === 'tanggal' ? value : filterTanggal,
+            tanggal_mulai: filterTanggalMulai,
+            tanggal_akhir: filterTanggalAkhir,
             sortimen: key === 'sortimen' ? value : filterSortimen,
             min_volume: key === 'min_volume' ? value : filterMinVolume,
             max_volume: key === 'max_volume' ? value : filterMaxVolume,
@@ -59,23 +66,13 @@ export default function Index({ lhps, filters = {}, kelompoks = [], summary = {}
         applyFilter('kelompok_id', val);
     };
 
-    const handleTanggalChange = (date) => {
-        let val = '';
-        if (date) {
-            const offset = date.getTimezoneOffset();
-            const localDate = new Date(date.getTime() - (offset*60*1000));
-            val = localDate.toISOString().split('T')[0];
-        }
-        setFilterTanggal(val);
-        applyFilter('tanggal', val);
-    };
-
     const handleAdvancedSearch = () => {
         applyFilter('advanced', 'trigger'); // just triggers the applyFilter with current states
     };
 
     const resetAdvancedSearch = () => {
-        setFilterTanggal('');
+        setFilterTanggalMulai('');
+        setFilterTanggalAkhir('');
         setFilterSortimen('');
         setFilterMinVolume('');
         setFilterMaxVolume('');
@@ -251,16 +248,35 @@ export default function Index({ lhps, filters = {}, kelompoks = [], summary = {}
                 {/* Advanced Search Panel */}
                 {showAdvanced && (
                     <div className="mt-4 pt-4 border-t border-outline-variant animate-in slide-in-from-top-2 duration-200">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
                             <div className="relative z-10">
-                                <label className="block text-sm font-bold text-on-surface-variant mb-1">Tanggal LHP</label>
+                                <label htmlFor="filter-tanggal-mulai" className="block text-sm font-bold text-on-surface-variant mb-1">Tanggal Mulai</label>
                                 <DatePicker
+                                    id="filter-tanggal-mulai"
                                     isClearable
-                                    selected={filterTanggal ? new Date(filterTanggal) : null}
-                                    onChange={handleTanggalChange}
+                                    selected={parseFilterDate(filterTanggalMulai)}
+                                    onChange={(date) => setFilterTanggalMulai(formatFilterDate(date))}
+                                    maxDate={parseFilterDate(filterTanggalAkhir)}
                                     dateFormat="dd MMMM yyyy"
                                     locale="id"
-                                    placeholderText="Pilih Tanggal..."
+                                    placeholderText="Dari tanggal..."
+                                    aria-label="Tanggal mulai LHP"
+                                    className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:outline-none focus:border-primary min-h-[38px]"
+                                    wrapperClassName="w-full"
+                                />
+                            </div>
+                            <div className="relative z-10">
+                                <label htmlFor="filter-tanggal-akhir" className="block text-sm font-bold text-on-surface-variant mb-1">Tanggal Akhir</label>
+                                <DatePicker
+                                    id="filter-tanggal-akhir"
+                                    isClearable
+                                    selected={parseFilterDate(filterTanggalAkhir)}
+                                    onChange={(date) => setFilterTanggalAkhir(formatFilterDate(date))}
+                                    minDate={parseFilterDate(filterTanggalMulai)}
+                                    dateFormat="dd MMMM yyyy"
+                                    locale="id"
+                                    placeholderText="Sampai tanggal..."
+                                    aria-label="Tanggal akhir LHP"
                                     className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:outline-none focus:border-primary min-h-[38px]"
                                     wrapperClassName="w-full"
                                 />

@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Enums\SortimenEnum;
 use App\Models\Pnbp;
 use App\Models\Lhp;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 use Maatwebsite\Excel\Facades\Excel;
@@ -17,54 +21,95 @@ class PnbpController extends Controller
     public function exportRekonsiliasi(Request $request)
     {
         $user = Auth::user();
-        
-        // We need LHPs with their PNBP, Kelompok, and JenisPohon
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'kelompok_id' => ['nullable', 'integer', 'exists:kelompoks,id'],
+            'tanggal_mulai' => ['nullable', 'date_format:Y-m-d'],
+            'tanggal_akhir' => ['nullable', 'date_format:Y-m-d'],
+            'tanggal_billing' => ['nullable', 'date_format:Y-m-d'],
+            'status' => ['nullable', Rule::in(['lunas', 'belum_lunas'])],
+            'sortimen' => ['nullable', Rule::in(SortimenEnum::values())],
+            'min_volume' => ['nullable', 'numeric', 'min:0'],
+            'max_volume' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        if (!empty($filters['tanggal_mulai']) && !empty($filters['tanggal_akhir'])
+            && $filters['tanggal_akhir'] < $filters['tanggal_mulai']) {
+            throw ValidationException::withMessages(['tanggal_akhir' => 'Tanggal akhir tidak boleh sebelum tanggal mulai.']);
+        }
+        if (isset($filters['min_volume'], $filters['max_volume'])
+            && (float) $filters['max_volume'] < (float) $filters['min_volume']) {
+            throw ValidationException::withMessages(['max_volume' => 'Volume maksimum tidak boleh kurang dari volume minimum.']);
+        }
+
         $query = Lhp::with(['pnbp', 'kelompok', 'jenisPohon']);
 
         if ($user->hasRole('admin_kelompok') && $user->kelompok_id) {
             $query->where('kelompok_id', $user->kelompok_id);
         }
 
-        // Apply filters similar to index
-        if ($request->filled('kelompok_id')) {
-            $query->where('kelompok_id', $request->kelompok_id);
-        }
-        
-        if ($request->filled('tanggal_billing')) {
-            $query->whereHas('pnbp', function($q) use ($request) {
-                $q->whereDate('tanggal_kode_billing', $request->tanggal_billing);
-            });
-        }
-        
-        if ($request->filled('status')) {
-            if ($request->status === 'lunas') {
-                $query->whereHas('pnbp', function($q) {
-                    $q->whereNotNull('ntpn');
-                });
-            } elseif ($request->status === 'belum_lunas') {
-                $query->whereHas('pnbp', function($q) {
-                    $q->whereNull('ntpn');
-                })->orWhereDoesntHave('pnbp');
-            }
+        if (!empty($filters['kelompok_id'])) {
+            $query->where('kelompok_id', $filters['kelompok_id']);
         }
 
-        $lhps = $query->orderBy('tanggal', 'asc')->get();
-        
-        // Determine Kelompok name for header
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('no_lhp', 'like', "%{$search}%")
+                    ->orWhereHas('pnbp', function ($pnbp) use ($search) {
+                        $pnbp->where('kode_billing', 'like', "%{$search}%")
+                            ->orWhere('ntpn', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if (!empty($filters['tanggal_mulai'])) {
+            $query->whereDate('tanggal', '>=', $filters['tanggal_mulai']);
+        }
+        if (!empty($filters['tanggal_akhir'])) {
+            $query->whereDate('tanggal', '<=', $filters['tanggal_akhir']);
+        }
+        if (!empty($filters['tanggal_billing'])) {
+            $query->whereHas('pnbp', fn ($pnbp) => $pnbp->whereDate('tanggal_kode_billing', $filters['tanggal_billing']));
+        }
+        if (!empty($filters['sortimen'])) {
+            $query->where('sortimen', $filters['sortimen']);
+        }
+        if (isset($filters['min_volume'])) {
+            $query->where('volume', '>=', $filters['min_volume']);
+        }
+        if (isset($filters['max_volume'])) {
+            $query->where('volume', '<=', $filters['max_volume']);
+        }
+        if (($filters['status'] ?? null) === 'lunas') {
+            $query->whereHas('pnbp', fn ($pnbp) => $pnbp->whereNotNull('ntpn'));
+        } elseif (($filters['status'] ?? null) === 'belum_lunas') {
+            $query->where(function ($q) {
+                $q->whereDoesntHave('pnbp')
+                    ->orWhereHas('pnbp', fn ($pnbp) => $pnbp->whereNull('ntpn'));
+            });
+        }
+
+        $lhps = $query->orderBy('tanggal', 'asc')->orderBy('id')->get();
+
         $kelompokName = 'Semua Kelompok';
-        if ($request->filled('kelompok_id')) {
-            $kelompok = \App\Models\Kelompok::find($request->kelompok_id);
+        if ($user->hasRole('admin_kelompok') && $user->kelompok) {
+            $kelompokName = 'KTH ' . $user->kelompok->nama_kelompok;
+        } elseif (!empty($filters['kelompok_id'])) {
+            $kelompok = \App\Models\Kelompok::find($filters['kelompok_id']);
             if ($kelompok) {
                 $kelompokName = 'KTH ' . $kelompok->nama_kelompok;
             }
-        } elseif ($user->hasRole('admin_kelompok') && $user->kelompok) {
-            $kelompokName = 'KTH ' . $user->kelompok->nama_kelompok;
         }
 
-        // Determine Periode (e.g. from filtering by month/year)
-        // Since we don't have a specific month filter in the request yet, we'll leave it generic
-        // Or you can format the current quarter/year
-        $periode = 'Tahun ' . date('Y');
+        $from = !empty($filters['tanggal_mulai']) ? Carbon::parse($filters['tanggal_mulai'])->format('d/m/Y') : null;
+        $to = !empty($filters['tanggal_akhir']) ? Carbon::parse($filters['tanggal_akhir'])->format('d/m/Y') : null;
+        $periode = match (true) {
+            $from !== null && $to !== null => "Periode LHP: {$from} s.d. {$to}",
+            $from !== null => "Periode LHP: sejak {$from}",
+            $to !== null => "Periode LHP: sampai {$to}",
+            default => 'Seluruh tanggal LHP',
+        };
 
         return Excel::download(new RekonsiliasiPsdhExport($lhps, $kelompokName, $periode), 'Rekonsiliasi_PSDH.xlsx');
     }
@@ -120,7 +165,8 @@ class PnbpController extends Controller
         return Inertia::render('Admin/Pnbp/Index', [
             'pnbps' => $pnbps,
             'filters' => $request->only(['search', 'tanggal_billing', 'status', 'kelompok_id']),
-            'kelompoks' => $kelompoks
+            'kelompoks' => $kelompoks,
+            'sortimens' => SortimenEnum::values(),
         ]);
     }
 

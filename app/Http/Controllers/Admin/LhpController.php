@@ -39,8 +39,11 @@ class LhpController extends Controller
         }
 
         // Advanced filters
-        if ($request->filled('tanggal')) {
-            $query->whereDate('tanggal', $request->tanggal);
+        if ($request->filled('tanggal_mulai')) {
+            $query->whereDate('tanggal', '>=', $request->tanggal_mulai);
+        }
+        if ($request->filled('tanggal_akhir')) {
+            $query->whereDate('tanggal', '<=', $request->tanggal_akhir);
         }
         if ($request->filled('sortimen')) {
             $query->where('sortimen', 'like', "%{$request->sortimen}%");
@@ -59,8 +62,11 @@ class LhpController extends Controller
             if ($request->filled('kelompok_id')) {
                 $q->where('kelompok_id', $request->kelompok_id);
             }
-            if ($request->filled('tanggal')) {
-                $q->whereDate('tanggal', $request->tanggal);
+            if ($request->filled('tanggal_mulai')) {
+                $q->whereDate('tanggal', '>=', $request->tanggal_mulai);
+            }
+            if ($request->filled('tanggal_akhir')) {
+                $q->whereDate('tanggal', '<=', $request->tanggal_akhir);
             }
         });
 
@@ -81,7 +87,7 @@ class LhpController extends Controller
         return Inertia::render('Admin/Lhp/Index', [
             'lhps' => $lhps,
             'summary' => $summary,
-            'filters' => $request->only(['search', 'kelompok_id', 'tanggal', 'sortimen', 'min_volume', 'max_volume']),
+            'filters' => $request->only(['search', 'kelompok_id', 'tanggal_mulai', 'tanggal_akhir', 'sortimen', 'min_volume', 'max_volume']),
             'kelompoks' => $kelompoks
         ]);
     }

@@ -12,7 +12,16 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 registerLocale('id', id);
 
-export default function Index({ pnbps, filters = {}, kelompoks = [] }) {
+const parseFilterDate = (value) => value ? new Date(`${value}T00:00:00`) : null;
+const formatFilterDate = (date) => date
+    ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+    : '';
+const emptyExportFilters = {
+    search: '', kelompok_id: '', tanggal_mulai: '', tanggal_akhir: '',
+    tanggal_billing: '', status: '', sortimen: '', min_volume: '', max_volume: '',
+};
+
+export default function Index({ pnbps, filters = {}, kelompoks = [], sortimens = [] }) {
     const { auth } = usePage().props;
     const user = auth.user;
     
@@ -29,6 +38,9 @@ export default function Index({ pnbps, filters = {}, kelompoks = [] }) {
     const [pnbpToDelete, setPnbpToDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [exportFilters, setExportFilters] = useState(emptyExportFilters);
+    const [exportError, setExportError] = useState('');
 
     const applyFilter = (key, value) => {
         const queryParams = {
@@ -95,6 +107,45 @@ export default function Index({ pnbps, filters = {}, kelompoks = [] }) {
         label: k.nama_kelompok
     }));
 
+    const openExportModal = () => {
+        setExportFilters({
+            ...emptyExportFilters,
+            search: searchQuery,
+            kelompok_id: filterKelompok,
+            tanggal_billing: filterTanggalBilling,
+            status: filterStatus,
+        });
+        setExportError('');
+        setIsExportModalOpen(true);
+    };
+
+    const updateExportFilter = (key, value) => {
+        setExportFilters((current) => ({ ...current, [key]: value }));
+        setExportError('');
+    };
+
+    const handleExportSubmit = (event) => {
+        event.preventDefault();
+        if (exportFilters.tanggal_mulai && exportFilters.tanggal_akhir && exportFilters.tanggal_akhir < exportFilters.tanggal_mulai) {
+            setExportError('Tanggal akhir LHP tidak boleh sebelum tanggal mulai.');
+            return;
+        }
+        if (exportFilters.min_volume !== '' && exportFilters.max_volume !== '' && Number(exportFilters.max_volume) < Number(exportFilters.min_volume)) {
+            setExportError('Volume maksimum tidak boleh kurang dari volume minimum.');
+            return;
+        }
+
+        setIsExporting(true);
+        const params = new URLSearchParams();
+        Object.entries(exportFilters).forEach(([key, value]) => {
+            if (value !== '' && value !== null && value !== undefined) params.set(key, value);
+        });
+        const query = params.toString();
+        window.location.href = route('admin.pnbp.export_rekonsiliasi') + (query ? `?${query}` : '');
+        setIsExportModalOpen(false);
+        setTimeout(() => setIsExporting(false), 5000);
+    };
+
     const openDeleteModal = (pnbp) => {
         setPnbpToDelete(pnbp);
         setIsDeleteModalOpen(true);
@@ -135,18 +186,7 @@ export default function Index({ pnbps, filters = {}, kelompoks = [] }) {
                     <button
                         type="button"
                         disabled={isExporting}
-                        onClick={() => {
-                            setIsExporting(true);
-                            const params = new URLSearchParams();
-                            if (searchQuery) params.set('search', searchQuery);
-                            if (filterKelompok) params.set('kelompok_id', filterKelompok);
-                            if (filterTanggalBilling) params.set('tanggal_billing', filterTanggalBilling);
-                            if (filterStatus) params.set('status', filterStatus);
-                            const query = params.toString();
-                            const url = route('admin.pnbp.export_rekonsiliasi') + (query ? '?' + query : '');
-                            window.location.href = url;
-                            setTimeout(() => setIsExporting(false), 5000);
-                        }}
+                        onClick={openExportModal}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors min-h-[48px] font-bold shadow-sm ${isExporting ? 'bg-[#0284c7]/60 text-white cursor-not-allowed' : 'bg-[#0284c7] text-white hover:bg-opacity-90'}`}
                     >
                         {isExporting
@@ -347,6 +387,77 @@ export default function Index({ pnbps, filters = {}, kelompoks = [] }) {
                     </div>
                 )}
             </div>
+
+            <Modal show={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} maxWidth="2xl">
+                <form onSubmit={handleExportSubmit} className="p-5 sm:p-6">
+                    <div className="flex items-start justify-between gap-4">
+                        <div>
+                            <h2 className="text-lg font-bold text-on-surface">Filter Export Excel</h2>
+                            <p className="mt-1 text-sm text-on-surface-variant">Pilih data untuk kertas kerja rekonsiliasi PSDH. Rentang tanggal berdasarkan tanggal LHP.</p>
+                        </div>
+                        <button type="button" onClick={() => setIsExportModalOpen(false)} className="rounded-lg p-1.5 text-on-surface-variant hover:bg-surface-container" aria-label="Tutup filter ekspor"><X className="h-5 w-5" /></button>
+                    </div>
+
+                    <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div className="sm:col-span-2">
+                            <label htmlFor="export-search" className="mb-1 block text-sm font-semibold text-on-surface">Cari No LHP / Kode Billing / NTPN</label>
+                            <input id="export-search" type="text" value={exportFilters.search} onChange={(event) => updateExportFilter('search', event.target.value)} placeholder="Semua data" className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                        </div>
+                        {kelompoks.length > 0 && <div>
+                            <label htmlFor="export-kelompok" className="mb-1 block text-sm font-semibold text-on-surface">Kelompok</label>
+                            <select id="export-kelompok" value={exportFilters.kelompok_id} onChange={(event) => updateExportFilter('kelompok_id', event.target.value)} className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                                <option value="">Semua kelompok</option>
+                                {kelompoks.map((kelompok) => <option key={kelompok.id} value={kelompok.id}>{kelompok.nama_kelompok}</option>)}
+                            </select>
+                        </div>}
+                        <div>
+                            <label htmlFor="export-status" className="mb-1 block text-sm font-semibold text-on-surface">Status Pembayaran</label>
+                            <select id="export-status" value={exportFilters.status} onChange={(event) => updateExportFilter('status', event.target.value)} className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                                <option value="">Semua status</option>
+                                <option value="lunas">Sudah bayar</option>
+                                <option value="belum_lunas">Belum bayar</option>
+                            </select>
+                        </div>
+                        <div className="relative z-20">
+                            <label htmlFor="export-tanggal-mulai" className="mb-1 block text-sm font-semibold text-on-surface">Tanggal LHP Mulai</label>
+                            <DatePicker id="export-tanggal-mulai" isClearable selected={parseFilterDate(exportFilters.tanggal_mulai)} onChange={(date) => updateExportFilter('tanggal_mulai', formatFilterDate(date))} maxDate={parseFilterDate(exportFilters.tanggal_akhir)} dateFormat="dd MMMM yyyy" locale="id" placeholderText="Dari tanggal..." className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none" wrapperClassName="w-full" />
+                        </div>
+                        <div className="relative z-20">
+                            <label htmlFor="export-tanggal-akhir" className="mb-1 block text-sm font-semibold text-on-surface">Tanggal LHP Akhir</label>
+                            <DatePicker id="export-tanggal-akhir" isClearable selected={parseFilterDate(exportFilters.tanggal_akhir)} onChange={(date) => updateExportFilter('tanggal_akhir', formatFilterDate(date))} minDate={parseFilterDate(exportFilters.tanggal_mulai)} dateFormat="dd MMMM yyyy" locale="id" placeholderText="Sampai tanggal..." className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none" wrapperClassName="w-full" />
+                        </div>
+                        <div>
+                            <label htmlFor="export-tanggal-billing" className="mb-1 block text-sm font-semibold text-on-surface">Tanggal Terbit Billing</label>
+                            <DatePicker id="export-tanggal-billing" isClearable selected={parseFilterDate(exportFilters.tanggal_billing)} onChange={(date) => updateExportFilter('tanggal_billing', formatFilterDate(date))} dateFormat="dd MMMM yyyy" locale="id" placeholderText="Semua tanggal" className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none" wrapperClassName="w-full" />
+                        </div>
+                        <div>
+                            <label htmlFor="export-sortimen" className="mb-1 block text-sm font-semibold text-on-surface">Sortimen</label>
+                            <select id="export-sortimen" value={exportFilters.sortimen} onChange={(event) => updateExportFilter('sortimen', event.target.value)} className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                                <option value="">Semua sortimen</option>
+                                {sortimens.map((sortimen) => <option key={sortimen} value={sortimen}>{sortimen}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="export-min-volume" className="mb-1 block text-sm font-semibold text-on-surface">Volume Minimum (m³)</label>
+                            <input id="export-min-volume" type="number" min="0" step="any" inputMode="decimal" value={exportFilters.min_volume} onChange={(event) => updateExportFilter('min_volume', event.target.value)} placeholder="Tanpa batas minimum" className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                        </div>
+                        <div>
+                            <label htmlFor="export-max-volume" className="mb-1 block text-sm font-semibold text-on-surface">Volume Maksimum (m³)</label>
+                            <input id="export-max-volume" type="number" min="0" step="any" inputMode="decimal" value={exportFilters.max_volume} onChange={(event) => updateExportFilter('max_volume', event.target.value)} placeholder="Tanpa batas maksimum" className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                        </div>
+                    </div>
+
+                    {exportError && <p role="alert" className="mt-4 rounded-lg bg-error-container px-3 py-2 text-sm text-error">{exportError}</p>}
+                    <div className="mt-6 flex flex-wrap items-center justify-end gap-2 border-t border-outline-variant pt-4">
+                        <button type="button" onClick={() => { setExportFilters(emptyExportFilters); setExportError(''); }} className="mr-auto px-3 py-2 text-sm font-semibold text-on-surface-variant hover:text-primary">Bersihkan filter</button>
+                        <SecondaryButton type="button" onClick={() => setIsExportModalOpen(false)}>Batal</SecondaryButton>
+                        <button type="submit" disabled={isExporting} className="inline-flex items-center gap-2 rounded-lg bg-[#0284c7] px-4 py-2 text-sm font-bold text-white hover:bg-[#0369a1] disabled:cursor-not-allowed disabled:opacity-60">
+                            {isExporting && <Loader2 className="h-4 w-4 animate-spin" />}
+                            Unduh Excel
+                        </button>
+                    </div>
+                </form>
+            </Modal>
 
             <Modal show={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} maxWidth="sm">
                 <div className="p-6">
