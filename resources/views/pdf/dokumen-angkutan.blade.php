@@ -3,7 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Dokumen Angkutan Kayu - {{ $dokumen->no_dokumen }}</title>
+    @unless ($isExcel ?? false)
+        <title>Dokumen Angkutan Kayu - {{ $dokumen->no_dokumen }}</title>
+    @endunless
     <style>
         body {
             font-family: Arial, sans-serif;

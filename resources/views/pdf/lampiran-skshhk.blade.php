@@ -2,7 +2,9 @@
 <html>
 
 <head>
-    <title>Lampiran SKSHHK</title>
+    @unless ($isExcel ?? false)
+        <title>Lampiran SKSHHK</title>
+    @endunless
     <style>
         body {
             font-family: sans-serif;
