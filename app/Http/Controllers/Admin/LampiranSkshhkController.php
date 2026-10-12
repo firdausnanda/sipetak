@@ -299,6 +299,9 @@ class LampiranSkshhkController extends Controller
 
     public function exportPdf($id)
     {
+        ini_set('memory_limit', '1024M');
+        ini_set('max_execution_time', '300');
+
         $user = Auth::user();
         $skshhk = Skshhk::with([
             'batangs.pohon.jenisPohon',
