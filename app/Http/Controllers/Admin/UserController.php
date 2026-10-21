@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\UsersExport;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Kelompok;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
@@ -70,6 +73,76 @@ class UserController extends Controller
             'kelompoks' => $kelompoks,
             'filters' => $request->only(['search', 'per_page', 'role', 'kelompok_id', 'sort', 'direction'])
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        $currentUser = auth()->user();
+        $isKelompokScoped = $currentUser->hasAnyRole(['admin_kelompok', 'ganis']);
+        $allowedRoles = $isKelompokScoped
+            ? ['user', 'admin_kelompok', 'ganis']
+            : ['user', 'admin_cdk', 'admin_kelompok', 'ganis', 'monitoring_viewer'];
+
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'roles' => ['nullable', 'array'],
+            'roles.*' => ['string', Rule::in($allowedRoles)],
+            'kelompok_id' => ['nullable', Rule::when($request->input('kelompok_id') !== 'none', ['integer', 'exists:kelompoks,id'])],
+            'status_verifikasi' => ['nullable', Rule::in(['verified', 'unverified'])],
+            'tanggal_mulai' => ['nullable', 'date_format:Y-m-d'],
+            'tanggal_akhir' => ['nullable', 'date_format:Y-m-d'],
+            'columns' => ['nullable', 'array'],
+            'columns.*' => ['string', Rule::in(array_keys(UsersExport::COLUMNS))],
+            'sort' => ['nullable', Rule::in(['name', 'email', 'created_at'])],
+            'direction' => ['nullable', Rule::in(['asc', 'desc'])],
+        ]);
+
+        if (!empty($filters['tanggal_mulai']) && !empty($filters['tanggal_akhir'])
+            && $filters['tanggal_akhir'] < $filters['tanggal_mulai']) {
+            throw ValidationException::withMessages(['tanggal_akhir' => 'Tanggal akhir tidak boleh sebelum tanggal mulai.']);
+        }
+
+        $query = User::with(['roles', 'kelompok', 'creator']);
+
+        if ($isKelompokScoped) {
+            $query->where('kelompok_id', $currentUser->kelompok_id);
+        } elseif (($filters['kelompok_id'] ?? null) === 'none') {
+            $query->whereNull('kelompok_id');
+        } elseif (!empty($filters['kelompok_id'])) {
+            $query->where('kelompok_id', $filters['kelompok_id']);
+        }
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('username', 'like', "%{$search}%");
+            });
+        }
+
+        if (!empty($filters['roles'])) {
+            $query->whereHas('roles', fn ($q) => $q->whereIn('name', $filters['roles']));
+        }
+
+        if (($filters['status_verifikasi'] ?? null) === 'verified') {
+            $query->whereNotNull('email_verified_at');
+        } elseif (($filters['status_verifikasi'] ?? null) === 'unverified') {
+            $query->whereNull('email_verified_at');
+        }
+
+        if (!empty($filters['tanggal_mulai'])) {
+            $query->whereDate('created_at', '>=', $filters['tanggal_mulai']);
+        }
+        if (!empty($filters['tanggal_akhir'])) {
+            $query->whereDate('created_at', '<=', $filters['tanggal_akhir']);
+        }
+
+        $users = $query->orderBy($filters['sort'] ?? 'name', $filters['direction'] ?? 'asc')
+            ->orderBy('id')
+            ->get();
+
+        return Excel::download(new UsersExport($users, $filters['columns'] ?? []), 'Data_Pengguna.xlsx');
     }
 
     public function store(Request $request)

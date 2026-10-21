@@ -84,6 +84,7 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok|ganis'])->
     Route::delete('/dashboard/batangs/{id}', [AdminDashboardController::class, 'destroyBatang'])->name('dashboard.batang.destroy');
     
     // User Management
+    Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
     Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);
     
     // Master Pohon

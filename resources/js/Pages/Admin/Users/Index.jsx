@@ -2,7 +2,35 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, router, Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import Select from 'react-select';
-import { Search, Plus, Edit, Trash2, Shield, Users as UsersIcon, X, Check, Eye, EyeOff } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Shield, Users as UsersIcon, X, Check, Eye, EyeOff, Loader2, FileSpreadsheet } from 'lucide-react';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import { id } from 'date-fns/locale/id';
+import 'react-datepicker/dist/react-datepicker.css';
+
+registerLocale('id', id);
+
+const parseFilterDate = (value) => value ? new Date(`${value}T00:00:00`) : null;
+const formatFilterDate = (date) => date
+    ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+    : '';
+const exportColumnOptions = [
+    { value: 'name', label: 'Nama Pengguna' },
+    { value: 'username', label: 'Username' },
+    { value: 'email', label: 'Email' },
+    { value: 'role', label: 'Peran' },
+    { value: 'kelompok', label: 'Kelompok' },
+    { value: 'status_verifikasi', label: 'Status Verifikasi' },
+    { value: 'created_by', label: 'Dibuat Oleh' },
+    { value: 'created_at', label: 'Tanggal Dibuat' },
+    { value: 'updated_at', label: 'Terakhir Diperbarui' },
+];
+const defaultExportColumns = ['name', 'username', 'email', 'role', 'kelompok', 'status_verifikasi', 'created_at'];
+const emptyExportFilters = {
+    search: '', roles: [], kelompok_id: '', status_verifikasi: '',
+    tanggal_mulai: '', tanggal_akhir: '', sort: 'name', direction: 'asc',
+    columns: defaultExportColumns,
+};
+const formatRoleName = (name) => name.replace('_', ' ').toUpperCase();
 
 const customSelectStyles = {
     control: (base, state) => ({
@@ -51,6 +79,11 @@ export default function Index({ users, roles, kelompoks, filters = {}, auth }) {
     const [userToEdit, setUserToEdit] = useState(null);
     const [userToDelete, setUserToDelete] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
+    const [exportFilters, setExportFilters] = useState(emptyExportFilters);
+    const [exportError, setExportError] = useState('');
+    const isAdminCdk = (auth.user.roles || []).includes('admin_cdk');
 
     // Form
     const { data, setData, post, put, delete: destroy, processing, errors, reset, clearErrors } = useForm({
@@ -115,6 +148,60 @@ export default function Index({ users, roles, kelompoks, filters = {}, auth }) {
         return sortDirection === 'asc' 
             ? <span className="ml-1 text-primary">↑</span> 
             : <span className="ml-1 text-primary">↓</span>;
+    };
+
+    const openExportModal = () => {
+        setExportFilters({
+            ...emptyExportFilters,
+            search,
+            roles: roleFilter ? [roleFilter] : [],
+            kelompok_id: isAdminCdk ? kelompokFilter : '',
+            sort: sortField,
+            direction: sortDirection,
+        });
+        setExportError('');
+        setIsExportModalOpen(true);
+    };
+
+    const updateExportFilter = (key, value) => {
+        setExportFilters((current) => ({ ...current, [key]: value }));
+        setExportError('');
+    };
+
+    const toggleExportListValue = (key, value) => {
+        setExportFilters((current) => ({
+            ...current,
+            [key]: current[key].includes(value)
+                ? current[key].filter((item) => item !== value)
+                : [...current[key], value],
+        }));
+        setExportError('');
+    };
+
+    const handleExportSubmit = (event) => {
+        event.preventDefault();
+        if (exportFilters.tanggal_mulai && exportFilters.tanggal_akhir && exportFilters.tanggal_akhir < exportFilters.tanggal_mulai) {
+            setExportError('Tanggal akhir tidak boleh sebelum tanggal mulai.');
+            return;
+        }
+        if (exportFilters.columns.length === 0) {
+            setExportError('Pilih minimal satu kolom untuk diekspor.');
+            return;
+        }
+
+        setIsExporting(true);
+        const params = new URLSearchParams();
+        Object.entries(exportFilters).forEach(([key, value]) => {
+            if (Array.isArray(value)) {
+                value.forEach((item) => params.append(`${key}[]`, item));
+            } else if (value !== '' && value !== null && value !== undefined) {
+                params.set(key, value);
+            }
+        });
+        const query = params.toString();
+        window.location.href = route('admin.users.export') + (query ? `?${query}` : '');
+        setIsExportModalOpen(false);
+        setTimeout(() => setIsExporting(false), 5000);
     };
 
     const openCreateModal = () => {
@@ -183,6 +270,17 @@ export default function Index({ users, roles, kelompoks, filters = {}, auth }) {
                     <p className="font-body-md text-body-md text-on-surface-variant">Kelola akun, peran, dan akses pengguna sistem.</p>
                 </div>
                 <div className="flex gap-3">
+                    <button
+                        type="button"
+                        disabled={isExporting}
+                        onClick={openExportModal}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors min-h-[48px] font-bold shadow-sm ${isExporting ? 'bg-[#0284c7]/60 text-white cursor-not-allowed' : 'bg-[#0284c7] text-white hover:bg-opacity-90'}`}
+                    >
+                        {isExporting
+                            ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
+                            : <><FileSpreadsheet className="w-[18px] h-[18px]" /> Export Excel</>
+                        }
+                    </button>
                     <button onClick={openCreateModal} className="flex items-center gap-2 bg-[#FB8500] text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors min-h-[48px] font-bold shadow-sm">
                         <Plus className="w-[18px] h-[18px]" />
                         Tambah Pengguna
@@ -533,6 +631,107 @@ export default function Index({ users, roles, kelompoks, filters = {}, auth }) {
                         </div>
                     </form>
                 </div>
+            </Modal>
+
+            {/* Export Modal */}
+            <Modal show={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} maxWidth="2xl">
+                <form onSubmit={handleExportSubmit} className="p-5 sm:p-6">
+                    <div className="flex items-start justify-between gap-4">
+                        <div>
+                            <h2 className="text-lg font-bold text-on-surface">Filter Export Excel</h2>
+                            <p className="mt-1 text-sm text-on-surface-variant">Pilih data pengguna yang akan diekspor. Rentang tanggal berdasarkan tanggal akun dibuat.</p>
+                        </div>
+                        <button type="button" onClick={() => setIsExportModalOpen(false)} className="rounded-lg p-1.5 text-on-surface-variant hover:bg-surface-container" aria-label="Tutup filter ekspor"><X className="h-5 w-5" /></button>
+                    </div>
+
+                    <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div className="sm:col-span-2">
+                            <label htmlFor="export-search" className="mb-1 block text-sm font-semibold text-on-surface">Cari Nama / Email / Username</label>
+                            <input id="export-search" type="text" value={exportFilters.search} onChange={(event) => updateExportFilter('search', event.target.value)} placeholder="Semua pengguna" className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                        </div>
+                        <div className="sm:col-span-2">
+                            <span className="mb-1 block text-sm font-semibold text-on-surface">Peran (Role)</span>
+                            <p className="mb-2 text-xs text-on-surface-variant">Kosongkan untuk semua peran.</p>
+                            <div className="flex flex-wrap gap-2">
+                                {roles.map((role) => {
+                                    const checked = exportFilters.roles.includes(role.name);
+                                    return (
+                                        <label key={role.id} className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-bold uppercase transition-colors ${checked ? 'border-primary bg-primary text-on-primary' : 'border-outline-variant bg-surface text-on-surface-variant hover:border-primary'}`}>
+                                            <input type="checkbox" className="sr-only" checked={checked} onChange={() => toggleExportListValue('roles', role.name)} />
+                                            {checked ? <Check className="h-3 w-3" /> : <Shield className="h-3 w-3" />}
+                                            {formatRoleName(role.name)}
+                                        </label>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                        {isAdminCdk && <div>
+                            <label htmlFor="export-kelompok" className="mb-1 block text-sm font-semibold text-on-surface">Kelompok</label>
+                            <select id="export-kelompok" value={exportFilters.kelompok_id} onChange={(event) => updateExportFilter('kelompok_id', event.target.value)} className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                                <option value="">Semua kelompok</option>
+                                <option value="none">Tanpa kelompok</option>
+                                {kelompoks.map((kelompok) => <option key={kelompok.id} value={kelompok.id}>{kelompok.nama_kelompok}</option>)}
+                            </select>
+                        </div>}
+                        <div>
+                            <label htmlFor="export-status-verifikasi" className="mb-1 block text-sm font-semibold text-on-surface">Status Verifikasi Email</label>
+                            <select id="export-status-verifikasi" value={exportFilters.status_verifikasi} onChange={(event) => updateExportFilter('status_verifikasi', event.target.value)} className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                                <option value="">Semua status</option>
+                                <option value="verified">Terverifikasi</option>
+                                <option value="unverified">Belum terverifikasi</option>
+                            </select>
+                        </div>
+                        <div className="relative z-20">
+                            <label htmlFor="export-tanggal-mulai" className="mb-1 block text-sm font-semibold text-on-surface">Tanggal Dibuat Mulai</label>
+                            <DatePicker id="export-tanggal-mulai" isClearable selected={parseFilterDate(exportFilters.tanggal_mulai)} onChange={(date) => updateExportFilter('tanggal_mulai', formatFilterDate(date))} maxDate={parseFilterDate(exportFilters.tanggal_akhir)} dateFormat="dd MMMM yyyy" locale="id" placeholderText="Dari tanggal..." className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none" wrapperClassName="w-full" />
+                        </div>
+                        <div className="relative z-20">
+                            <label htmlFor="export-tanggal-akhir" className="mb-1 block text-sm font-semibold text-on-surface">Tanggal Dibuat Akhir</label>
+                            <DatePicker id="export-tanggal-akhir" isClearable selected={parseFilterDate(exportFilters.tanggal_akhir)} onChange={(date) => updateExportFilter('tanggal_akhir', formatFilterDate(date))} minDate={parseFilterDate(exportFilters.tanggal_mulai)} dateFormat="dd MMMM yyyy" locale="id" placeholderText="Sampai tanggal..." className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none" wrapperClassName="w-full" />
+                        </div>
+                        <div>
+                            <label htmlFor="export-sort" className="mb-1 block text-sm font-semibold text-on-surface">Urutkan Berdasarkan</label>
+                            <select id="export-sort" value={exportFilters.sort} onChange={(event) => updateExportFilter('sort', event.target.value)} className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                                <option value="name">Nama Pengguna</option>
+                                <option value="email">Email</option>
+                                <option value="created_at">Tanggal Dibuat</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="export-direction" className="mb-1 block text-sm font-semibold text-on-surface">Arah Urutan</label>
+                            <select id="export-direction" value={exportFilters.direction} onChange={(event) => updateExportFilter('direction', event.target.value)} className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                                <option value="asc">Naik (A-Z / terlama)</option>
+                                <option value="desc">Turun (Z-A / terbaru)</option>
+                            </select>
+                        </div>
+                        <div className="sm:col-span-2">
+                            <div className="mb-2 flex items-center justify-between gap-2">
+                                <span className="block text-sm font-semibold text-on-surface">Kolom yang Diekspor</span>
+                                <button type="button" onClick={() => updateExportFilter('columns', exportFilters.columns.length === exportColumnOptions.length ? [] : exportColumnOptions.map((column) => column.value))} className="text-xs font-semibold text-primary hover:underline">
+                                    {exportFilters.columns.length === exportColumnOptions.length ? 'Hapus semua' : 'Pilih semua'}
+                                </button>
+                            </div>
+                            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                                {exportColumnOptions.map((column) => (
+                                    <label key={column.value} className="inline-flex cursor-pointer items-center gap-2 text-sm text-on-surface">
+                                        <input type="checkbox" checked={exportFilters.columns.includes(column.value)} onChange={() => toggleExportListValue('columns', column.value)} className="rounded border-outline-variant text-primary focus:ring-primary" />
+                                        {column.label}
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {exportError && <p role="alert" className="mt-4 rounded-lg bg-error-container px-3 py-2 text-sm text-error">{exportError}</p>}
+                    <div className="mt-6 flex flex-wrap items-center justify-end gap-2 border-t border-outline-variant pt-4">
+                        <button type="button" onClick={() => { setExportFilters(emptyExportFilters); setExportError(''); }} className="mr-auto px-3 py-2 text-sm font-semibold text-on-surface-variant hover:text-primary">Bersihkan filter</button>
+                        <SecondaryButton type="button" onClick={() => setIsExportModalOpen(false)}>Batal</SecondaryButton>
+                        <button type="submit" disabled={isExporting} className="inline-flex items-center gap-2 rounded-lg bg-[#0284c7] px-4 py-2 text-sm font-bold text-white hover:bg-[#0369a1] disabled:cursor-not-allowed disabled:opacity-60">
+                            {isExporting && <Loader2 className="h-4 w-4 animate-spin" />}
+                            Unduh Excel
+                        </button>
+                    </div>
+                </form>
             </Modal>
 
             {/* Delete Modal */}
