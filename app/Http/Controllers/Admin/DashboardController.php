@@ -89,6 +89,10 @@ class DashboardController extends Controller
     {
         $query = $this->buildQuery($request);
 
+        $totals = (clone $query)->select([])->selectRaw(
+            'COUNT(DISTINCT batangs.pohon_id) as jumlah_pohon, COUNT(*) as jumlah_batang, COALESCE(SUM(batangs.volume), 0) as jumlah_vol'
+        )->toBase()->first();
+
         $sort = $request->input('sort', 'tanggal');
         $direction = $request->input('direction', 'desc');
 
@@ -123,6 +127,11 @@ class DashboardController extends Controller
             'batangs' => $batangs,
             'kelompoks' => $kelompoks,
             'petaks' => $petaks,
+            'rekap' => [
+                'jumlah_pohon' => (int) $totals->jumlah_pohon,
+                'jumlah_batang' => (int) $totals->jumlah_batang,
+                'jumlah_vol' => (float) $totals->jumlah_vol,
+            ],
             'filters' => $request->only(['kelompok_id', 'petak_id', 'start_date', 'end_date', 'sort', 'direction', 'search', 'per_page', 'no_barcode', 'no_pohon', 'no_batang', 'mutu'])
         ]);
     }

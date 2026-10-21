@@ -15,7 +15,7 @@ import InputError from '@/Components/InputError';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 
-export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
+export default function Dashboard({ batangs, kelompoks, petaks, filters, rekap }) {
     const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
     
@@ -346,6 +346,19 @@ export default function Dashboard({ batangs, kelompoks, petaks, filters }) {
                         />
                     </div>
                 </div>
+            </div>
+
+            <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label="Rekap hasil pencarian">
+                {[
+                    ['Jumlah Pohon', new Intl.NumberFormat('id-ID').format(rekap.jumlah_pohon)],
+                    ['Jumlah Batang', new Intl.NumberFormat('id-ID').format(rekap.jumlah_batang)],
+                    ['Jumlah Vol', `${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 3, maximumFractionDigits: 3 }).format(rekap.jumlah_vol)} m³`],
+                ].map(([label, value]) => (
+                    <div key={label} className="rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3">
+                        <div className="text-sm text-on-surface-variant">{label}</div>
+                        <div className="mt-1 text-xl font-bold tabular-nums text-primary">{value}</div>
+                    </div>
+                ))}
             </div>
 
             {/* Table Controls */}
