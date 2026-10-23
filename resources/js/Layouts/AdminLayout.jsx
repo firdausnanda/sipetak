@@ -103,7 +103,7 @@ export default function AdminLayout({ children }) {
                             className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.lampiran_skshhk.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                         >
                             <Paperclip className="w-5 h-5" />
-                            Lampiran SKSHHK
+                            Lampiran Pengiriman Kayu
                         </Link>
                     )}
                     
@@ -306,7 +306,7 @@ export default function AdminLayout({ children }) {
                             className={`flex items-center gap-3 px-4 py-3 ${route().current('admin.lampiran_skshhk.*') ? 'bg-secondary-container text-on-secondary-container font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'} rounded-xl active:scale-95 duration-150 ease-in-out font-label-caps text-label-caps`}
                         >
                             <Paperclip className="w-5 h-5" />
-                            Lampiran SKSHHK
+                            Lampiran Pengiriman Kayu
                         </Link>
                     )}
                     
