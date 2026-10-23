@@ -101,6 +101,7 @@ Route::middleware(['auth', 'verified', 'role:admin_cdk|admin_kelompok|ganis'])->
     
     // Rencana Tebang
     Route::get('rencana-tebangs', [RencanaTebangController::class, 'index'])->name('rencana_tebangs.index');
+    Route::get('rencana-tebangs/export', [RencanaTebangController::class, 'export'])->name('rencana_tebangs.export');
     Route::get('rencana-tebangs/template', [RencanaTebangController::class, 'template'])->name('rencana_tebangs.template');
     Route::post('rencana-tebangs/import', [RencanaTebangController::class, 'import'])->name('rencana_tebangs.import');
     Route::delete('rencana-tebangs/{id}', [RencanaTebangController::class, 'destroy'])->name('rencana_tebangs.destroy');

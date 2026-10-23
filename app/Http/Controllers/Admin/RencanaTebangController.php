@@ -8,7 +8,10 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\RencanaTebangImport;
+use App\Exports\RencanaTebangExport;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class RencanaTebangController extends Controller
 {
@@ -77,6 +80,59 @@ class RencanaTebangController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Gagal mengimport data: ' . $e->getMessage()]);
         }
+    }
+
+    public function export(Request $request)
+    {
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'kelompok_id' => ['nullable', 'integer', 'exists:kelompoks,id'],
+            'petak_id' => ['nullable', 'integer', 'exists:petaks,id'],
+            'jenis_pohon_id' => ['nullable', 'integer', 'exists:jenis_pohons,id'],
+            'tanggal_mulai' => ['nullable', 'date_format:Y-m-d'],
+            'tanggal_akhir' => ['nullable', 'date_format:Y-m-d'],
+            'sort' => ['nullable', Rule::in(['created_at', 'no_pohon', 'no_barcode'])],
+            'direction' => ['nullable', Rule::in(['asc', 'desc'])],
+            'columns' => ['nullable', 'array', 'min:1'],
+            'columns.*' => ['string', Rule::in(array_keys(RencanaTebangExport::COLUMNS))],
+        ]);
+
+        if (!empty($filters['tanggal_mulai']) && !empty($filters['tanggal_akhir'])
+            && $filters['tanggal_akhir'] < $filters['tanggal_mulai']) {
+            throw ValidationException::withMessages(['tanggal_akhir' => 'Tanggal akhir tidak boleh sebelum tanggal mulai.']);
+        }
+
+        $user = Auth::user();
+        $query = RencanaTebang::with(['kelompok', 'petak', 'jenisPohon']);
+
+        if ($user->hasAnyRole(['admin_kelompok', 'ganis'])) {
+            $query->where('kelompok_id', $user->kelompok_id);
+        } elseif (!empty($filters['kelompok_id'])) {
+            $query->where('kelompok_id', $filters['kelompok_id']);
+        }
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(fn ($q) => $q->where('no_pohon', 'like', "%{$search}%")
+                ->orWhere('no_barcode', 'like', "%{$search}%"));
+        }
+        if (!empty($filters['petak_id'])) {
+            $query->where('petak_id', $filters['petak_id']);
+        }
+        if (!empty($filters['jenis_pohon_id'])) {
+            $query->where('jenis_pohon_id', $filters['jenis_pohon_id']);
+        }
+        if (!empty($filters['tanggal_mulai'])) {
+            $query->whereDate('created_at', '>=', $filters['tanggal_mulai']);
+        }
+        if (!empty($filters['tanggal_akhir'])) {
+            $query->whereDate('created_at', '<=', $filters['tanggal_akhir']);
+        }
+
+        $query->orderBy($filters['sort'] ?? 'created_at', $filters['direction'] ?? 'desc')
+            ->orderBy('id');
+
+        return Excel::download(new RencanaTebangExport($query, $filters['columns'] ?? []), 'Rencana_Tebang.xlsx');
     }
 
     public function destroy($id)

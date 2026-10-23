@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import { Search, Upload, Trash2, Download, FileText, ClipboardList, Map as MapIcon, TreePine, Users } from 'lucide-react';
+import { Search, Upload, Trash2, Download, FileText, Map as MapIcon, TreePine, Users, FileSpreadsheet, Loader2, X } from 'lucide-react';
 import Modal from '@/Components/Modal';
 import InputLabel from '@/Components/InputLabel';
 import InputError from '@/Components/InputError';
@@ -38,6 +38,22 @@ const customSelectStyles = {
     indicatorSeparator: () => ({ display: 'none' })
 };
 
+const exportColumnOptions = [
+    { value: 'kelompok', label: 'Kelompok' },
+    { value: 'petak', label: 'Petak' },
+    { value: 'jenis_pohon', label: 'Jenis Pohon' },
+    { value: 'no_pohon', label: 'No Pohon' },
+    { value: 'no_barcode', label: 'Barcode' },
+    { value: 'created_at', label: 'Tanggal Dibuat' },
+    { value: 'updated_at', label: 'Terakhir Diperbarui' },
+];
+
+const defaultExportFilters = {
+    search: '', kelompok_id: '', petak_id: '', jenis_pohon_id: '',
+    tanggal_mulai: '', tanggal_akhir: '', sort: 'created_at', direction: 'desc',
+    columns: exportColumnOptions.map((column) => column.value),
+};
+
 export default function Index({ auth, rencanaTebangs, petaks = [], jenisPohons = [], kelompoks = [], filters = {} }) {
     const safeFilters = Array.isArray(filters) ? {} : filters;
     const [search, setSearch] = useState(safeFilters.search || '');
@@ -65,6 +81,11 @@ export default function Index({ auth, rencanaTebangs, petaks = [], jenisPohons =
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
+    const [exportFilters, setExportFilters] = useState(defaultExportFilters);
+    const [exportError, setExportError] = useState('');
+    const isAdminCdk = auth.user.roles?.includes('admin_cdk');
 
     const { data, setData, post, processing, errors, reset } = useForm({
         file: null,
@@ -125,6 +146,79 @@ export default function Index({ auth, rencanaTebangs, petaks = [], jenisPohons =
         window.location.href = route('admin.rencana_tebangs.template');
     };
 
+    const openExportModal = () => {
+        setExportFilters({
+            ...defaultExportFilters,
+            search: safeFilters.search || '',
+            kelompok_id: isAdminCdk ? safeFilters.kelompok_id || '' : '',
+            petak_id: safeFilters.petak_id || '',
+            jenis_pohon_id: safeFilters.jenis_pohon_id || '',
+        });
+        setExportError('');
+        setIsExportModalOpen(true);
+    };
+
+    const updateExportFilter = (key, value) => {
+        setExportFilters((current) => ({
+            ...current,
+            [key]: value,
+            ...(key === 'kelompok_id' ? { petak_id: '', jenis_pohon_id: '' } : {}),
+        }));
+        setExportError('');
+    };
+
+    const handleExportSubmit = async (event) => {
+        event.preventDefault();
+        if (exportFilters.tanggal_mulai && exportFilters.tanggal_akhir && exportFilters.tanggal_akhir < exportFilters.tanggal_mulai) {
+            setExportError('Tanggal akhir tidak boleh sebelum tanggal mulai.');
+            return;
+        }
+        if (exportFilters.columns.length === 0) {
+            setExportError('Pilih minimal satu kolom untuk diekspor.');
+            return;
+        }
+
+        const params = new URLSearchParams();
+        Object.entries(exportFilters).forEach(([key, value]) => {
+            if (Array.isArray(value)) {
+                value.forEach((item) => params.append(`${key}[]`, item));
+            } else if (value !== '') {
+                params.set(key, value);
+            }
+        });
+
+        setIsExporting(true);
+        setExportError('');
+        try {
+            const response = await fetch(`${route('admin.rencana_tebangs.export')}?${params.toString()}`, {
+                headers: { Accept: 'application/json, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
+                credentials: 'same-origin',
+            });
+            if (!response.ok) {
+                const error = await response.json().catch(() => null);
+                const message = error?.errors ? Object.values(error.errors).flat()[0] : error?.message;
+                throw new Error(message || 'Gagal mengekspor data. Silakan coba lagi.');
+            }
+            if (response.headers.get('content-type')?.includes('text/html')) {
+                throw new Error('Sesi Anda berakhir. Muat ulang halaman lalu coba lagi.');
+            }
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'Rencana_Tebang.xlsx';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            setIsExportModalOpen(false);
+        } catch (error) {
+            setExportError(error.message || 'Gagal mengekspor data. Silakan coba lagi.');
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     return (
         <AdminLayout>
             <Head title="SIPETAK Admin - Rencana Tebang" />
@@ -135,7 +229,10 @@ export default function Index({ auth, rencanaTebangs, petaks = [], jenisPohons =
                     <h2 className="font-display text-display text-primary mb-2">Data Rencana Tebang</h2>
                     <p className="font-body-md text-body-md text-on-surface-variant">Kelola daftar pohon yang direncanakan untuk ditebang (injeksi data).</p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
+                    <button type="button" onClick={openExportModal} className="flex items-center gap-2 bg-[#0284c7] text-white px-4 py-2 rounded-lg hover:bg-[#0369a1] transition-colors min-h-[48px] font-bold shadow-sm">
+                        <FileSpreadsheet className="w-[18px] h-[18px]" /> Export Excel
+                    </button>
                     <button onClick={handleDownloadTemplate} className="flex items-center gap-2 bg-surface-container-high text-on-surface-variant px-4 py-2 rounded-lg hover:bg-surface-container-highest transition-colors min-h-[48px] font-bold shadow-sm border border-outline-variant">
                         <Download className="w-[18px] h-[18px]" />
                         Unduh Template
@@ -149,7 +246,7 @@ export default function Index({ auth, rencanaTebangs, petaks = [], jenisPohons =
 
             {/* Filters Bar */}
             <div className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm mb-6 flex flex-col lg:flex-row gap-4 items-end relative z-20">
-                {auth.user.roles?.includes('admin_cdk') && (
+                {isAdminCdk && (
                     <div className="w-full lg:flex-1">
                         <label className="block font-label-caps text-label-caps text-[#6D4C41] mb-2">Kelompok</label>
                         <div className="relative">
@@ -294,6 +391,88 @@ export default function Index({ auth, rencanaTebangs, petaks = [], jenisPohons =
                     </div>
                 )}
             </div>
+
+            <Modal show={isExportModalOpen} onClose={() => !isExporting && setIsExportModalOpen(false)} maxWidth="2xl" closeable={!isExporting}>
+                <form onSubmit={handleExportSubmit} className="p-5 sm:p-6">
+                    <div className="flex items-start justify-between gap-4">
+                        <div>
+                            <h2 className="text-lg font-bold text-on-surface">Export Rencana Tebang</h2>
+                            <p className="mt-1 text-sm text-on-surface-variant">Unduh seluruh data yang cocok dengan filter, termasuk data di halaman lain.</p>
+                        </div>
+                        <button type="button" onClick={() => setIsExportModalOpen(false)} disabled={isExporting} aria-label="Tutup filter ekspor" className="rounded-lg p-1.5 text-on-surface-variant hover:bg-surface-container disabled:opacity-50"><X className="h-5 w-5" /></button>
+                    </div>
+
+                    <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div className="sm:col-span-2">
+                            <label htmlFor="export-search" className="mb-1 block text-sm font-semibold text-on-surface">Cari No Pohon / Barcode</label>
+                            <input id="export-search" type="text" value={exportFilters.search} onChange={(event) => updateExportFilter('search', event.target.value)} placeholder="Semua data" className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                        </div>
+                        {isAdminCdk && <div>
+                            <label htmlFor="export-kelompok" className="mb-1 block text-sm font-semibold text-on-surface">Kelompok</label>
+                            <select id="export-kelompok" value={exportFilters.kelompok_id} onChange={(event) => updateExportFilter('kelompok_id', event.target.value)} className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                                <option value="">Semua kelompok</option>
+                                {kelompoks.map((kelompok) => <option key={kelompok.id} value={kelompok.id}>{kelompok.nama_kelompok}</option>)}
+                            </select>
+                        </div>}
+                        <div>
+                            <label htmlFor="export-petak" className="mb-1 block text-sm font-semibold text-on-surface">Petak</label>
+                            <select id="export-petak" value={exportFilters.petak_id} onChange={(event) => updateExportFilter('petak_id', event.target.value)} className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                                <option value="">Semua petak</option>
+                                {petaks.filter((petak) => !exportFilters.kelompok_id || petak.kelompok_id == exportFilters.kelompok_id).map((petak) => <option key={petak.id} value={petak.id}>{petak.no_petak}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="export-jenis-pohon" className="mb-1 block text-sm font-semibold text-on-surface">Jenis Pohon</label>
+                            <select id="export-jenis-pohon" value={exportFilters.jenis_pohon_id} onChange={(event) => updateExportFilter('jenis_pohon_id', event.target.value)} className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                                <option value="">Semua jenis</option>
+                                {jenisPohons.filter((jenis) => !exportFilters.kelompok_id || jenis.kelompok_id == exportFilters.kelompok_id).map((jenis) => <option key={jenis.id} value={jenis.id}>{jenis.nama_jenis}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="export-tanggal-mulai" className="mb-1 block text-sm font-semibold text-on-surface">Tanggal Dibuat Mulai</label>
+                            <input id="export-tanggal-mulai" type="date" value={exportFilters.tanggal_mulai} max={exportFilters.tanggal_akhir || undefined} onChange={(event) => updateExportFilter('tanggal_mulai', event.target.value)} className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                        </div>
+                        <div>
+                            <label htmlFor="export-tanggal-akhir" className="mb-1 block text-sm font-semibold text-on-surface">Tanggal Dibuat Akhir</label>
+                            <input id="export-tanggal-akhir" type="date" value={exportFilters.tanggal_akhir} min={exportFilters.tanggal_mulai || undefined} onChange={(event) => updateExportFilter('tanggal_akhir', event.target.value)} className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                        </div>
+                        <div>
+                            <label htmlFor="export-sort" className="mb-1 block text-sm font-semibold text-on-surface">Urutkan Berdasarkan</label>
+                            <select id="export-sort" value={exportFilters.sort} onChange={(event) => updateExportFilter('sort', event.target.value)} className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                                <option value="created_at">Tanggal Dibuat</option>
+                                <option value="no_pohon">No Pohon</option>
+                                <option value="no_barcode">Barcode</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="export-direction" className="mb-1 block text-sm font-semibold text-on-surface">Arah Urutan</label>
+                            <select id="export-direction" value={exportFilters.direction} onChange={(event) => updateExportFilter('direction', event.target.value)} className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                                <option value="asc">Naik (A-Z / terlama)</option>
+                                <option value="desc">Turun (Z-A / terbaru)</option>
+                            </select>
+                        </div>
+                        <fieldset className="sm:col-span-2">
+                            <legend className="mb-2 text-sm font-semibold text-on-surface">Kolom yang Diekspor</legend>
+                            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                                {exportColumnOptions.map((column) => <label key={column.value} className="inline-flex cursor-pointer items-center gap-2 text-sm text-on-surface">
+                                    <input type="checkbox" checked={exportFilters.columns.includes(column.value)} onChange={() => updateExportFilter('columns', exportFilters.columns.includes(column.value) ? exportFilters.columns.filter((value) => value !== column.value) : [...exportFilters.columns, column.value])} className="rounded border-outline-variant text-primary focus:ring-primary" />
+                                    {column.label}
+                                </label>)}
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    {exportError && <p role="alert" className="mt-4 rounded-lg bg-error-container px-3 py-2 text-sm text-error">{exportError}</p>}
+                    <div className="mt-6 flex flex-wrap items-center justify-end gap-2 border-t border-outline-variant pt-4">
+                        <button type="button" onClick={() => { setExportFilters(defaultExportFilters); setExportError(''); }} className="mr-auto px-3 py-2 text-sm font-semibold text-on-surface-variant hover:text-primary">Bersihkan filter</button>
+                        <SecondaryButton type="button" onClick={() => setIsExportModalOpen(false)} disabled={isExporting}>Batal</SecondaryButton>
+                        <button type="submit" disabled={isExporting} className="inline-flex min-h-[40px] items-center gap-2 rounded-lg bg-[#0284c7] px-4 py-2 text-sm font-bold text-white hover:bg-[#0369a1] disabled:cursor-not-allowed disabled:opacity-60">
+                            {isExporting && <Loader2 className="h-4 w-4 animate-spin" />}
+                            Unduh Excel
+                        </button>
+                    </div>
+                </form>
+            </Modal>
 
             {/* Import Modal */}
             <Modal show={isImportModalOpen} onClose={() => setIsImportModalOpen(false)}>
