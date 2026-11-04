@@ -273,7 +273,7 @@ return [
         |
         */
         'illuminate'  => [
-            'store' => env('EXCEL_CACHE_STORE', 'file'),
+            'store' => env('EXCEL_CACHE_STORE', 'excel'),
         ],
 
         /*

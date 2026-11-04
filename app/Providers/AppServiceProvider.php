@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use Illuminate\Cache\FileStore;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +23,16 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+
+        // File cache with its own unserialize allow-list (used by the Excel cell cache).
+        Cache::extend('excel_file', function ($app, array $config) {
+            return Cache::repository(new FileStore(
+                $app['files'],
+                $config['path'],
+                null,
+                $config['serializable_classes'] ?? false,
+            ));
+        });
 
         \Illuminate\Support\Facades\Event::listen(function (\Illuminate\Auth\Events\Login $event) {
             activity()

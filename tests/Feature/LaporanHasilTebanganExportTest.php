@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Cache\CacheManager;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Settings;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -57,6 +59,38 @@ class LaporanHasilTebanganExportTest extends TestCase
         $this->assertCount(1200, array_unique($keys));
         $this->assertNotContains('Kelompok B', array_column($data, 0));
         $this->assertSame(25.0, $sheet->getColumnDimension('A')->getWidth());
+    }
+
+    public function test_cells_survive_being_flushed_to_the_excel_file_cache(): void
+    {
+        // Force the batch cache to write cells to the "excel" store almost immediately,
+        // so they are unserialized again (blocked by cache.serializable_classes => false
+        // unless the store allows PhpSpreadsheet cells).
+        config()->set('excel.cache.batch.memory_limit', 50);
+        Settings::setCache(app(CacheManager::class)->createBatchDriver());
+
+        Role::firstOrCreate(['name' => 'admin_cdk']);
+        $user = User::factory()->create();
+        $user->assignRole('admin_cdk');
+
+        $group = DB::table('kelompoks')->insertGetId(['nama_kelompok' => 'Kelompok A']);
+        $tree = $this->tree($group, '007');
+        foreach (range(1, 30) as $n) {
+            DB::table('batangs')->insert([
+                'pohon_id' => $tree, 'no_batang' => $n, 'panjang' => 1,
+                'diameter_pangkal' => 20, 'diameter_ujung' => 18, 'mutu' => 'P', 'volume' => $n,
+            ]);
+        }
+
+        $response = $this->actingAs($user)
+            ->get(route('admin.dashboard.export', ['kelompok_id' => $group]))
+            ->assertOk();
+
+        $data = IOFactory::load($response->baseResponse->getFile()->getPathname())->getActiveSheet()->toArray();
+
+        $this->assertCount(31, $data);
+        $this->assertSame(['Kelompok A', 'Manual', '007'], array_slice($data[1], 0, 3));
+        $this->assertSame(30, (int) $data[30][7]);
     }
 
     private function tree(int $group, string $number): int
