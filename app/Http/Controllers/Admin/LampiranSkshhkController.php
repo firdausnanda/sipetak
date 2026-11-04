@@ -146,6 +146,12 @@ class LampiranSkshhkController extends Controller
                 $q->where('no_barcode', 'like', "%{$search}%")
                   ->orWhere('no_pohon', 'like', "%{$search}%");
             });
+
+            // Urutkan berdasarkan relevansi: cocok persis > diawali kata kunci > mengandung
+            $query->orderByRaw(
+                "CASE WHEN no_pohon = ? OR no_barcode = ? THEN 0 WHEN no_pohon LIKE ? THEN 1 ELSE 2 END",
+                [$search, $search, "{$search}%"]
+            )->orderByRaw('CAST(no_pohon AS UNSIGNED)');
         }
 
         if ($user->hasAnyRole(['admin_kelompok', 'ganis']) && $user->kelompok_id) {
