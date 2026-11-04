@@ -4,7 +4,7 @@ namespace App\Exports;
 
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -12,11 +12,12 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\DefaultValueBinder;
 
-class RencanaTebangExport extends DefaultValueBinder implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize, WithStyles, WithEvents, WithCustomValueBinder
+class RencanaTebangExport extends DefaultValueBinder implements FromQuery, WithHeadings, WithMapping, WithColumnWidths, WithStyles, WithEvents, WithCustomValueBinder
 {
     public const COLUMNS = [
         'kelompok' => 'Kelompok',
@@ -26,6 +27,16 @@ class RencanaTebangExport extends DefaultValueBinder implements FromQuery, WithH
         'no_barcode' => 'Barcode',
         'created_at' => 'Tanggal Dibuat',
         'updated_at' => 'Terakhir Diperbarui',
+    ];
+
+    public const COLUMN_WIDTHS = [
+        'kelompok' => 25,
+        'petak' => 10,
+        'jenis_pohon' => 20,
+        'no_pohon' => 12,
+        'no_barcode' => 18,
+        'created_at' => 18,
+        'updated_at' => 20,
     ];
 
     private array $columns;
@@ -59,6 +70,19 @@ class RencanaTebangExport extends DefaultValueBinder implements FromQuery, WithH
         ];
 
         return array_merge([++$this->rowNumber], array_map(fn ($column) => $values[$column], $this->columns));
+    }
+
+    /**
+     * Fixed widths instead of ShouldAutoSize, which measures every cell.
+     */
+    public function columnWidths(): array
+    {
+        $widths = ['A' => 6];
+        foreach ($this->columns as $index => $column) {
+            $widths[Coordinate::stringFromColumnIndex($index + 2)] = self::COLUMN_WIDTHS[$column];
+        }
+
+        return $widths;
     }
 
     public function bindValue(Cell $cell, $value)

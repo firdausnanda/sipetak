@@ -271,7 +271,7 @@ class DokumenAngkutanController extends Controller
 
     public function exportPdf($id)
     {
-        ini_set('memory_limit', '1024M');
+        ini_set('memory_limit', '512M');
         ini_set('max_execution_time', '300');
         
         $user = Auth::user();
@@ -300,8 +300,8 @@ class DokumenAngkutanController extends Controller
 
     public function exportExcel($id)
     {
-        ini_set('memory_limit', '1024M');
-        ini_set('max_execution_time', '300');
+        ini_set('memory_limit', '256M');
+        ini_set('max_execution_time', '120');
         
         $user = Auth::user();
         $dokumen = DokumenAngkutan::with([

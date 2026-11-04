@@ -88,7 +88,7 @@
             <td rowspan="3" style="width: 120px; text-align: center; vertical-align: middle; border: none;">
                 @php
                     $logoBase64 = null;
-                    if ($dokumen->kelompok && $dokumen->kelompok->logo_url) {
+                    if (!($isExcel ?? false) && $dokumen->kelompok && $dokumen->kelompok->logo_url) {
                         $url = ltrim($dokumen->kelompok->logo_url, '/');
                         if (file_exists(storage_path('app/public/' . $url))) {
                             $logoPath = storage_path('app/public/' . $url);

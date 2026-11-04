@@ -4,14 +4,15 @@ namespace App\Exports;
 
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class UsersExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
+class UsersExport implements FromCollection, WithHeadings, WithMapping, WithColumnWidths, WithStyles
 {
     public const COLUMNS = [
         'name' => 'Nama Pengguna',
@@ -23,6 +24,18 @@ class UsersExport implements FromCollection, WithHeadings, WithMapping, ShouldAu
         'created_by' => 'Dibuat Oleh',
         'created_at' => 'Tanggal Dibuat',
         'updated_at' => 'Terakhir Diperbarui',
+    ];
+
+    public const COLUMN_WIDTHS = [
+        'name' => 25,
+        'username' => 18,
+        'email' => 30,
+        'role' => 20,
+        'kelompok' => 25,
+        'status_verifikasi' => 20,
+        'created_by' => 20,
+        'created_at' => 22,
+        'updated_at' => 22,
     ];
 
     protected Collection $users;
@@ -66,6 +79,19 @@ class UsersExport implements FromCollection, WithHeadings, WithMapping, ShouldAu
         ];
 
         return array_merge([++$this->rowNumber], array_map(fn ($column) => $values[$column], $this->columns));
+    }
+
+    /**
+     * Fixed widths instead of ShouldAutoSize, which measures every cell.
+     */
+    public function columnWidths(): array
+    {
+        $widths = ['A' => 6];
+        foreach ($this->columns as $index => $column) {
+            $widths[Coordinate::stringFromColumnIndex($index + 2)] = self::COLUMN_WIDTHS[$column];
+        }
+
+        return $widths;
     }
 
     public function styles(Worksheet $sheet)

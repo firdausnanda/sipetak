@@ -140,9 +140,13 @@ class DashboardController extends Controller
     {
         $query = $this->buildQuery($request);
         
-        $query->join('pohons', 'batangs.pohon_id', '=', 'pohons.id')
+        // Relations not used in the sheet are dropped to keep each chunk small.
+        // batangs.id is a tie-breaker so chunked pagination never skips or repeats rows.
+        $query->without(['pohon.dokumenAngkutan', 'skshhk'])
+              ->join('pohons', 'batangs.pohon_id', '=', 'pohons.id')
               ->orderBy('pohons.no_pohon', 'asc')
-              ->orderBy('batangs.no_batang', 'asc');
+              ->orderBy('batangs.no_batang', 'asc')
+              ->orderBy('batangs.id', 'asc');
 
         $filename = "laporan_hasil_tebangan_" . date('Y-m-d_H-i-s') . ".xlsx";
         

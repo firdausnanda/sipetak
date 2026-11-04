@@ -4,7 +4,7 @@ namespace App\Exports;
 
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -13,7 +13,7 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class RekonsiliasiPsdhExport implements FromView, ShouldAutoSize, WithStyles, WithColumnFormatting
+class RekonsiliasiPsdhExport implements FromView, WithColumnWidths, WithStyles, WithColumnFormatting
 {
     protected $lhps;
     protected $kelompokName;
@@ -85,6 +85,15 @@ class RekonsiliasiPsdhExport implements FromView, ShouldAutoSize, WithStyles, Wi
                 ],
             ]);
         }
+    }
+
+    public function columnWidths(): array
+    {
+        // Fixed widths instead of ShouldAutoSize, which measures every cell.
+        return [
+            'A' => 22, 'B' => 12, 'C' => 26, 'D' => 10, 'E' => 14, 'F' => 14, 'G' => 14,
+            'H' => 22, 'I' => 14, 'J' => 14, 'K' => 22, 'L' => 14, 'M' => 14, 'N' => 25,
+        ];
     }
 
     public function columnFormats(): array
