@@ -53,23 +53,6 @@ return [
             'lock_path' => storage_path('framework/cache/data'),
         ],
 
-        // Cell cache for Excel exports (see config/excel.php). The global
-        // "serializable_classes" => false blocks PhpSpreadsheet cells, so this
-        // store only allows the classes a detached cell can contain.
-        'excel' => [
-            'driver' => 'excel_file',
-            'path' => storage_path('framework/cache/excel'),
-            'serializable_classes' => [
-                \PhpOffice\PhpSpreadsheet\Cell\Cell::class,
-                \PhpOffice\PhpSpreadsheet\Cell\IgnoredErrors::class,
-                \PhpOffice\PhpSpreadsheet\RichText\RichText::class,
-                \PhpOffice\PhpSpreadsheet\RichText\TextElement::class,
-                \PhpOffice\PhpSpreadsheet\RichText\Run::class,
-                \PhpOffice\PhpSpreadsheet\Style\Font::class,
-                \PhpOffice\PhpSpreadsheet\Style\Color::class,
-            ],
-        ],
-
         'storage' => [
             'driver' => 'storage',
             'disk' => env('CACHE_STORAGE_DISK'),

@@ -138,6 +138,10 @@ class DashboardController extends Controller
 
     public function export(Request $request)
     {
+        // Large list exports: PhpSpreadsheet keeps every cell in memory (~12 MB per 1,000 rows here).
+        set_time_limit(120);
+        ini_set('memory_limit', '384M');
+
         $query = $this->buildQuery($request);
         
         // Relations not used in the sheet are dropped to keep each chunk small.

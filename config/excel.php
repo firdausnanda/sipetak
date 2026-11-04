@@ -244,7 +244,9 @@ return [
         | Drivers: memory|illuminate|batch
         |
         */
-        'driver'      => env('EXCEL_CACHE_DRIVER', 'batch'),
+        // Keep "memory": on this app the batch/illuminate drivers write one cache
+        // file per cell, which made a 2,000-row export take ~3 minutes instead of ~1s.
+        'driver'      => env('EXCEL_CACHE_DRIVER', 'memory'),
 
         /*
         |--------------------------------------------------------------------------
@@ -257,7 +259,7 @@ return [
         |
         */
         'batch'       => [
-            'memory_limit' => env('EXCEL_CACHE_BATCH_LIMIT', 20000),
+            'memory_limit' => 60000,
         ],
 
         /*
@@ -273,7 +275,7 @@ return [
         |
         */
         'illuminate'  => [
-            'store' => env('EXCEL_CACHE_STORE', 'excel'),
+            'store' => null,
         ],
 
         /*

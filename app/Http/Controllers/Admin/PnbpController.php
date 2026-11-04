@@ -20,6 +20,10 @@ class PnbpController extends Controller
 {
     public function exportRekonsiliasi(Request $request)
     {
+        // Large list exports: PhpSpreadsheet keeps every cell in memory (~12 MB per 1,000 rows here).
+        set_time_limit(120);
+        ini_set('memory_limit', '384M');
+
         $user = Auth::user();
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:255'],
