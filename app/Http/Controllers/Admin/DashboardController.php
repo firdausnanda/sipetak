@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\LaporanHasilTebanganExport;
+use App\Exports\StreamingXlsxWriter;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
 use App\Models\Batang;
 use App\Models\Kelompok;
 use App\Models\Petak;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
@@ -110,7 +112,8 @@ class DashboardController extends Controller
 
         $perPage = $request->input('per_page', 10);
         $batangs = $query->paginate($perPage)->withQueryString();
-        
+
+
         $currentUser = auth()->user();
         $kelompoksQuery = Kelompok::orderBy('nama_kelompok');
         $petaksQuery = Petak::orderBy('no_petak');
@@ -136,25 +139,27 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function export(Request $request)
+    public function export(Request $request, StreamingXlsxWriter $writer)
     {
-        // Large list exports: PhpSpreadsheet keeps every cell in memory (~12 MB per 1,000 rows here).
-        set_time_limit(120);
-        ini_set('memory_limit', '384M');
+        set_time_limit(300);
 
         $query = $this->buildQuery($request);
-        
+
         // Relations not used in the sheet are dropped to keep each chunk small.
         // batangs.id is a tie-breaker so chunked pagination never skips or repeats rows.
         $query->without(['pohon.dokumenAngkutan', 'skshhk'])
-              ->join('pohons', 'batangs.pohon_id', '=', 'pohons.id')
-              ->orderBy('pohons.no_pohon', 'asc')
-              ->orderBy('batangs.no_batang', 'asc')
-              ->orderBy('batangs.id', 'asc');
+            ->join('pohons', 'batangs.pohon_id', '=', 'pohons.id')
+            ->orderBy('pohons.no_pohon', 'asc')
+            ->orderBy('batangs.no_batang', 'asc')
+            ->orderBy('batangs.id', 'asc');
 
-        $filename = "laporan_hasil_tebangan_" . date('Y-m-d_H-i-s') . ".xlsx";
-        
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\LaporanHasilTebanganExport($query), $filename);
+        $filename = 'laporan_hasil_tebangan_'.date('Y-m-d_H-i-s').'.xlsx';
+
+        $path = $writer->write(new LaporanHasilTebanganExport($query));
+
+        return response()->download($path, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ])->deleteFileAfterSend(true);
     }
 
     public function updateBatang(Request $request, $id)

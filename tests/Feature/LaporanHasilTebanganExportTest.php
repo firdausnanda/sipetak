@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
+use XMLReader;
 
 class LaporanHasilTebanganExportTest extends TestCase
 {
@@ -53,10 +54,54 @@ class LaporanHasilTebanganExportTest extends TestCase
         $this->assertSame('Kelompok', $data[0][0]);
         $this->assertCount(1201, $data);
 
-        $keys = array_map(fn ($row) => $row[11] . '|' . $row[7], array_slice($data, 1));
+        $keys = array_map(fn ($row) => $row[11].'|'.$row[7], array_slice($data, 1));
         $this->assertCount(1200, array_unique($keys));
         $this->assertNotContains('Kelompok B', array_column($data, 0));
         $this->assertSame(25.0, $sheet->getColumnDimension('A')->getWidth());
+    }
+
+    public function test_export_streams_42574_rows_with_limited_memory(): void
+    {
+        Role::firstOrCreate(['name' => 'admin_cdk']);
+        $user = User::factory()->create();
+        $user->assignRole('admin_cdk');
+        $tree = $this->tree(DB::table('kelompoks')->insertGetId(['nama_kelompok' => 'Besar']), 'POH-1');
+
+        for ($start = 1; $start <= 42574; $start += 250) {
+            $rows = [];
+            for ($number = $start; $number < min($start + 250, 42575); $number++) {
+                $rows[] = [
+                    'pohon_id' => $tree, 'no_batang' => $number, 'panjang' => 1,
+                    'diameter_pangkal' => 20, 'diameter_ujung' => 18,
+                    'mutu' => 'P', 'volume' => 1.5,
+                ];
+            }
+            DB::table('batangs')->insert($rows);
+        }
+
+        $previousLimit = ini_set('memory_limit', '128M');
+        try {
+            $response = $this->actingAs($user)->get(route('admin.dashboard.export'))->assertOk();
+            $path = $response->baseResponse->getFile()->getPathname();
+            $reader = new XMLReader;
+            $this->assertTrue($reader->open('zip://'.$path.'#xl/worksheets/sheet1.xml'));
+
+            $rowCount = 0;
+            while ($reader->read()) {
+                if ($reader->nodeType === XMLReader::ELEMENT && $reader->localName === 'row') {
+                    $rowCount++;
+                }
+            }
+            $reader->close();
+
+            $this->assertSame(42575, $rowCount);
+            $this->assertLessThan(128 * 1024 * 1024, memory_get_peak_usage(true));
+        } finally {
+            if (isset($path)) {
+                @unlink($path);
+            }
+            ini_set('memory_limit', $previousLimit);
+        }
     }
 
     private function tree(int $group, string $number): int

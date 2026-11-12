@@ -4,15 +4,8 @@ namespace App\Exports;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\WithColumnWidths;
-use Maatwebsite\Excel\Concerns\WithCustomChunkSize;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class LaporanHasilTebanganExport implements FromQuery, WithHeadings, WithMapping, WithColumnWidths, WithStyles, WithCustomChunkSize
+class LaporanHasilTebanganExport
 {
     protected Builder $query;
 
@@ -21,10 +14,7 @@ class LaporanHasilTebanganExport implements FromQuery, WithHeadings, WithMapping
         $this->query = $query;
     }
 
-    /**
-     * Data is read in chunks (see chunkSize) instead of loading every batang at once.
-     */
-    public function query()
+    public function query(): Builder
     {
         return $this->query;
     }
@@ -76,9 +66,6 @@ class LaporanHasilTebanganExport implements FromQuery, WithHeadings, WithMapping
         ];
     }
 
-    /**
-     * Fixed widths instead of ShouldAutoSize, which measures every cell.
-     */
     public function columnWidths(): array
     {
         return [
@@ -96,13 +83,6 @@ class LaporanHasilTebanganExport implements FromQuery, WithHeadings, WithMapping
             'L' => 12,
             'M' => 8,
             'N' => 20,
-        ];
-    }
-
-    public function styles(Worksheet $sheet)
-    {
-        return [
-            1 => ['font' => ['bold' => true]],
         ];
     }
 }
