@@ -103,37 +103,49 @@ export default function History({ auth, pohons = { data: [] }, filters = {} }) {
                 {/* Data List Container */}
                 <section className="flex flex-col gap-4">
                     {items.map((pohon) => (
-                        <article key={pohon.id} className="bg-surface border border-outline-variant rounded-xl p-4 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-shadow">
-                            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                        <article key={pohon.id} className="grid min-w-0 gap-4 rounded-xl border border-outline-variant bg-surface-container-lowest p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_240px] lg:gap-6">
+                            <div className="min-w-0">
                                 <div className="flex gap-4 items-center">
-                                    <div className="h-12 w-12 rounded-lg bg-surface-container-high flex items-center justify-center text-[#6D4C41] border border-outline-variant">
+                                    <div className="h-12 w-12 shrink-0 rounded-lg bg-surface-container-high flex items-center justify-center text-[#6D4C41] border border-outline-variant">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
                                             <path d="M12 22v-5"/>
                                             <path d="M9 22h6"/>
                                             <path d="M12 17l-5-5h2l-4-4h4l-3-3 6 4 6-4-3 3h4l-4 4h2z"/>
                                         </svg>
                                     </div>
-                                    <div>
-                                        <div className="flex items-center gap-2 mb-1">
+                                    <div className="min-w-0">
+                                        <div className="flex flex-wrap items-center gap-2 mb-1">
                                             <span className="font-label-caps text-label-caps text-[#6D4C41]">NO. PETAK</span>
-                                            <span className="font-data-mono text-data-mono text-[#1B4332] font-bold bg-surface-container-low px-2 py-0.5 rounded border border-outline-variant">{pohon.petak?.no_petak || 'N/A'}</span>
+                                            <span className="max-w-full break-all font-data-mono text-data-mono text-[#1B4332] font-bold bg-surface-container-low px-2 py-0.5 rounded border border-outline-variant">{pohon.petak?.no_petak || 'N/A'}</span>
                                         </div>
-                                        <h3 className="font-headline-md text-headline-lg-mobile text-primary">{pohon.jenis_pohon?.nama_jenis || 'N/A'}</h3>
+                                        <h3 className="break-words font-headline-md text-headline-lg-mobile text-primary">{pohon.jenis_pohon?.nama_jenis || 'N/A'}</h3>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 md:flex gap-4 md:ml-8 md:items-center w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-outline-variant">
-                                    <div className="flex flex-col">
+                                <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-outline-variant/60 pt-3">
+                                    <div className="min-w-0">
+                                        <dt className="text-xs font-semibold text-on-surface-variant">No. Pohon</dt>
+                                        <dd className="mt-1 break-all font-data-mono text-data-mono font-semibold text-primary-container">{pohon.no_pohon || '-'}</dd>
+                                    </div>
+                                    <div className="min-w-0">
+                                        <dt className="text-xs font-semibold text-on-surface-variant">Barcode</dt>
+                                        <dd className="mt-1 break-all font-data-mono text-data-mono text-primary-container">{pohon.no_barcode || '-'}</dd>
+                                    </div>
+                                </dl>
+                            </div>
+                            <div className="flex min-w-0 flex-col justify-between gap-4 border-t border-outline-variant/60 pt-4 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+                                <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-4">
+                                    <div className="flex min-w-0 flex-col">
                                         <span className="font-label-caps text-label-caps text-on-surface-variant mb-1">WAKTU INPUT</span>
-                                        <span className="font-body-md text-body-md text-on-surface flex items-center gap-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-outline">
+                                        <span className="text-sm text-on-surface flex items-start gap-1.5">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="mt-0.5 h-4 w-4 shrink-0 text-outline" aria-hidden="true">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
-                                            {new Date(pohon.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                            <time dateTime={pohon.created_at}>{new Date(pohon.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</time>
                                         </span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="font-label-caps text-label-caps text-on-surface-variant mb-1">STATUS</span>
-                                        <span className="font-body-md text-body-md text-green-700 flex items-center gap-1 font-semibold">
+                                        <span className="text-sm text-green-700 flex items-center gap-1 font-semibold">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 16.5l-3-3 1.5-1.5 1.5 1.5 4.5-4.5 1.5 1.5-6 6z" />
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
@@ -142,10 +154,10 @@ export default function History({ auth, pohons = { data: [] }, filters = {} }) {
                                         </span>
                                     </div>
                                 </div>
+                                <Link href={route('history.show', pohon.id)} className="flex min-h-touch-target w-full items-center justify-center rounded-lg border border-outline-variant bg-surface px-6 text-sm font-semibold text-primary transition-colors hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                                    Lihat Detail
+                                </Link>
                             </div>
-                            <Link href={route('history.show', pohon.id)} className="flex items-center justify-center w-full md:w-auto h-touch-target px-6 rounded-lg border border-outline-variant bg-surface hover:bg-surface-container-high text-primary font-body-md text-body-md font-semibold transition-colors mt-2 md:mt-0">
-                                Lihat Detail
-                            </Link>
                         </article>
                     ))}
                     

@@ -39,51 +39,62 @@ export default function Show({ pohon }) {
                 </section>
 
                 {/* Details Card */}
-                <section className="bg-surface-container-lowest rounded-lg border border-outline-variant overflow-hidden">
-                    <div className="px-4 py-3 border-b border-outline-variant bg-surface-container-low">
-                        <h3 className="font-headline-md text-base text-primary-container">Informasi Pohon</h3>
+                <section className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest" aria-labelledby="informasi-pohon-title">
+                    <div className="border-b border-outline-variant bg-surface-container-low px-4 py-3 sm:px-5">
+                        <h3 id="informasi-pohon-title" className="text-base font-semibold text-primary-container">Informasi Pohon</h3>
                     </div>
-                    <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-1">
-                            <span className="font-label-caps text-label-caps text-[#6D4C41]">NAMA KELOMPOK</span>
-                            <span className="font-body-lg text-body-lg text-[#1B4332]">{pohon.kelompok?.nama_kelompok || 'N/A'}</span>
+                    <dl className="grid grid-cols-1 gap-px bg-outline-variant/60 md:grid-cols-2">
+                        <div className="grid min-w-0 grid-cols-[96px_minmax(0,1fr)] items-baseline gap-3 bg-surface-container-lowest px-4 py-4 sm:px-5 md:flex md:flex-col md:gap-1.5">
+                            <dt className="text-sm text-on-surface-variant">No. Pohon</dt>
+                            <dd className="min-w-0 break-all font-data-mono text-base font-semibold leading-6 text-primary-container">{pohon.no_pohon ?? '-'}</dd>
                         </div>
-                        <div className="flex flex-col gap-1">
-                            <span className="font-label-caps text-label-caps text-[#6D4C41]">JENIS POHON</span>
-                            <span className="font-body-lg text-body-lg text-[#1B4332]">{pohon.jenis_pohon?.nama_jenis || 'N/A'}</span>
+                        <div className="grid min-w-0 grid-cols-[96px_minmax(0,1fr)] items-baseline gap-3 bg-surface-container-lowest px-4 py-4 sm:px-5 md:flex md:flex-col md:gap-1.5">
+                            <dt className="text-sm text-on-surface-variant">Barcode</dt>
+                            <dd className="min-w-0 break-all font-data-mono text-base font-medium leading-6 text-primary-container">{pohon.no_barcode || '-'}</dd>
                         </div>
-                    </div>
+                        <div className="grid min-w-0 grid-cols-[96px_minmax(0,1fr)] items-baseline gap-3 bg-surface-container-lowest px-4 py-4 sm:px-5 md:flex md:flex-col md:gap-1.5">
+                            <dt className="text-sm text-on-surface-variant">Nama Kelompok</dt>
+                            <dd className="min-w-0 break-words text-base font-medium leading-6 text-primary-container [overflow-wrap:anywhere]">{pohon.kelompok?.nama_kelompok || '-'}</dd>
+                        </div>
+                        <div className="grid min-w-0 grid-cols-[96px_minmax(0,1fr)] items-baseline gap-3 bg-surface-container-lowest px-4 py-4 sm:px-5 md:flex md:flex-col md:gap-1.5">
+                            <dt className="text-sm text-on-surface-variant">Jenis Pohon</dt>
+                            <dd className="min-w-0 break-words text-base font-medium leading-6 text-primary-container [overflow-wrap:anywhere]">{pohon.jenis_pohon?.nama_jenis || '-'}</dd>
+                        </div>
+                    </dl>
                 </section>
 
                 {/* Log List Section */}
-                <section className="space-y-4">
-                    <h3 className="font-headline-md text-headline-md text-primary-container px-2 border-l-4 border-[#FB8500]">Rincian Batang (Log)</h3>
+                <section className="space-y-3" aria-labelledby="rincian-batang-title">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                        <h3 id="rincian-batang-title" className="font-headline-md text-headline-md text-primary-container">Rincian Batang (Log)</h3>
+                        <span className="text-sm text-on-surface-variant">{pohon.batangs?.length ?? 0} batang</span>
+                    </div>
                     
                     <div className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden hidden md:block">
-                        <table className="w-full text-left border-collapse">
-                            <thead className="bg-surface-container-low font-label-caps text-label-caps text-on-surface-variant border-b border-outline-variant">
+                        <table className="w-full table-fixed text-left border-collapse">
+                            <thead className="bg-surface-container-low text-sm text-on-surface-variant border-b border-outline-variant">
                                 <tr>
-                                    <th className="p-4 font-bold">No. Batang</th>
-                                    <th className="p-4 font-bold">Panjang (m)</th>
-                                    <th className="p-4 font-bold">Diameter (cm)</th>
-                                    <th className="p-4 font-bold">Volume (m³)</th>
-                                    <th className="p-4 font-bold">Mutu</th>
+                                    <th scope="col" className="px-3 py-3 text-center font-semibold">No. Batang</th>
+                                    <th scope="col" className="px-3 py-3 text-right font-semibold">Panjang<span className="block text-xs font-normal">m</span></th>
+                                    <th scope="col" className="px-3 py-3 text-right font-semibold">Diameter<span className="block text-xs font-normal">cm</span></th>
+                                    <th scope="col" className="px-3 py-3 text-right font-semibold">Volume<span className="block text-xs font-normal">m³</span></th>
+                                    <th scope="col" className="w-[12%] px-3 py-3 text-center font-semibold">Mutu</th>
                                 </tr>
                             </thead>
                             <tbody className="font-data-mono text-data-mono text-primary-container">
-                                {pohon.batangs?.map((batang, idx) => (
-                                    <tr key={batang.id} className={`${idx % 2 === 0 ? 'border-b border-outline-variant/50' : 'bg-surface-container-low/30'} hover:bg-surface-container-highest transition-colors`}>
-                                        <td className="p-4">{batang.no_batang.toString().padStart(2, '0')}</td>
-                                        <td className="p-4">{batang.panjang}</td>
-                                        <td className="p-4">{((parseFloat(batang.diameter_pangkal) + parseFloat(batang.diameter_ujung)) / 2).toFixed(1)}</td>
-                                        <td className="p-4">{batang.volume}</td>
-                                        <td className="p-4">
-                                            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high border border-outline font-bold">{batang.mutu}</span>
+                                {pohon.batangs?.map((batang) => (
+                                    <tr key={batang.id} className="border-b border-outline-variant/50 last:border-b-0 even:bg-surface-container-low/50 hover:bg-surface-container-low">
+                                        <td className="px-3 py-4 text-center font-semibold">{batang.no_batang.toString().padStart(2, '0')}</td>
+                                        <td className="px-3 py-4 text-right tabular-nums break-all">{batang.panjang}</td>
+                                        <td className="px-3 py-4 text-right tabular-nums break-all">{((parseFloat(batang.diameter_pangkal) + parseFloat(batang.diameter_ujung)) / 2).toFixed(1)}</td>
+                                        <td className="px-3 py-4 text-right tabular-nums font-semibold break-all">{batang.volume}</td>
+                                        <td className="px-3 py-4 text-center">
+                                            <span className="inline-flex min-w-8 items-center justify-center rounded-lg bg-primary-container/10 px-2 py-1 font-semibold">{batang.mutu}</span>
                                         </td>
                                     </tr>
                                 ))}
                                 {(!pohon.batangs || pohon.batangs.length === 0) && (
-                                    <tr><td colSpan="5" className="p-4 text-center text-on-surface-variant">Tidak ada data batang.</td></tr>
+                                    <tr><td colSpan="5" className="px-4 py-8 text-center font-sans text-sm text-on-surface-variant">Belum ada rincian batang untuk pohon ini.</td></tr>
                                 )}
                             </tbody>
                         </table>
@@ -92,24 +103,35 @@ export default function Show({ pohon }) {
                     {/* Mobile View for Logs (Cards) */}
                     <div className="md:hidden space-y-3">
                         {pohon.batangs?.map((batang) => (
-                            <div key={batang.id} className="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 flex justify-between items-center shadow-sm">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded bg-surface-container-high flex items-center justify-center border border-outline-variant">
-                                        <span className="font-data-mono font-bold text-lg text-primary-container">{batang.no_batang.toString().padStart(2, '0')}</span>
+                            <article key={batang.id} className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest">
+                                <dl className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 border-b border-outline-variant/60 px-4 py-3">
+                                    <div className="min-w-0">
+                                        <dt className="text-xs text-on-surface-variant">No. Batang</dt>
+                                        <dd className="mt-1 font-data-mono text-lg font-bold text-primary-container">{batang.no_batang.toString().padStart(2, '0')}</dd>
                                     </div>
-                                    <div className="flex flex-col">
-                                        <span className="font-data-mono text-data-mono text-on-surface">P: {batang.panjang}m | D: {((parseFloat(batang.diameter_pangkal) + parseFloat(batang.diameter_ujung)) / 2).toFixed(1)}cm | V: {batang.volume}m³</span>
-                                        <span className="font-label-caps text-[10px] text-on-surface-variant">PANJANG | DIAMETER | VOLUME</span>
+                                    <div className="text-center">
+                                        <dt className="text-xs text-on-surface-variant">Mutu</dt>
+                                        <dd className="mt-1 inline-flex min-w-8 items-center justify-center rounded-lg bg-primary-container/10 px-2 py-0.5 font-data-mono text-sm font-semibold text-primary-container">{batang.mutu}</dd>
                                     </div>
-                                </div>
-                                <div className="flex flex-col items-center">
-                                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high border border-outline font-bold text-primary-container">{batang.mutu}</span>
-                                    <span className="font-label-caps text-[10px] text-on-surface-variant mt-1">MUTU</span>
-                                </div>
-                            </div>
+                                </dl>
+                                <dl className="grid grid-cols-3 divide-x divide-outline-variant/60 bg-surface-container-low/50 py-4">
+                                    <div className="min-w-0 px-3">
+                                        <dt className="text-xs text-on-surface-variant">Panjang <span className="whitespace-nowrap">(m)</span></dt>
+                                        <dd className="mt-1.5 font-data-mono text-sm tabular-nums text-primary-container break-all">{batang.panjang}</dd>
+                                    </div>
+                                    <div className="min-w-0 px-3">
+                                        <dt className="text-xs text-on-surface-variant">Diameter <span className="whitespace-nowrap">(cm)</span></dt>
+                                        <dd className="mt-1.5 font-data-mono text-sm tabular-nums text-primary-container break-all">{((parseFloat(batang.diameter_pangkal) + parseFloat(batang.diameter_ujung)) / 2).toFixed(1)}</dd>
+                                    </div>
+                                    <div className="min-w-0 px-3">
+                                        <dt className="text-xs text-on-surface-variant">Volume <span className="whitespace-nowrap">(m³)</span></dt>
+                                        <dd className="mt-1.5 font-data-mono text-sm font-semibold tabular-nums text-primary-container break-all">{batang.volume ?? '-'}</dd>
+                                    </div>
+                                </dl>
+                            </article>
                         ))}
                         {(!pohon.batangs || pohon.batangs.length === 0) && (
-                            <div className="text-center p-4 text-on-surface-variant">Tidak ada data batang.</div>
+                            <p className="rounded-xl border border-outline-variant bg-surface-container-lowest px-4 py-8 text-center text-sm text-on-surface-variant">Belum ada rincian batang untuk pohon ini.</p>
                         )}
                     </div>
                 </section>
